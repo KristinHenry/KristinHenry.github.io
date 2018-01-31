@@ -1,5 +1,7 @@
 var svg = d3.select("#chart").append("svg");
 
+console.log(svg.x)
+
 svg.attr("width", 600)
    .attr("height", 500)
    .style("background-color", "#E6E5E3")
@@ -101,9 +103,9 @@ d3.csv("randy_2.csv", function(error, data) {
 
       d3.select(this).select(".info")
         .attr("opacity", 1)
-      var info_x = 120; 
+      var info_x = 20; 
 
-      var info_y = y(d.data.date);
+      var info_y = -height; //y(d.data.date);
 
       showToolTip(d, info_x, info_y);
     })
@@ -129,7 +131,7 @@ function showToolTip(d, x, y){
             )
 
     .style("left", x + "px")
-      .style("top", (y +200) + "px")
+      .style("top", y + "px")
 
 
 
