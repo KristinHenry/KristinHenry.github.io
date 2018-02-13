@@ -1,0 +1,162 @@
+<html>
+  <head>
+    <style>
+
+.node {
+  opacity: 0.5;
+}
+
+.node:hover {
+  opacity: 1;
+}
+
+.link {
+  stroke: #999;
+  stroke-opacity: 0.3;
+}
+
+    </style>
+    <script src="http://d3js.org/d3.v3.min.js"></script>
+  </head>
+  <body>
+    <div id="viz"></div>
+    <script>
+
+function name(d) { return d.name; }
+function group(d) { return d.group; }
+
+var color = d3.scale.category10();
+function colorByGroup(d) { return color(group(d)); }
+
+var anchors = [0,11,17];
+
+var width = 960,
+    height = 500;
+
+var svg = d3.select('#viz')
+    .append('svg')
+    .attr('width', width)
+    .attr('height', height);
+
+var node, link;
+
+var voronoi = d3.geom.voronoi()
+    .x(function(d) { return d.x; })
+    .y(function(d) { return d.y; })
+    .clipExtent([[-10, -10], [width+10, height+10]]);
+
+function recenterVoronoi(nodes) {
+    var shapes = [];
+    voronoi(nodes).forEach(function(d) {
+        if ( !d.length ) return;
+        var n = [];
+        d.forEach(function(c){
+            n.push([ c[0] - d.point.x, c[1] - d.point.y ]);
+        });
+        n.point = d.point;
+        shapes.push(n);
+    });
+    return shapes;
+}
+
+var force = d3.layout.force()
+    .charge(-800)
+    .friction(0.3)
+     // .linkDistance(50)
+    .linkDistance(function(d){ return d.value; })
+    .size([width/2, height/2]);
+
+force.on('tick', function() {
+    node.attr('transform', function(d) {if(anchors.indexOf(d.id) != -1){ d.x = d.fx; d.y = d.fy;}; return 'translate('+d.x+','+d.y+')'; })
+
+    // resize words
+    node.select('text')
+        .transition()
+        .attr('font-size', function(d){ return d.group + "em"; })//'.5em'})
+        
+    link.attr('x1', function(d) { return d.source.x; })
+        .attr('y1', function(d) { return d.source.y; })
+        .attr('x2', function(d) { return d.target.x; })
+        .attr('y2', function(d) { return d.target.y; })
+
+});
+
+d3.json('words.json', function(err, data) {
+
+    data.nodes.forEach(function(d, i) {
+        d.id = i;
+    });
+
+    link = svg.selectAll('.link')
+        .data( data.links )
+      .enter().append('line')
+        .attr('class', 'link')
+        .style("opacity", .4)
+        .style("stroke-width", 1)
+
+    node = svg.selectAll('.node')
+        .data( data.nodes )
+      .enter().append('g')
+        .attr("id", function(d){ console.log('d id', d.id); return 'id_' + d.id; })
+        .attr('title', name)
+        .attr('class', 'node')
+        .attr("fx", function(d){ return getFX(d);})
+        .attr("fy", function(d){ return getFY(d);})
+        .call( force.drag );
+
+    
+
+    node.append('text')
+        
+        .attr("text-anchor", "middle")
+        .style("fill", function(d){ return (anchors.indexOf(d.id) != -1)  ? "purple" : "grey";  })
+        .text(function(d){ return d.name;})
+        .attr("font-size", function(d){ return '2em'; }) //d.value + "em"})
+
+    node.on('mousedown', function(d){
+        // only do this if this is an anchor node
+        if(anchors.indexOf(d.id) != -1){
+            
+            data.links.forEach(function(e){
+                // use node's "group" to set size of font for word....ToDo: rename "group"
+               if(d.child == e.source.id){
+                    if(e.value > 50){ 
+                        e.value = 2
+                        e.target.group = .1;
+
+                    } else {
+                        e.value = 100
+                        e.target.group = 1;
+                    }
+                } 
+            })
+
+            //  update layout
+            force.linkDistance(function(d){ return d.value; })
+            force.start();            
+        }
+    })
+
+
+    force
+        .nodes( data.nodes )
+        .links( data.links )
+        .start();
+});
+
+
+function getFX(d){
+    //console.log(d.id)
+    if(anchors.indexOf(d.id) != -1){ d.fx = d.id*12 +100; return 0; }
+    return null;
+}
+
+function getFY(d){
+    var anchors = [0,11,17];
+    if(anchors.indexOf(d.id) != -1){ d.fy = height;  return 50; }
+    return null;
+}
+
+    </script>
+  </body>
+</html>
