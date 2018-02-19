@@ -1,0 +1,186 @@
+	<!DOCTYPE html>
+	<meta charset="utf-8">
+	<title>Modifying a force layout v4</title>
+
+	<style>
+
+		.link {
+			stroke: #000;
+			stroke-width: 1.5px;
+		}
+
+		.node {
+			fill: #000;
+			stroke: #fff;
+			stroke-width: 1.5px;
+		}
+
+
+		.node.a { fill: #1f77b4; }
+		.node.b { fill: #ff7f0e; }
+		.node.c { fill: #2ca02c; }
+
+
+	</style>
+	<body>
+		<script src="//d3js.org/d3.v4.js"></script>
+		<script>
+
+			var width = 960,
+			height = 500;
+
+			//var color = d3.scaleOrdinal(d3.schemeCategory10);
+
+			var anchors = ["ClickMe1", "ClickMe2", "ClickMe3"];
+
+			var nodes = [],
+			links = [];
+
+
+
+			var simulation = d3.forceSimulation()
+				.force("link", d3.forceLink().distance(200).strength(.6))
+				.force("charge", d3.forceManyBody())
+				// use forceX and forceY instead to change the relative positioning
+				.force("centering", d3.forceCenter(width/2, height/2))
+				// .force("x", d3.forceX(width/2))
+				// .force("y", d3.forceY(height/2))
+				.on("tick", tick);
+
+
+			var svg = d3.select("body").append("svg")
+				.attr("width", width)
+				.attr("height", height);
+
+			var a = createNode("a");
+			var b = createNode("b");
+			var c = createNode("c");
+
+			var data;
+
+			d3.json("words_v4.json", function(error, graph) {
+				if (error) throw error;
+
+				data = graph;
+
+				graph.nodes.forEach(function(d){
+
+					d.x = width/2;
+					d.y = height/2;
+
+					if(anchors.indexOf(d.id) != -1){
+				        console.log(d.id)
+				        d.fx = 100*anchors.indexOf(d.id) + 50;
+				        d.fy = height;
+				    }
+
+      
+
+				})
+
+				graph.links.forEach(function(d){
+					//console.log(d)
+					//links.push(d)
+				})
+			})
+
+
+		// Add nodes and links from data
+		setTimeout(function() {
+
+			for(i in data.nodes){
+				var node = createNode(data.nodes[i].id);
+				nodes.push(node)
+			}
+
+			for(i in data.links){
+				var link = data.links[i]
+				var s = findNode(link.source, nodes);
+				var t = findNode(link.target, nodes);
+
+				links.push({source:s, target:t, value: link.value})
+			}
+
+			start();
+		}, 100);
+
+
+		function createNode(id) {
+			fx = null;
+			fy = null;
+			if(anchors.indexOf(id) != -1){
+		        console.log(id)
+		        fx = 100*anchors.indexOf(id) + 100;
+		        fy = height;
+		      }
+			return {id: id, x: width/2, y:height/2, fx: fx, fy: fy}
+		}
+
+
+		function findNode(id, nodes){
+			for(node in nodes){
+				// console.log('testing...........',node)
+				//console.log(nodes[node])
+				if (nodes[node].id == id) return nodes[node];
+			}
+			return null;
+		}
+
+		// function createNodeLink(id, id2){
+		// 	return {source: id, target: id2}
+		// }
+
+		function start() {
+			
+			var nodeElements = svg.selectAll(".node").data(nodes, function(d){return d.id});
+			var linkElements = svg.selectAll(".link").data(links);
+
+			nodeElements.enter().append("circle")
+				.attr("class", function(d) {return "node " + d.id; })						
+				.attr("r", 8);
+
+			linkElements.enter().insert("line", ".node").attr("class", "link");
+
+			nodeElements.exit().remove();
+			linkElements.exit().remove();
+
+			simulation.nodes(nodes)
+			simulation.force("link").links(links)
+			simulation.restart();
+		}
+
+
+		function tick() {
+			var nodeElements = svg.selectAll(".node");
+			var linkElements = svg.selectAll(".link");
+
+			// node.attr('transform', function(d) {if(anchors.indexOf(d.id) != -1){
+			//  d.x = d.fx; d.y = d.fy;}; 
+			//  return 'translate('+d.x+','+d.y+')'; })
+
+
+			// console.log(nodeElements._groups[0][0])
+
+			nodeElements._groups[0].forEach(function(d){
+				console.log(d)
+			})
+
+
+			// nodeElements.attr("x", function(d){
+			// 					if(anchors.indexOf(d.id) != -1) d.x = d.fx;
+			// 					return d.x;
+			// 				})
+
+
+			nodeElements.attr("cx", function(d,i) {return d.x; })
+						.attr("cy", function(d) { return d.y; })
+
+			linkElements.attr("x1", function(d) { return d.source.x; })
+						.attr("y1", function(d) { return d.source.y; })
+						.attr("x2", function(d) { return d.target.x; })
+						.attr("y2", function(d) { return d.target.y; });
+
+
+		}
+
+	</script>

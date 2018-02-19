@@ -1,0 +1,13 @@
+{
+  "nodes":[
+    {"id": "Orange", "group":".1"},
+    {"id":"Aqua", "group":".1"}
+    
+
+  ],
+  "links":[
+   
+    {"source":"Orange", "target":"Aqua", "value":4}
+   
+  ]
+}
