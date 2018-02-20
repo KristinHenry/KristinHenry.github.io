@@ -42,10 +42,24 @@
 		var nodes = [];
 		var links = [];
 
+		var forceLink = d3
+		    .forceLink().id(function (d) {
+		        return d.id;
+		    })
+		    .distance(function (d) {
+		        return GetNodeDefaults(d.label).linkDistance;
+		    })
+		    .strength(0.1);
+
 		var simulation = d3.forceSimulation()
 				//.force("link", d3.forceLink().distance(200).strength(.6))
-				.force("link", d3.forceLink())
-				.force("charge", d3.forceManyBody())
+				.force("link", d3.forceLink() )
+				.force("charge", d3.forceManyBody().strength(function (d, i) {
+						console.log(d)
+						var a = (d.fx != null) ? -2000 : -1000;
+				        //var a = i == 0 ? -2000 : -1000;
+				        return a;
+				    }).distanceMin(20).distanceMax(100))
 				// use forceX and forceY instead to change the relative positioning
 				.force("centering", d3.forceCenter(width/4, height-50))
 				//.forceY(height-100)

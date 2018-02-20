@@ -1,0 +1,193 @@
+	<!DOCTYPE html>
+	<meta charset="utf-8">
+	<title>Modifying a force layout v4</title>
+
+	<style>
+	</style>
+	<body>
+	<script src="//d3js.org/d3.v4.js"></script>
+	<script src="node_chart_v4.js"></script>
+	<script>
+
+	// var width = 960,
+	// height = 500;
+
+	// var anchors = ["ClickMe1", "ClickMe2", "ClickMe3"];
+	// //var blooms = [];
+
+	// var svg = d3.select("body").append("svg")
+	// 		.attr("width", width)
+	// 		.attr("height", height);
+
+
+	// d3.json("words_v4.json", function(error, graph) {
+	// 	if (error) throw error;
+	// 		data = graph;
+
+	// 		graph.nodes.forEach(function(d){
+	// 			d.x = width/2;
+	// 			d.y = height/2;
+
+	// 			if(anchors.indexOf(d.id) != -1){
+	// 		        //console.log(d.id)
+	// 		        d.fx = 100*anchors.indexOf(d.id) + 50;
+	// 		        d.fy = height;
+	// 		    }
+	// 		})
+
+	// 		draw(data);
+	// })
+
+
+	
+	// 	var nodes = [];
+	// 	var links = [];
+
+
+	// 	var simulation = d3.forceSimulation()
+	// 			.force("link", d3.forceLink().distance(function(d){ return d.distance; }).strength(.9))
+	// 			// .force("link", d3.forceLink() )
+	// 			.force("charge", d3.forceManyBody().strength(-150))
+	// 			.force("centering", d3.forceCenter(width/4, height/2))
+			
+	// 			.on("tick", tick);
+			
+
+	// // Add nodes and links from data
+	// function draw(data) {
+
+		
+
+	// 	for(i in data.nodes){
+	// 		//console.log(data.nodes[i])
+	// 		var node = createNode(data.nodes[i].id);
+	// 		nodes.push(node)
+	// 	}
+
+	// 	for(i in data.links){
+	// 		var link = data.links[i]
+	// 		var s = findNode(link.source, nodes);
+	// 		var t = findNode(link.target, nodes);
+	// 		var d = link.value///10;
+	// 		var st = d///100;
+
+	// 		links.push({source:s, target:t, distance: d, strength: st})
+	// 	}
+
+	// 	start();
+	// };
+
+
+	// function createNode(id) {
+	// 	fx = null;
+	// 	fy = null;
+	// 	group = .1;
+	// 	if(anchors.indexOf(id) != -1){
+	//         console.log(id)
+	//         fx = 100*anchors.indexOf(id) + 100;
+	//         fy = height;
+	//         group = 1;
+	//       }
+		
+	// 	return {id: id, x: width/2, y:height, fx: fx, fy: fy, group:group}
+	// }
+
+
+	// function findNode(id, nodes){
+	// 	for(i in nodes){
+	// 		if (nodes[i].id == id) return nodes[i];
+	// 	}
+	// 	return null;
+	// }
+
+
+	// function start() {
+
+			
+	// 	var nodeElements = svg.selectAll(".node").data(nodes, function(d){return d.id});
+	// 	var linkElements = svg.selectAll(".link").data(links);
+		
+	// 	nodeElements.enter()
+	//  		.append("g")
+	//  		.attr("class", function(d) {return "node " + d.id; })
+	//  		.attr("id", function(d){ return "node" + d.id; })
+	//  		.append("text")
+	//  		.attr("text-anchor", "middle")
+	//  		.style("fill", function(d){ return (anchors.indexOf(d.id) != -1)  ? "purple" : "grey";  })
+	//  		.text(function(d){ return (d.id.substring(0,7) == "midNode") ?  " " : d.id; })
+	//  		.attr("font-size", function(d){ return d.group + 'em'; })
+
+	// 		.on('mousedown', function(d){ bloom(d.id) })
+		 		
+
+	// 	linkElements.enter().insert("line", ".node").attr("class", "link")
+	// 		.style("stroke", "grey")
+	// 		.style("stroke-opacity", .2)
+	// 		.style("stroke-width", "1px");
+ 
+	// 	nodeElements.exit().remove();
+	// 	linkElements.exit().remove();
+
+	// 	simulation.nodes(nodes);
+	// 	simulation.force("link").links(links)
+	// 	simulation.restart();
+	// }
+
+
+	// function tick() {
+
+	// 	var nodeElements = svg.selectAll(".node");
+	// 	var linkElements = svg.selectAll(".link");
+
+	// 	nodeElements.attr("x", function(d,i) {return d.x; })
+	// 				.attr("y", function(d) { return d.y; })
+
+	// 	nodeElements.select("text")
+	// 			.attr("transform", function(d) { 
+ //    				return 'translate(' + [d.x, d.y] + ')';})
+	// 			.transition(10)
+ //        		.attr('font-size', function(d){ return d.group + "em"; })
+
+ //        // linkElements.attr("distance", function(d){ return d.distance; })
+
+	// 	linkElements.attr("x1", function(d) { return d.source.x; })
+	// 					.attr("y1", function(d) { return d.source.y; })
+	// 					.attr("x2", function(d) { return d.target.x; })
+	// 					.attr("y2", function(d) { return d.target.y; });
+
+	// }
+
+
+	// function linkFromAnchor(id){
+	// 	for(i in links){
+	// 		if(links[i].source.id == id){
+	// 			return links[i];
+	// 			break;
+	// 		} 
+	// 	}
+	// 	return null;
+	// }
+
+
+	// function bloom(id){
+	// 	// console.log("bloom", id)
+				
+	// 	var link = linkFromAnchor(id);
+	// 	link.distance = (link.distance > 4) ? 1:100; // ToDo: make this work!!!
+	// 	//console.log('link',link)
+
+				
+	// 	// this is used to resize
+	// 	links.forEach(function(e){
+	// 		if(e.source.id == link.target.id){
+	// 			//console.log(e)
+	// 			e.target.group = (e.target.group < 1) ? 1: .1;
+	// 			e.distance = (e.distance > 4) ? 1:100; // ToDo: make this work!!!!
+	// 		}
+	// 	})
+		
+	// 	// update and restart the simulation	
+	// 	start();		  
+	// }
+
+	</script>
