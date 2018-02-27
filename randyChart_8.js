@@ -283,7 +283,7 @@ function showToolTip(d, x, y){
     var notes = ["\u266B", "\u266A", "\u2669", "\u266C"]
 
     // These are for the word explosions
-    if(word_data && (words_active < 40)){
+    if(word_data && (words_active < 50)){
         if(word_data[d.transcript]) {
          
           word_data[d.transcript].words.forEach(function(e){
