@@ -9,14 +9,9 @@ ToDo: add annotations for impportant dates:
 
 */
 
-//var anchors = ["Anchor1", "Anchor2", "Anchor3"]; // for words node-chart
-
-
 var svg = d3.select("#chart").append("svg");
 var lastCell;
 var selected;
-
-// console.log(svg.x)
 
 svg.attr("width", 800)
    .attr("height", 500)
@@ -44,6 +39,29 @@ var r = d3.scaleLinear()
 var g = svg.append("g")
     .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
 
+var ln = g.append("g")
+    //.attr("opacity", 0)
+    // down side of text box
+    var lines = {"x1":120, "x2": 170, "y1":50, "y2":350, "y3": 175};
+    
+    ln.append("line")
+      .attr("x1", lines.x1)
+      .attr("y1", lines.y1)
+      .attr("x2", lines.x1)
+      .attr("y2", lines.y2)
+      .attr("stroke-width", 1)
+      .attr("stroke", "#FFF");
+
+    ln.append("line")
+      .attr('x1', lines.x1)
+      .attr("y1", lines.y3)
+      .attr("x2", lines.x2)
+      .attr("y2", lines.y3)
+      .attr("stroke-width", 1)
+      .attr("stroke", "#FFF")
+
+var bubbleLine = ln.append("g").attr("id", "bubbleLine")
+
 // Define the div for the tooltip
 var  div = d3.select("#chart").append("div") 
     .attr("class", "tooltip")   
@@ -55,6 +73,9 @@ var video_data = {};
 
 // keep track of words to show
 var word_list = [];
+
+// for controlling how often word-burst on mouseover
+var words_active = 0;
 
 // ToDo: this can be a lot more consice!!!
 function cleanDate(d){
@@ -77,9 +98,7 @@ d3.csv("randy_4_a.csv", function(error, data) {
 
   data.forEach(function(d){
 
-    //console.log(d['Date_str'])
     d['Date_str'] = cleanDate(d['Date_str'])
-    //console.log(d['Date_str'])
 
     // only restructuring video data, if we have a transcript file for it
     if(d.transcript != 'none'){
@@ -89,7 +108,6 @@ d3.csv("randy_4_a.csv", function(error, data) {
 
     // remove commas and convert to int
     //d.views = d["views_as_of_Jan-15-18"]
-   // console.log('views', d["views_as_of_Feb-21-18"])
     if(d["views_as_of_Feb-21-18"]){
       d.views = d["views_as_of_Feb-21-18"]
     } else {
@@ -98,14 +116,28 @@ d3.csv("randy_4_a.csv", function(error, data) {
     d.views = parseInt(d.views.replace(/\,/g,''))
 
     d.pub_date = d["Date_str"]
-    //console.log(d)
-    //console.log(d["Date_str"])
     d.date = parseTime(d["Date_str"]);
   })
 
   
    y.domain(d3.extent(data, function(d) { return d.date; }));
    r.domain(d3.extent(data, function(d){ return d.views; }))
+
+
+   data.forEach(function(d){
+    d.r = r(d.views)
+   })
+
+  
+  var words = g.append("g")
+        .attr("class", "words")
+        .selectAll("g").data(word_list)
+        .append("text")
+        .attr("x", randomRange(100,width))
+        .attr("y", randomRange(100, height))
+        .text(function(d){ return d; })
+
+
 
   var simulation = d3.forceSimulation(data)
       .force("y", d3.forceY(function(d) { return y(d.date); }).strength(1))
@@ -114,7 +146,6 @@ d3.csv("randy_4_a.csv", function(error, data) {
       .stop();
 
   for (var i = 0; i < 120; ++i) simulation.tick();
-
 
   g.append("g")
     .attr("class", "axis axis--y")
@@ -163,17 +194,20 @@ d3.csv("randy_4_a.csv", function(error, data) {
   cell.on("mouseover", function(d){
 
       if(lastCell) lastCell.style("opacity", fade)
-     
+
+
+      console.log("testing ", d.data.x, d.data.y, d.data);
+
 
       d3.select(this)
           .style("opacity", 1)
-      //   .attr("transform", "rotate(-1)" );
-
           .select(".info")
-            .attr("opacity", 1)
+            .style("opacity", 1)
       
       var info_x = 20; 
       var info_y = -height + margin.top //-height - 60; // ToDo: clean this up...simplify positioning
+
+      ln.select("g").remove()
 
       showToolTip(d, info_x, info_y);
       lastCell = d3.select(this);
@@ -186,33 +220,18 @@ d3.csv("randy_4_a.csv", function(error, data) {
         .style("opacity", .4)
 
       lastCell.style("opacity", .4)
-        // d3.select(this)
-        //   .style("opacity", .4)
+
     })
 });
 
 
 function showToolTip(d, x, y){
   var d = d.data;
+  var word_x = d.x;
+  var word_y = d.y + (d.r*2);
 
   var words = '';
-
-  if(d['words']){
-
-       console.log('***********************', d['words']['words'])
-      // d['words']['words'].forEach(function(e){
-      //     console.log(e.count, e.word)
-
-      //     for(var i=0; i<e.count; i++){
-      //       words += e.word;
-      //       words += " ";
-      //     }
-      // })
-  } else {
-
-     words = "Oh shoot, no transcript available"
-  }
-  
+ 
 
  var song_parody = "<p>"
  if(d['song_parody'] == "y") song_parody = "<p><font color='#870F87'>Song Parody</font><br/>"
@@ -234,24 +253,49 @@ function showToolTip(d, x, y){
 
     .style("left", x + "px")
     .style("top", function(){ return y + "px";})
-// 
+
+    
+    // clear old line, from last mouseover
+    d3.select("#bubbleLine").remove();
+
+    //draw line from bubble to info
+    var bl = ln.append("g").attr("id", "bubbleLine")
 
 
-  console.log("************************", words)
+    // ToDo: rewrite more concicely
+    bl.append("line")
+      .attr("x1", d.x+d.r)
+      .attr("y1", d.y+d.r)
+      .attr("x2", lines.x2)
+      .attr("y2", d.y+d.r)
+      .attr("stroke-width", 1)
+      .attr("stroke", "#FFF");
+
+    bl.append("line")
+      .attr("x1", lines.x2)
+      .attr("y1", d.y+d.r)
+      .attr("x2", lines.x2)
+      .attr('y2', lines.y3)
+      .attr("stroke-width", 1)
+      .attr("stroke", "#FFF");
 
 
+    // These are for the word explosions
+    if(word_data && (words_active < 30)){
+        if(word_data[d.transcript]) {
+         
+          word_data[d.transcript].words.forEach(function(d){
+            
+            create_word(d.word, word_x, word_y)
 
-    if(word_data){
-      if(word_data[d.transcript]) {
-        console.log(d.transcript);
-        console.log(word_data[d.transcript].words)
-        word_data[d.transcript].words.forEach(function(d){
-          console.log('raw words', d, d.count)
-          for(var i=0; i<d.count; i++){
-            create_word(d.word)
-          }
-        })
-      }
+            // for(var i=0; i<d.count; i++){
+            //   create_word(d.word)
+            // }
+          })
+
+        } else {
+          create_word("Oops! No transcript yet", word_x, word_y)
+        }
 
     }
    
@@ -259,12 +303,41 @@ function showToolTip(d, x, y){
 }
 
 
-function create_word(word){
-  console.log("create word: ", word)
+function create_word(word, x, y){
 
-  word_list.push(word);
-  console.log(word_list);
+  words_active += 1;
+  
+  x1 = x - randomRange(-100, 100);
+  y1 = y - randomRange(50, 100);
 
+  x2 = x1 + randomRange(-100, 100);
+
+  w = g.append("g")
+    .attr("class", "words")
+    .append("g")
+    .append("text")
+    .attr("x", x)
+    .attr("y", y)
+    .attr("font-size", ".1em")
+    .text(word)
+  w.transition()
+    .attr("x", x1)
+    .attr("y", y1)
+    .attr("font-size", "1em")
+    .duration(500)
+    .ease(d3.easeCircleInOut)
+  .transition()
+      .attr("x", x2)
+      .attr("y", height+100)
+      .attr("opacity", .4)
+      .attr("transform", "rotate(" + randomRange(-4,4) + ", 0, 0)")
+      .duration(randomRange(1000, 3000))
+      .ease(d3.easeBounce)
+  .transition()
+      .attr("opacity", .1)
+      .duration(500)
+      .remove()
+      .on("end", function(){words_active--;})
 }
 
 
@@ -275,35 +348,13 @@ d3.json("randyWords.txt", function(error, data) {
 
   var sets = data.words;
 
-  // console.log(sets)
-
-
-  // console.log('video data',video_data)
-
-    sets.forEach(function(d){
-      console.log(d)
-
-      word_data[d.fileName] = d;
-
-      console.log(d.size, d.fileName)
-
-    })
-
-    console.log(word_data)
+  sets.forEach(function(d){ word_data[d.fileName] = d; })
 
 });
 
 
-// // This portion controls the timer loop
-// var timer_elapsed = 0;
-// var max_time = 50000;
-// // Kick off the timer, and the action begins: 
-// var timer = d3.timer(tickFxn);
-// function tickFxn(elapsed) {
-//   timer_elapsed = elapsed;
- 
-//   console.log(elapsed)
-  
-//   if (timer_elapsed > max_time) { timer.stop(); } // comment this out, if we want animation to not stop
-// }
-// 
+
+function randomRange(min, max){ 
+  return Math.floor((Math.random() * (max - min + 1)) + min); 
+}
+

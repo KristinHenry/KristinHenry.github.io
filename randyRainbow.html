@@ -44,7 +44,7 @@
         text-align: left;  
 
         width: 200px;         
-        height: 200px;         
+        /*height: 300px;         */
         padding: 2px;       
         font: 14px sans-serif;    
         /*background: grey; */
@@ -53,9 +53,17 @@
         /*pointer-events: none;     */
     }
 
+    .node {
+  opacity: 0.5;
+}
+
+.node:hover {
+  opacity: 1;
+}
+
     </style>
 
-    <script src="http://d3js.org/d3.v4.min.js"></script>
+    
     
   </head>
 
@@ -111,8 +119,12 @@
     <script src="vendor/jquery/jquery.min.js"></script>
     <script src="vendor/bootstrap/js/bootstrap.bundle.min.js"></script>
 
+    <script src="https://d3js.org/d3.v4.min.js"></script>
+    <script src="https://d3js.org/d3-voronoi.v1.min.js"></script>
     <!-- D3 code for chart -->
-    <script src="randyChart_4.js"></script>
+    <script src="randyChart_8.js"></script>
+    <!-- <script src="node_chart_v4.js"></script> -->
+   <!-- <script src="words_fall.js"></script> -->
 
   </body>
 
