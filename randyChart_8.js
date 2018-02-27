@@ -196,7 +196,7 @@ d3.csv("randy_4_a.csv", function(error, data) {
       if(lastCell) lastCell.style("opacity", fade)
 
 
-      console.log("testing ", d.data.x, d.data.y, d.data);
+      // console.log("testing ", d.data.x, d.data.y, d.data);
 
 
       d3.select(this)
@@ -280,21 +280,28 @@ function showToolTip(d, x, y){
       .attr("stroke", "#FFF");
 
 
+    var notes = ["\u266B", "\u266A", "\u2669", "\u266C"]
+
     // These are for the word explosions
-    if(word_data && (words_active < 30)){
+    if(word_data && (words_active < 40)){
         if(word_data[d.transcript]) {
          
-          word_data[d.transcript].words.forEach(function(d){
+          word_data[d.transcript].words.forEach(function(e){
             
-            create_word(d.word, word_x, word_y)
+            create_word(e.word, word_x, word_y)
+            //console.log('song parody', d['song_parody'], d)
+            if(d['song_parody'] != "n") create_word(notes[randomRange(0,3)], word_x, word_y)
+
+
 
             // for(var i=0; i<d.count; i++){
-            //   create_word(d.word)
+            //   create_word(e.word)
             // }
           })
 
         } else {
           create_word("Oops! No transcript yet", word_x, word_y)
+          if(d['song_parody'] == "y") create_word(notes[1], word_x, word_y)
         }
 
     }
