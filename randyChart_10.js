@@ -99,7 +99,7 @@ function cleanDate(d){
   return month + " " + day + ", " + year;
 }
 
-d3.csv("randy_4_a.csv", function(error, data) {
+d3.csv("randy_5.csv", function(error, data) {
   if (error) throw error;
 
   data.forEach(function(d){
@@ -111,11 +111,12 @@ d3.csv("randy_4_a.csv", function(error, data) {
       video_data[d.transcript] = d;
     }
 
+    console.log(d)
 
     // remove commas and convert to int
     //d.views = d["views_as_of_Jan-15-18"]
-    if(d["views_as_of_Feb-21-18"]){
-      d.views = d["views_as_of_Feb-21-18"]
+    if(d["views_as_of_March-9-18"]){
+      d.views = d["views_as_of_March-9-18"]
     } else {
       d.views = 1,000;
     }
@@ -185,7 +186,7 @@ d3.csv("randy_4_a.csv", function(error, data) {
 
   var lastCell;
   // // show initial info, without needing to mouse-over, with transcript='beforeHeTweets'
-  showToolTip(firstCell, info_x, info_y)
+  // showToolTip(firstCell, info_x, info_y)
 
   cell.on("mouseover", function(d){
 
@@ -303,6 +304,9 @@ function showToolTip(d, x, y){
 
     var notes = ["\u266B", "\u266A", "\u2669", "\u266C"]
 
+
+    console.log("from tooltip: ", d.transcript)
+
     // These are for the word explosions
     if(word_data && (words_active < 50)){
         if(word_data[d.transcript]) {
@@ -371,12 +375,18 @@ function create_word(word, x, y){
 
 var word_data = {};
 
-d3.json("randyWords.txt", function(error, data) {
+// d3.json("randyWords.txt", function(error, data) {
+
+d3.json("output.txt", function(error, data) {
   if (error) throw error;
+  console.log(data)
 
   var sets = data.words;
 
-  sets.forEach(function(d){ word_data[d.fileName] = d; })
+  sets.forEach(function(d){ console.log("----", d); word_data[d.fileName] = d; })
+
+  console.log("got words")
+  console.log(word_data)
 
 });
 
