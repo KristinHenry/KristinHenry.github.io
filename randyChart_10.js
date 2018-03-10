@@ -173,7 +173,7 @@ d3.csv("randy_5.csv", function(error, data) {
 
   // ToDo: find cleaner way to set firstCell for initial info to display
   cell.append("svg:image")  
-      .attr("id", function(d,i){ if(d.data.transcript == "beforeHeTweets") firstCell = d; return d.data.transcript; })
+      .attr("id", function(d,i){ if(d.data.transcript == "microwaves.txt") firstCell = d; return d.data.transcript; })
       .attr("link:href", function(d){ return d.data['song_parody'] == "y" ? "randy_pink.jpg" : "randy_teal.jpg"})  
       .attr("width", function(d){ return r(d.data.views) * 2; })
       .attr("height", function(d){ return r(d.data.views) * 2; })
@@ -186,7 +186,7 @@ d3.csv("randy_5.csv", function(error, data) {
 
   var lastCell;
   // // show initial info, without needing to mouse-over, with transcript='beforeHeTweets'
-  // showToolTip(firstCell, info_x, info_y)
+  showToolTip(firstCell, info_x, info_y)
 
   cell.on("mouseover", function(d){
 
