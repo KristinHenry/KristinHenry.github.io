@@ -99,7 +99,7 @@ function cleanDate(d){
   return month + " " + day + ", " + year;
 }
 
-d3.csv("randy_5.csv", function(error, data) {
+d3.csv("randy_6.csv", function(error, data) {
   if (error) throw error;
 
   data.forEach(function(d){
@@ -115,8 +115,8 @@ d3.csv("randy_5.csv", function(error, data) {
 
     // remove commas and convert to int
     //d.views = d["views_as_of_Jan-15-18"]
-    if(d["views_as_of_March-9-18"]){
-      d.views = d["views_as_of_March-9-18"]
+    if(d["views_as_of_March-17-18"]){
+      d.views = d["views_as_of_March-17-18"]
     } else {
       d.views = 1,000;
     }
@@ -172,8 +172,9 @@ d3.csv("randy_5.csv", function(error, data) {
     
 
   // ToDo: find cleaner way to set firstCell for initial info to display
+  var transcript_0 = "yourMakingThingsUpAgain.txt"
   cell.append("svg:image")  
-      .attr("id", function(d,i){ if(d.data.transcript == "microwaves.txt") firstCell = d; return d.data.transcript; })
+      .attr("id", function(d,i){ if(d.data.transcript == transcript_0) firstCell = d; return d.data.transcript; })
       .attr("link:href", function(d){ return d.data['song_parody'] == "y" ? "randy_pink.jpg" : "randy_teal.jpg"})  
       .attr("width", function(d){ return r(d.data.views) * 2; })
       .attr("height", function(d){ return r(d.data.views) * 2; })
@@ -305,7 +306,7 @@ function showToolTip(d, x, y){
     var notes = ["\u266B", "\u266A", "\u2669", "\u266C"]
 
 
-    console.log("from tooltip: ", d.transcript)
+    //console.log("from tooltip: ", d.transcript)
 
     // These are for the word explosions
     if(word_data && (words_active < 50)){
