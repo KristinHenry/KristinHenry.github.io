@@ -144,6 +144,7 @@ d3.csv(datafile, function(error, data) {
    y.domain(d3.extent(data, function(d) { return d.date; }));
    r.domain(d3.extent(data, function(d){ return d.views; }));
    bar_w.domain(d3.extent(data, function(d){ return d.views; }));
+   bar_w_reversed.domain(bar_w.domain())
 
 
    data.forEach(function(d){
@@ -166,15 +167,15 @@ d3.csv(datafile, function(error, data) {
     .call(d3.axisRight(y).ticks(7).tickSize(0).tickSizeOuter(0))
 
 
-  // g.append("g")
-  //   .attr("class", "axis axis--x")
-  //   .attr("transform", "translate(" + (width-max_bar) + ", 0)")
-  //   .call(d3.axisTop(bar_w_reversed))
-  //   .call(d3.axisTop(bar_w_reversed).ticks(2).tickSize(0).tickSizeOuter(0))
+  g.append("g")
+    .attr("class", "axis axis--x")
+    .attr("transform", "translate(" + (width-max_bar) + ", 0)")
+    // .call(d3.axisTop(bar_w_reversed))
+    .call(d3.axisTop(bar_w_reversed).ticks(3).tickSize(0).tickSizeOuter(0))
   g.append("text")
     .attr("transform", "translate(" + (width-(max_bar/2)) + ", -20)")
     .style("text-anchor", "middle")
-    .text("Views (in millions)")
+    .text("Views")
 
  
 
