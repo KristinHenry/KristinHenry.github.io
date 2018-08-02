@@ -169,6 +169,7 @@ d3.csv(datafile, function(error, data) {
   // g.append("g")
   //   .attr("class", "axis axis--x")
   //   .attr("transform", "translate(" + (width-max_bar) + ", 0)")
+  //   .call(d3.axisTop(bar_w_reversed))
   //   .call(d3.axisTop(bar_w_reversed).ticks(2).tickSize(0).tickSizeOuter(0))
   g.append("text")
     .attr("transform", "translate(" + (width-(max_bar/2)) + ", -20)")
