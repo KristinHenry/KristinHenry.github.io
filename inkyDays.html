@@ -1,0 +1,675 @@
+<!DOCTYPE html>
+<html lang="en">
+
+  <head>
+
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <meta name="description" content="">
+    <meta name="author" content="">
+
+    <title>ArtAtomic: Art, Code and Science of Kristin Henry</title>
+
+    <!-- Bootstrap core CSS -->
+    <link href="vendor/bootstrap/css/bootstrap.min.css" rel="stylesheet">
+
+    <!-- Custom styles for this template -->
+    <link href="css/4-col-portfolio.css" rel="stylesheet">
+   <!--  // <script src="http://d3js.org/d3.v4.min.js"></script> -->
+
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+  <style>
+    /* default / demo page */
+    * {
+      box-sizing: border-box;
+    }
+    html,
+    body {
+      margin: 0;
+      padding: 0;
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
+    }
+    body {
+      min-height: 1280px;
+      font-weight: 300;
+      color: #2a2a2a;
+    }
+    p,
+    h1,
+    h2,
+    h3,
+    h4,
+    a {
+      margin: 0;
+      font-weight: 300;
+    }
+    a,
+    a:visited,
+   /* a:hover {
+      color: #f30;
+      text-decoration: none;
+      border-bottom: 1px solid currentColor;
+    }*/
+    #intro {
+      max-width: 40rem;
+      margin: 1rem auto;
+      text-align: center;
+    }
+    .intro__overline {
+      font-size: 1.4rem;
+    }
+    .intro__hed {
+      font-size: 1.4rem;
+      margin: 1.5rem auto;
+      /*text-transform: uppercase;*/
+      font-weight: 900;
+      letter-spacing: 0.05em;
+    }
+    .intro__dek {
+      font-size: 1.4rem;
+    }
+    /* demo */
+    #intro {
+      margin-bottom: 110px;
+    }
+    #outro {
+      /*height: 200px;*/
+      height: 100px;
+    }
+
+    /* for chart text  */
+    .colorCaption {
+      font-size: .4em;
+    }
+    .months {
+      font-size: .3em;
+    }
+
+
+    /* scrollama */
+    /*#scroll {
+      position: relative;
+      border-top: 2px dashed #000;
+      border-bottom: 2px dashed #000;
+    }*/
+    .scroll__graphic {
+      position: -webkit-sticky;
+      position: sticky;
+      float: right;
+      top: 0;
+      right: 2rem;
+      -webkit-transform: translate3d(0, 0, 0);
+      -moz-transform: translate3d(0, 0, 0);
+      transform: translate3d(0, 0, 0);
+      /*background-color: #ddd;
+      border: 1px solid #000;*/
+    }
+    .scroll__graphic p {
+      text-align: center;
+      padding: 1rem;
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      -moz-transform: translate(-50%, -50%);
+      -webkit-transform: translate(-50%, -50%);
+      transform: translate(-50%, -50%);
+      font-size: 8rem;
+      font-weight: 900;
+      color: #666;
+    }
+    .scroll__text {
+      position: relative;
+      padding: 0 1rem;
+      max-width: 30rem;
+      width: 33%;
+    }
+    .step {
+      margin: 0 auto 2rem auto;
+      opacity: .3;
+      /*border: 1px solid #333;*/
+    }
+    .step:last-child {
+      /*border-bottom: 1px solid #333;*/
+    }
+    .step.is-active {
+      /*background-color: #ccc;*/
+      opacity: .9;
+    }
+    .step p {
+      /*text-align: center;*/
+      padding: 1rem;
+      /*font-size: 1.5rem;*/
+      font-size: 1rem;
+    }
+
+    .img-overlay-wrap {
+      position: relative;
+      display: inline-block; /* <= shrinks container to image size */
+      transition: transform 150ms ease-in-out;
+    }
+
+    .img-overlay-wrap img { /* <= optional, for responsiveness */
+       display: block;
+       max-width: 70%;
+       height: auto;
+    }
+
+    .img-overlay-wrap svg {
+      position: absolute;
+      top: 0;
+      left: 0;
+    }
+
+  </style>
+
+
+  </head>
+
+  <body>
+
+    <!-- Navigation -->
+    <nav class="navbar navbar-expand-lg navbar-dark bg-dark fixed-top">
+      <div class="container">
+        <a class="navbar-brand" href="index.html">ArtAtomic: Art + Code + Science</a>
+        <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarResponsive" aria-controls="navbarResponsive" aria-expanded="false" aria-label="Toggle navigation">
+          <span class="navbar-toggler-icon"></span>
+        </button>
+        <div class="collapse navbar-collapse" id="navbarResponsive">
+          <ul class="navbar-nav ml-auto">
+            <li class="nav-item active">
+              <a class="nav-link" href="index.html">Home</a>
+            </li>
+            <li class="nav-item">
+              <a class="nav-link" href="#">About<span class="sr-only">(current)</span></a>
+            </li>
+            <li class="nav-item">
+              <a class="nav-link" href="https://kristinhenry.dunked.com/contact">Contact</a>
+            </li>
+          </ul>
+        </div>
+      </div>
+    </nav>
+
+    <!-- Page Content -->
+    <div class="container">
+      <!-- Page Heading -->
+      <h1>InkyDays</h1>
+
+      <section id='intro'>
+        <h1 class='intro__hed'> . </h1>
+        <p class='intro__dek'><b>#InkyDays</b>: A year of drawing, daily, with ink.</p>
+      </section>
+      <section id='scroll'>
+        <div class='scroll__graphic sticky'>
+          <div id='graphic_content'>
+            <div id="chart" class="img-overlay-wrap">
+              <img x=100>
+              <svg viewBox="0 0 200 200"></svg>
+            </div>
+          </div>
+        </div>
+        <div class='scroll__text'></div>
+      </section>
+      <section id='outro'>
+        <!-- <div><img src="inkyDays090118.jpg"></div> -->
+      </section>
+            
+    </div>
+    <!-- /.container -->
+
+
+    <!-- Footer -->
+    <footer class="py-5 bg-dark">
+      <div class="container">
+        <p class="m-0 text-center text-white">Copyright &copy; Kristin Henry 2018</p>
+      </div>
+      <!-- /.container -->
+    </footer>
+
+    <!-- Bootstrap core JavaScript -->
+    <script src="vendor/jquery/jquery.min.js"></script>
+    <script src="vendor/bootstrap/js/bootstrap.bundle.min.js"></script>
+    <!-- scrolly and d3 javascript -->
+    <script src='d3.v4.min.js'></script>
+    <script src='inkyDays/stickyfill.min.js'></script>
+    <script src='https://unpkg.com/intersection-observer@0.5.0/intersection-observer.js'></script>
+  <script src='inkyDays/scrollama.min.js'></script>
+
+  <script>
+    var graphicWidth;
+    var max_steps = 39; // ToDo: make sure this is right number of 'text' steps in data
+    //==============================================================
+
+    var parseTime = d3.timeParse("%Y-%m-%d")
+    var formatTime = d3.timeFormat("%m/%Y")
+    var dateFormat = d3.timeFormat("%Y, %m, %d")
+
+    var offsetDate = new Date("2017-01-01"); 
+    var startDate = new Date("2017-10-01");//d3.timeParse("2017_10_01")
+
+    var octDay = d3.timeDay.count(offsetDate, startDate)
+
+    var a = (2*Math.PI)/365;  // angle per day
+    var a1 = 180*a; // start angle, for October
+    var a2 = 270*a; // Jan
+    var a3 = 0; // Apr
+    var a4 = 90*a;  // Jul
+
+    var r1 = 18;
+    var r2 = 50;
+
+    var x1  = 30; //110; //graphicWidth/2; //110;
+    var y1 = 110;
+
+    var x2 = 70;
+    var y2 = 70;
+
+    var colorInfo = {};
+    var dots = [];
+    var images = [];
+    var stepData;
+     
+    var step = d3.select(".scroll__text")
+
+    
+    for(var i=0; i<=max_steps; i++){
+      step.append('div')
+        .attr('class', 'step')
+        .attr('data-step', i)
+        .attr('id', 'step'+i)
+    }
+
+    
+
+
+    //==============================================================
+    // example code came from
+    // https://github.com/russellgoldenberg/scrollama/tree/master/docs
+    // more info here: https://github.com/russellgoldenberg/scrollama/
+
+
+    // using d3 for convenience
+    var container = d3.select('#scroll');
+    var graphic = container.select('.scroll__graphic');
+    var text = container.select('.scroll__text');
+    var step = text.selectAll('.step');
+    // initialize the scrollama
+    var scroller;// = scrollama();
+    // generic window resize listener event
+    function handleResize() {
+      // 1. update height of step elements
+      // var stepHeight = Math.floor(window.innerHeight * 0.75);
+      var stepHeight = Math.floor(window.innerHeight * 0.40);
+      step.style('height', stepHeight + 'px');
+      // 2. update width/height of graphic element
+      var bodyWidth = d3.select('body').node().offsetWidth;
+      var graphicMargin = 16 * 4;
+      var textWidth = text.node().offsetWidth;
+      
+      graphicWidth = container.node().offsetWidth - textWidth - graphicMargin;
+      //x1 = graphicwidth/2;
+
+      var graphicHeight = Math.floor(window.innerHeight / 2)
+      var graphicMarginTop = Math.floor(graphicHeight / 2)
+      graphic
+        .style('width', graphicWidth + 'px')
+        .style('height', graphicHeight + 'px')
+        .style('top', graphicMarginTop + 'px');
+      // 3. tell scrollama to update new element dimensions
+      scroller.resize();
+    }
+
+    // scrollama event handlers
+    function handleStepEnter(response) {
+
+      // indicate current step
+      step.classed('is-active', function (d, i) {
+        return i === response.index;
+      })
+      
+      //  image
+      var img = graphic.select('img')
+        .attr('src', images[response.index])
+        .attr('width', graphicWidth)
+            
+      var t = d3.transition()
+        .duration(220)
+        .ease(d3.easeLinear);
+
+
+      
+      if(response.index >= max_steps){
+        // big version at end of scrolling
+        var x  = x2;
+        var y = y2;
+        var r = r2;
+        var dr = 2;
+
+      } else {
+        // regular vesion, while scrolling
+        var x = x1;
+        var y = y1;
+        var r = r1;
+        var dr = 2;
+      }
+
+        img.style("opacity", 1)
+
+        d3.selectAll(".dot").transition(t)
+          .attr("cx", 100)
+          .attr("cy", 100)
+          .attr("r", .3) //1)
+            .attr("cx", function(d){ return (Math.cos(d.day*a + a1) * (r + (dr*d.row) )) + x})
+            .attr("cy", function(d){ return (Math.sin(d.day*a + a1) * (r + (dr*d.row) )) + y})
+            .attr("opacity", function(d){ 
+            if(response.index <= 2) return 0;
+
+            if(d.date <= stepData[response.index].date) return 1;
+            if(response.index == max_steps) return 1;
+            return .1;
+          })  
+
+
+      // testing out idea for mouse events
+      if(response.index >= max_steps){
+
+        showMonths();
+
+        console.log('last step', response.index)
+
+        img.style("opacity", function(){ return 0;} )
+
+        // only when big
+        d3.selectAll(".dot")
+          // .attr("r", 2)
+          .on("mouseover", handleMouseOver)
+          .on("mouseout", handleMouseOut);
+
+
+      } else {
+        // when small and scrolling
+        d3.selectAll(".dot")
+          .on("mouseover", null)
+          .on("mouseout", null);
+
+        hideMonths();  // don't show month annoation unless chart is big
+
+      }
+
+    }
+
+
+    function showMonths(){
+
+        var info = [{'name': 'Oct', 'a': a1, 'anchor': 'end'},
+                    {'name': 'Jan', 'a': a2, 'anchor': 'start'},
+                    {'name': 'Apr', 'a': a3, 'anchor': 'start'},
+                    {'name': 'Jul', 'a': a4, 'anchor': 'start'}]
+
+        var svg = d3.select("#chart").select("svg");
+
+        svg.selectAll("months").data(info)
+          .enter()
+          .append("text")
+          .attr("class", "months")
+          .attr("x", function(d){ return (Math.cos(d.a) * (r2 +10)) + x2})
+          .attr("y", function(d){ return (Math.sin(d.a) * (r2 +10)) + y2})
+          .attr("dy", ".1em")
+          .attr("text-anchor", function(d){ return d.anchor; })
+          .text(function(d){ console.log(d.name); return d.name; })
+          .style("fill", "#CCC")      
+
+    }
+
+
+    function hideMonths(){
+       d3.selectAll(".months")
+              .remove()
+    }
+
+
+    function handleMouseOver(d) {  // Add interactivity
+            //console.log(d)
+            // Use D3 to select element, change color and size
+            var dot = d3.select(this)
+              .attr("r", 2)
+
+            var svg = d3.select("#chart").select("svg");
+
+            d3.selectAll(".line")
+              .remove()
+
+            d3.selectAll(".colorCaption")
+              .remove()
+
+
+            var info = colorInfo[d.hex]
+            console.log(info)
+
+            svg.append("text")
+              .attr("class", "colorCaption")
+              .attr("x", 120)
+              .attr("y", 100)
+              .attr("dy", ".2em")
+              .text(info["name"])
+              .style("fill", info["hex"])
+              .style("font-weight", "bold")
+
+            svg.append("text")
+              .attr("class", "colorCaption")
+              .attr("x", 120)
+              .attr("y", 114)
+              .attr("dy", ".1em")
+              .text("Made in: " + info["origin"])
+              .style("fill", info["hex"])
+
+            svg.append("text")
+              .attr("class", "colorCaption")
+              .attr("x", 120)
+              .attr("y", 124)
+              .attr("dy", ".1em")
+              .attr("width", 100)
+              .text("I got it in: " + info["source"])
+              .style("fill", info["hex"])
+
+
+
+
+
+            var someDots = dots.filter(function(e){ return e.hex == d.hex; })
+
+            for(var i = 0; i<someDots.length; i++){
+              var d = someDots[i]
+              svg.append("line")
+                .attr("class", "line")
+                .attr("x1", d.x2)
+                .attr("y1", d.y2)
+                .attr("x2", x2)
+                .attr("y2", y2)
+                .style("stroke", d.hex)
+                .style("stroke-width", .1)
+            }
+              
+    }
+
+    function handleMouseOut(d) {             
+
+            var dot = d3.select(this)
+              .attr("r", .3)
+
+            d3.selectAll(".colorCaption")
+              .remove()
+
+            d3.selectAll(".line")
+              // .transition()
+              // .duration(1000)
+              // .attr("opacity", .1)
+              .remove()
+    }
+
+
+    function handleContainerEnter(response) {
+      // response = { direction }
+    }
+    function handleContainerExit(response) {
+      // response = { direction }
+    }
+    function setupStickyfill() {
+      d3.selectAll('.sticky').each(function () {
+        Stickyfill.add(this);
+      });
+    }
+
+
+    function init() {
+      
+      // initialize the scrollama
+      scroller = scrollama();
+
+      setupStickyfill();
+      // 1. force a resize on load to ensure proper dimensions are sent to scrollama
+      handleResize();
+      // 2. setup the scroller passing options
+      // this will also initialize trigger observations
+      // 3. bind scrollama event handlers (this can be chained like below)
+      scroller.setup({
+        container: '#scroll',
+        graphic: '.scroll__graphic',
+        text: '.scroll__text',
+        step: '.scroll__text .step',
+        debug: true,
+        offset: 0.60 //0.33,
+      })
+        .onStepEnter(handleStepEnter)
+        .onContainerEnter(handleContainerEnter)
+        .onContainerExit(handleContainerExit);
+      // setup resize event
+      window.addEventListener('resize', handleResize);
+    }
+
+
+    function handleData(error, colorNames, colors, days){
+      if(error){ console.log(error); }
+
+      getColorNames(colorNames)
+      getStepData(days);
+      getColorData(colors);
+            
+    }
+
+    function getColorNames(names){
+      // console.log(names);
+
+      names.forEach(function(d){
+        // console.log(d)
+
+        colorInfo[d.HEX] = {'hex': d.HEX,
+                            'name': d.NAME,
+                            'origin': d.ORIGIN,
+                            'source': d.SOURCE
+                            }
+
+      })
+    }
+
+
+    function getStepData(days){
+      
+      var step = d3.select(".scroll__text")
+
+      days.forEach(function(d,i){
+
+        d.date = new Date(d.DATE); 
+      
+        images.push("imgs/inkyDays/" + d.FILE)
+
+        d3.select("#step"+i)
+          .append('p').text(d.TEXT)
+
+      })
+
+      stepData = days;
+
+      // set up all the scrolly code
+      init()
+
+    }
+
+    //----------------------------------------
+    function getColorData(colors){
+      
+      colors.forEach(function(d,i) {
+
+        var x = x1; //110; //graphicWidth/2;//0; //100;
+        var y = y1; //80;
+        var dr = 2; 
+
+          d.colors = d.COLORS.split(",")
+          
+
+          d.hex = d.HEX.split(",")
+          d.hex.forEach(function(h,j){ 
+
+            var dot = {}
+            dot.hex = h;
+            dot.color = d.colors[j];
+            dot.date = new Date(d.DATE);
+            dot.img = d.FILE
+            dot.day = i;
+            dot.row = j;
+            dot.r = .3;
+
+            dot.x1 = (Math.cos(i*a + a1) * (r1 + (dr*j) )) + x1;
+            dot.y1 = (Math.sin(i*a + a1) * (r1 + (dr*j) )) + y1;
+            dot.x2 = (Math.cos(i*a + a1) * (r2 + (dr*j) )) + x2;
+            dot.y2 = (Math.sin(i*a + a1) * (r2 + (dr*j) )) + y2;
+
+            dots.push(dot);         
+          })
+        })
+      //})
+
+        drawChart(dots)
+    }
+
+    function drawChart(data){
+
+      var h = 8;
+      var x = 110; //graphicWidth/2;//0; //100;
+      var y = 80;
+      
+      var r = 24; //80;
+      var dr = 2; //3;
+      
+      var svg = d3.select("#chart").select("svg")
+
+      // Add the scatterplot
+      var dot = svg.selectAll("dot")
+            .data(data)
+          .enter()
+          
+      dot.append("circle")
+        .attr("class", "dot")
+            .attr("r", function(d){ return d.r; }) //1)
+            .attr("cx", function(d){ return d.x1; })
+            .attr("cy", function(d){ return d.y1; })
+            .attr("opacity", .1)
+            .style("fill", function(d){ return d.hex; })
+
+    }
+
+
+    //----------------------------------------
+    // kick things off
+    d3.queue()
+        .defer(d3.csv, "inkyDays/inkNames.csv")
+        .defer(d3.csv, "inkyDays/InkyDaysColorData.csv")
+        .defer(d3.csv, "inkyDays/Days_test.csv")
+        .await(handleData);
+
+  </script>
+
+
+  </body>
+
+</html>
