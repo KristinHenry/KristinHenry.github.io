@@ -258,8 +258,8 @@
     var r1 = 18;
     var r2 = 50;
 
-    var x1  = 30; //110; //graphicWidth/2; //110;
-    var y1 = 110;
+    var x1  = 110; //30; //110; //graphicWidth/2; //110;
+    var y1 = 80; //110;
 
     var x2 = 70;
     var y2 = 70;
@@ -388,9 +388,9 @@
 
       } else {
         // when small and scrolling
-        d3.selectAll(".dot")
-          .on("mouseover", null)
-          .on("mouseout", null);
+        // d3.selectAll(".dot")
+        //   .on("mouseover", null)
+        //   .on("mouseout", null);
 
         hideMonths();  // don't show month annoation unless chart is big
 
@@ -429,7 +429,7 @@
 
 
     function handleMouseOver(d) {  // Add interactivity
-            //console.log(d)
+            console.log(d)
             // Use D3 to select element, change color and size
             var dot = d3.select(this)
               .attr("r", 2)
