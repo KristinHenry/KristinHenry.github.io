@@ -345,12 +345,16 @@
         var r = r2;
         var dr = 2;
 
+        var dotsize = .5;
+
       } else {
         // regular vesion, while scrolling
         var x = x1;
         var y = y1;
         var r = r1;
         var dr = 2;
+
+        var dotsize = .3;
       }
 
         img.style("opacity", 1)
@@ -358,7 +362,7 @@
         d3.selectAll(".dot").transition(t)
           .attr("cx", 100)
           .attr("cy", 100)
-          .attr("r", .3) //1)
+          .attr("r", dotsize) //1)
             .attr("cx", function(d){ return (Math.cos(d.day*a + a1) * (r + (dr*d.row) )) + x})
             .attr("cy", function(d){ return (Math.sin(d.day*a + a1) * (r + (dr*d.row) )) + y})
             .attr("opacity", function(d){ 
@@ -388,9 +392,13 @@
 
       } else {
         // when small and scrolling
-        // d3.selectAll(".dot")
-        //   .on("mouseover", null)
-        //   .on("mouseout", null);
+        d3.selectAll(".dot")
+          .on("mouseover", null)
+          .on("mouseout", null);
+
+
+         d3.selectAll(".line")
+              .remove()
 
         hideMonths();  // don't show month annoation unless chart is big
 
@@ -495,7 +503,7 @@
     function handleMouseOut(d) {             
 
             var dot = d3.select(this)
-              .attr("r", .3)
+              .attr("r", .5)
 
             d3.selectAll(".colorCaption")
               .remove()
