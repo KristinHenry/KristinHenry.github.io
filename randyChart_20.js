@@ -11,9 +11,9 @@ ToDo: add annotations for important dates:
 
 //-------------------------------------------
 // update these, when new video data added
-var first_transcript = "interviewsGaryJohnson.txt";
-var datafile = "randy_13.csv";
-var views_date = "2018-10-15";
+var first_transcript = "russiaTies.txt";
+var datafile = "randy_14.csv";
+var views_date = "2018-11-05";
 
 //-------------------------------------------
 
@@ -245,11 +245,7 @@ d3.csv(datafile, function(error, data) {
     })
 
     cell.on("mouseout", function(d){
-
-      
-
       lastCell.style("opacity", .4)
-
     })
 
 
