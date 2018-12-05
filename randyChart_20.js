@@ -11,9 +11,9 @@ ToDo: add annotations for important dates:
 
 //-------------------------------------------
 // update these, when new video data added
-var first_transcript = "russiaTies.txt";
-var datafile = "randy_14.csv";
-var views_date = "2018-11-05";
+var first_transcript = "unpopular.txt";
+var datafile = "randy_15.csv";
+var views_date = "2018-12-05";
 
 //-------------------------------------------
 
