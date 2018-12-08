@@ -1,0 +1,178 @@
+<!DOCTYPE html>
+<html lang="en">
+
+  <head>
+
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <meta name="description" content="">
+    <meta name="author" content="">
+
+    <title>ArtAtomic: Art, Code and Science of Kristin Henry</title>
+
+    <!-- Bootstrap core CSS -->
+    <link href="vendor/bootstrap/css/bootstrap.min.css" rel="stylesheet">
+
+    <!-- Custom styles for this template -->
+    <link href="css/4-col-portfolio.css" rel="stylesheet">
+    <script src="d3.v4.min.js"></script>
+  </head>
+
+  <body>
+
+    <!-- Navigation -->
+    <nav class="navbar navbar-expand-lg navbar-dark bg-dark fixed-top">
+      <div class="container">
+        <a class="navbar-brand" href="index.html">ArtAtomic: Art + Code + Science</a>
+        <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarResponsive" aria-controls="navbarResponsive" aria-expanded="false" aria-label="Toggle navigation">
+          <span class="navbar-toggler-icon"></span>
+        </button>
+        <div class="collapse navbar-collapse" id="navbarResponsive">
+          <ul class="navbar-nav ml-auto">
+            <li class="nav-item active">
+              <a class="nav-link" href="index.html">Home</a>
+            </li>
+            <li class="nav-item">
+              <a class="nav-link" href="about.html">About</a>
+            </li>
+            <li class="nav-item">
+              <a class="nav-link" href="https://kristinhenry.dunked.com/contact">Contact</a>
+            </li>
+          </ul>
+        </div>
+      </div>
+    </nav>
+
+    <!-- Page Content -->
+    <div class="container">
+
+      <!-- Page Heading -->
+      <h1 class="my-4">InkyDays: Kristin Henry
+        <small><br>Daily sketches, drawn in ink.</small>
+      </h1>
+
+      <div id="images" class="row"></div>
+      <!-- /.row -->
+
+
+      <!--     load more -->
+
+      <div class="mx-auto" style="width: 200px;">
+        <button type="button" class="btn btn-secondary" id="loadMore">Load More Drawings</button>
+        <p></p>
+      </div>
+
+      
+
+
+     
+     
+
+
+    </div>
+    <!-- /.container -->
+
+    <!-- Footer -->
+    <footer class="py-5 bg-dark">
+      <div class="container">
+        <p class="m-0 text-center text-white">Copyright &copy; Kristin Henry 2018</p>
+        <p>.</p>
+      </div>
+      <div class="container text-center">
+        <script type='text/javascript' src='https://ko-fi.com/widgets/widget_2.js'></script><script type='text/javascript'>kofiwidget2.init('Support My Projects on Ko-fi', '#6281ad', 'S6S36A7G');kofiwidget2.draw();</script> 
+      </div>
+      <div class="container text-center">
+        <p>.</p>
+        <a href="https://www.patreon.com/bePatron?u=74769"><img src="imgs/become_a_patron_button.png"></a>
+      </div>
+
+      <!-- /.container -->
+    </footer>
+
+    <!-- Bootstrap core JavaScript -->
+    <script src="vendor/jquery/jquery.min.js"></script>
+    <script src="vendor/bootstrap/js/bootstrap.bundle.min.js"></script>
+
+    <script>
+
+    var datafile = "inkyDaysImages.csv";
+
+    var targ = d3.select('#images')
+
+    var dataset;
+    var totalImgs = 0;
+    var showing = 0;
+    var group = 20; //4;
+
+    d3.csv(datafile, function(error, data) {
+      if (error) throw error;
+
+      totalImgs = data.length;
+      dataset = data;
+
+      data.forEach(function(d,i){
+        d.i = i;
+        if(i< group) addImg(d);
+      })
+
+    })
+
+    var button = d3.select("#loadMore")
+                  .on("click", function(d){
+                    for(var i=0; i<group; i+=1){
+                      if(showing < totalImgs){
+                        addImg(dataset[showing])
+                      } else {
+                        // reached end of data, get rid of button
+                        this.remove();
+                      }
+                    }
+                  })
+
+
+
+
+    function addImg(d){
+     
+      showing += 1;
+
+      var img = "imgs/inkyDays/" + d.Image;
+
+      var card = targ.append("div")
+                .attr("class", "col-lg-3 col-md-4 col-sm-6 portfolio-item")
+
+      card = card.append("div")
+                .attr("class", "card h-100")
+
+      card.append("img")
+                .attr("class", "card-img-top")
+                .attr("src", img)
+
+      card.append("div")
+          .attr("class", "card-body")
+          .append("p")
+          .attr("class", "card-text")
+          .append("text")
+          .text(d.Title)
+
+
+
+
+
+
+       // <div class="col-lg-3 col-md-4 col-sm-6 portfolio-item">
+       //    <div class="card h-100">
+       //      <a href="https://www.ko-fi.com/post/InkyDays-090218-C0C2J142"><img class="card-img-top" src="imgs/inkyDays/inkyDays110218.jpg" alt=""></a>
+       //      <div class="card-body">
+       //        <p class="card-text">inkyDays 11/02/2018</p>
+       //      </div>
+       //    </div>
+       //  </div>
+
+    }
+
+    </script>
+
+  </body>
+
+</html>
