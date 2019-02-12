@@ -1,5 +1,7 @@
 # Notes on developing my first Browser Extension (screenDatify)
 
+* This is a preview of my notes-- **please don't share link yet!**
+
 
 ## Goal: Collect screenshots and associated data for ads on youtube
 
