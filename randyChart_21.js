@@ -11,9 +11,9 @@ ToDo: add annotations for important dates:
 
 //-------------------------------------------
 // update these, when new video data added
-var first_transcript = "rudyAndTheBeast.txt";
-var datafile = "randy_16.csv";
-var views_date = "2019-02-19"; // is this working now?
+var first_transcript = "russiaTies.txt";
+var datafile = "randy_16a.csv";
+var views_date = "2019-03-06"; // is this working now?
 
 //-------------------------------------------
 
@@ -23,10 +23,13 @@ var selected;
 
 var lineColor = "#ccc"
 
-svg.attr("width", 800)
-   .attr("height", 500)
+// svg.attr("width", 800)
+svg.attr("width", 900)
+  .attr("height", 500)  
+   // .attr("height", 500)
    // .style("background-color", "#E6E5E3")
 
+// var margin = {top: 40, right: 40, bottom: 40, left: 100},
 var margin = {top: 40, right: 40, bottom: 40, left: 100},
     width = svg.attr("width") - margin.left - margin.right,
     height = svg.attr("height") - margin.top - margin.bottom;
@@ -46,8 +49,11 @@ var formatValue = d3.format(",d");
 var y = d3.scaleTime()
     .range([height, 0]);
 
+var rMin = 3;
+var rMax = 20;
 var r = d3.scaleLinear()
-        .range([3,20])
+        // .range([3,20])
+        .range([rMin,rMax])
 
 var max_bar = 190;
 var bar_w = d3.scaleLinear()
@@ -152,10 +158,26 @@ d3.csv(datafile, function(error, data) {
    })
 
 
+// var simulation = d3.forceSimulation(data)
+//       .force("x", d3.forceX(function(d) { return x(d.date); }).strength(1))
+//       .force("y", d3.forceY(height / 2))
+//       .force("collide", d3.forceCollide(4))
+//       .stop();
+
   var simulation = d3.forceSimulation(data)
-      .force("y", d3.forceY(function(d) { return y(d.date); }).strength(1))
       .force("x", d3.forceX(width / 2))
-      .force("collide", d3.forceCollide(function(d){ return r(d.views)*1.5; }))
+      .force("y", d3.forceY(function(d) { return y(d.date); }).strength(1))
+      .force("collide", d3.forceCollide(function(d,i){
+        console.log('----------collide')
+        console.log(rMax, r(d.views))
+        console.log(i,d) 
+        //return (rMax + r(d.views));
+
+
+
+        return r(d.views)*1.6; 
+        // return rMax*1.5;
+        }))
       .stop();
 
   for (var i = 0; i < 120; ++i) simulation.tick();
@@ -175,7 +197,7 @@ d3.csv(datafile, function(error, data) {
   g.append("text")
     .attr("transform", "translate(" + (width-(max_bar/2)) + ", -20)")
     .style("text-anchor", "middle")
-    .text("Views")
+    .text("Views (on youtube)")
 
  
 
@@ -314,14 +336,17 @@ function showToolTip(d, x, y){
       .attr("height", 190)
       // .attr("id", function(d,i){ if(d.data.transcript == transcript_0) firstCell = d; return d.data.transcript; })
       .attr("xlink:href", thumbnail)  
-      .style("opacity", .7)
+      .style("opacity", .9)
       
       g.append("rect")
       .attr("x", 2)
       .attr("y", 2)
       .attr("width", 185)
       .attr("height", 95)
-      .style("fill", "#fff")
+      //.style("fill", "#fff")
+      .style("fill-opacity", 0)
+      .style("stroke", "#fff")
+      .style("stroke-width", 6)
       .style("opacity", .5)
       
     
