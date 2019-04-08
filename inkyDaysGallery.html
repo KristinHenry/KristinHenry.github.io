@@ -111,6 +111,8 @@
       dataset = data;
 
       data.forEach(function(d,i){
+        console.log(d)
+
         d.i = i;
         if(i< group) addImg(d);
       })
@@ -144,9 +146,13 @@
       card = card.append("div")
                 .attr("class", "card h-100")
 
-      card.append("img")
+
+      card.append("a")
+        .attr("href", d.Link)
+        .append("img")
                 .attr("class", "card-img-top")
-                .attr("src", img)
+                .attr("src", img) 
+                .attr("alt", "#inkyDays drawing for " + d.Date)  
 
       card.append("div")
           .attr("class", "card-body")
@@ -154,7 +160,7 @@
           .attr("class", "card-text")
           .append("text")
           .text(d.Title)
-
+    
     }
 
     </script>
