@@ -11,9 +11,9 @@ ToDo: add annotations for important dates:
 
 //-------------------------------------------
 // update these, when new video data added
-var first_transcript = "rudyAndTheBeast.txt";
+var first_transcript = "barr.txt";
 var datafile = "randy_19.csv";
-var views_date = "2019-05-28"; // is this working now?
+var views_date = "2019-07-22"; // is this working now?
 
 //-------------------------------------------
 
@@ -168,9 +168,9 @@ d3.csv(datafile, function(error, data) {
       .force("x", d3.forceX(width / 2))
       .force("y", d3.forceY(function(d) { return y(d.date); }).strength(1))
       .force("collide", d3.forceCollide(function(d,i){
-        console.log('----------collide')
-        console.log(rMax, r(d.views))
-        console.log(i,d) 
+        // console.log('----------collide')
+        // console.log(rMax, r(d.views))
+        // console.log(i,d) 
         //return (rMax + r(d.views));
 
 
