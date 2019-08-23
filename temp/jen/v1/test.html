@@ -1,0 +1,125 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset='utf-8' />
+    <title>GL JS Choropleth</title>
+    <meta name='viewport' content='initial-scale=1,maximum-scale=1,user-scalable=no' />
+    <script src='https://api.tiles.mapbox.com/mapbox-gl-js/v0.20.0/mapbox-gl.js'></script>
+    <link href='https://api.tiles.mapbox.com/mapbox-gl-js/v0.20.0/mapbox-gl.css' rel='stylesheet' />
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+        }
+        
+        #map {
+            position: absolute;
+            top: 0;
+            bottom: 0;
+            width: 100%;
+        }
+        
+        #sidebar {
+            position: absolute;
+            top: 15px;
+            left: 15px;
+            bottom: 15px;
+            width: 250px;
+            overflow: auto;
+            background: rgba(255, 255, 255, 0.8);
+            font-family: "Arial";
+            padding-left: 10px;
+        }
+    </style>
+
+</head>
+
+<body>
+
+    <div id='map'></div>
+    <div id='sidebar'>
+        <h1>Choropleth example</h1>
+        <h2>Percent Owner-Occupied, 2000</h2>
+        <div id="tooltip-name"></div>
+        <div id='tooltip'></div>
+    </div>
+
+    <script>
+        //replace with YOUR access token
+        mapboxgl.accessToken = 'pk.eyJ1Ijoia3Jpc3RpbmhlbnJ5IiwiYSI6ImNqMWdxMjd5aDAwM28zM2xtaGV2azYwcjYifQ.NTJiOqcnhP-_3etf4aZYmQ';
+
+        //globals for the choropleth
+        var COLORS = ["#f1eef6", "#d0d1e6", "#a6bddb", "#74a9cf", "#2b8cbe", "#045a8d"],
+            //["#762a83", "#af8dc3", "#e7d4e8", "#d9f0d3", "#7fbf7b", "#1b7837"],
+            //['#8c510a', '#d8b365', '#f6e8c3', '#c7eae5', '#5ab4ac', '#01665e'],
+            // BREAKS = [-1000, -500, 0, 500, 1000, 1500],
+            BREAKS = [10, 20, 30, 40, 50, 60],
+            FILTERUSE;
+
+        //create a map using the Mapbox Light theme, zoomed in to DC
+        var map = new mapboxgl.Map({
+            container: 'map',
+            style: 'mapbox://styles/mapbox/light-v8',
+            pitch: 60, // pitch in degrees
+            zoom: 11,
+            center: [-74.1724, 40.7357]
+            // center: [-77.014576, 38.899396]
+        });
+
+        // Add zoom and rotation controls to the map.
+        map.addControl(new mapboxgl.Navigation());
+
+        //data source: http://opendata.dc.gov/datasets/e87a760828844422afe864a6754049c2_20?geometry=-77.297%2C38.854%2C-76.732%2C38.934
+        map.on('load', function () {
+            map.addSource('dc', {
+                type: 'geojson',
+                data: 'newarktractpolygon.json'
+                //data: 'data.geojson'
+            });
+
+            map.addLayer({
+                "id": "tracts",
+                "type": "fill",
+                "source": "dc",
+                "paint": {
+                    "fill-color": {
+                        //property: 'TOTPOPCHG',
+                        property: 'OWNOCC2000',
+                        stops: [
+                    [BREAKS[0], COLORS[0]],
+                    [BREAKS[1], COLORS[1]],
+                    [BREAKS[2], COLORS[2]],
+                    [BREAKS[3], COLORS[3]],
+                    [BREAKS[4], COLORS[4]],
+                    [BREAKS[5], COLORS[5]]]
+                    },
+                    "fill-opacity": 0.7,
+                    "fill-outline-color": "#ffffff"
+                }
+            });
+        });
+
+        map.on("mousemove", function (e) {
+            var features = map.queryRenderedFeatures(e.point, {
+                layers: ["tracts"]
+            });
+
+            if (features.length) {
+                //show name and value in sidebar
+                document.getElementById('tooltip-name').innerHTML = "Tract " + features[0].properties.NAME; //FEDTRACTNO;
+                document.getElementById('tooltip').innerHTML = Math.round(features[0].properties.OWNOCC2000) + "% Owner-Occupied";
+                //properties.TOTPOPCHG);
+                //for troubleshooting - show complete features info
+                //document.getElementById('tooltip').innerHTML = JSON.stringify(features, null, 2);
+            } else {
+                //if not hovering over a feature set tooltip to empty
+                document.getElementById('tooltip-name').innerHTML = "";
+                document.getElementById('tooltip').innerHTML = "";
+            }
+        });
+    </script>
+
+</body>
+
+</html>
