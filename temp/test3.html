@@ -1,0 +1,194 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset='utf-8' />
+    <title>Choropleth to Extrusions</title>
+    <meta name='viewport' content='initial-scale=1,maximum-scale=1,user-scalable=no' />
+    <!-- <script src='https://api.tiles.mapbox.com/mapbox-gl-js/v0.20.0/mapbox-gl.js'></script>
+    <link href='https://api.tiles.mapbox.com/mapbox-gl-js/v0.20.0/mapbox-gl.css' rel='stylesheet' />
+ -->
+    <script src='https://api.tiles.mapbox.com/mapbox-gl-js/v1.3.0/mapbox-gl.js'></script>
+    <link href='https://api.tiles.mapbox.com/mapbox-gl-js/v1.3.0/mapbox-gl.css' rel='stylesheet' />
+
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+        }
+        
+        #map {
+            position: absolute;
+            top: 0;
+            bottom: 0;
+            width: 100%;
+        }
+        
+        #sidebar {
+            position: absolute;
+            top: 15px;
+            left: 15px;
+            bottom: 15px;
+            width: 250px;
+            overflow: auto;
+            background: rgba(80, 80, 80, 0.8);
+            font-family: "Arial";
+            padding-left: 10px;
+        }
+    </style>
+
+</head>
+
+<body>
+
+    <div id='map'></div>
+    <div id='sidebar'>
+        <h1>Extrusion example</h1>
+        <h2>Percent Owner-Occupied, 2000</h2>
+        <div id="tooltip-name"></div>
+        <div id='tooltip'></div>
+    </div>
+
+    <script>
+        //replace with YOUR access token
+        mapboxgl.accessToken = 'pk.eyJ1Ijoia3Jpc3RpbmhlbnJ5IiwiYSI6ImNqMWdxMjd5aDAwM28zM2xtaGV2azYwcjYifQ.NTJiOqcnhP-_3etf4aZYmQ';
+
+        //globals for the choropleth
+        // var COLORS = ["#f1eef6", "#d0d1e6", "#a6bddb", "#74a9cf", "#2b8cbe", "#045a8d"],
+        //     BREAKS = [10, 20, 30, 40, 50, 60],
+        //     FILTERUSE;
+        var COLORS = ["#f1eef6", "#d0d1e6", "#a6bddb", "#74a9cf", "#2b8cbe", "red"],
+            BREAKS = [10, 20, 30, 40, 50, 60],
+            FILTERUSE;
+
+        //create a map using the Mapbox Dark theme, zoomed in to Newark
+        var map = new mapboxgl.Map({
+            container: 'map',
+            style: 'mapbox://styles/mapbox/dark-v8',
+            pitch: 40, //60, // pitch in degrees
+            zoom: 11,
+            center: [-74.1724, 40.7357]
+        });
+
+        // // Add zoom and rotation controls to the map.
+        // map.addControl(new mapboxgl.Navigation());
+
+        //data source: http://opendata.dc.gov/datasets/e87a760828844422afe864a6754049c2_20?geometry=-77.297%2C38.854%2C-76.732%2C38.934
+        map.on('load', function () {
+            map.addSource('newark', {
+                type: 'geojson',
+                data: 'newarktractpolygon_temp.json'
+            });
+
+            map.addLayer({
+                'id': 'extrusions',
+                'source': 'newark',
+                'type': 'fill-extrusion',
+                'paint': {
+                    // 'fill-extrusion-height': 1000,
+                    'fill-extrusion-height': [
+                        'interpolate',
+                        ['linear'],
+                        ['get', 'OWNOCC2000'],
+                        0, 10,
+                        // 20, 2000,
+                        // 30, 3000,
+                        // 40, 4000,
+                        // 50, 5000,
+                        // 60, 6000,
+                        // 70, 7000,
+                        // 80, 8000,
+                        // 90, 9000,
+                        100, 11000
+
+                    ],
+                    'fill-extrusion-base': 0,
+                    'fill-extrusion-color': [
+                        'interpolate',
+                        ['linear'],
+                        ['get', 'OWNOCC2000'],
+                        0, COLORS[0],
+                        // 20, COLORS[1],
+                        // 40, COLORS[2],
+                        // 60, COLORS[3],
+                        // 80, COLORS[4],
+                        90, COLORS[5]
+                    ],
+                    'fill-extrusion-opacity': .55
+                }
+                
+            })
+
+            
+
+            // map.addLayer({
+            //     "id": "tracts2",
+            //     "type": "fill-extrusion",
+            //     "source": "newark",
+            //     "paint": {
+            //         "fill-extrusion-color": {
+            //             
+            //             property: 'OWNOCC2000',
+            //             stops: [
+            //         [BREAKS[0], 'orange'],
+            //         [BREAKS[1], 'orange'],
+            //         [BREAKS[2], 'orange'],
+            //         [BREAKS[3], 'orange'],
+            //         [BREAKS[4], 'orange'],
+            //         [BREAKS[5], 'orange']]
+            //         },
+            //         "fill-extrusion-height": {
+            //             //property: 'TOTPOPCHG',
+            //             property: 'OWNOCC2000',
+            //             stops: [
+            //         [BREAKS[0], 1000],
+            //         [BREAKS[1], 1000],
+            //         [BREAKS[2], 1000],
+            //         [BREAKS[3], 1000],
+            //         [BREAKS[4], 1000],
+            //         [BREAKS[5], 1000]]
+            //         },
+            //         "fill-extrusion-opacity": 0.7,
+                    
+            //     }
+            // })//;
+
+
+            // map.addLayer({
+            //     'id': 'extrusions',
+            //     'type': 'fill-extrusion',
+            //     'source', 'newark',
+            //     'paint': {
+            //         'fill-extrusion-color': 'orange',
+            //         'fill-extrusion-height': 1000,
+            //         'fill-extrusion-opacity': 0.6,
+            //         'fill-extrusion-base': 0
+            //     }
+
+
+            // });
+        });
+
+        map.on("mousemove", function (e) {
+            var features = map.queryRenderedFeatures(e.point, {
+                layers: ["tracts"]
+            });
+
+            if (features.length) {
+                //show name and value in sidebar
+                document.getElementById('tooltip-name').innerHTML = "Tract " + features[0].properties.NAME; //FEDTRACTNO;
+                document.getElementById('tooltip').innerHTML = Math.round(features[0].properties.OWNOCC2000) + "% Owner-Occupied";
+                //properties.TOTPOPCHG);
+                //for troubleshooting - show complete features info
+                //document.getElementById('tooltip').innerHTML = JSON.stringify(features, null, 2);
+            } else {
+                //if not hovering over a feature set tooltip to empty
+                document.getElementById('tooltip-name').innerHTML = "";
+                document.getElementById('tooltip').innerHTML = "";
+            }
+        });
+    </script>
+
+</body>
+
+</html>
