@@ -1,0 +1,308 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset='utf-8' />
+    <title>Choropleth to Extrusions</title>
+    <meta name='viewport' content='initial-scale=1,maximum-scale=1,user-scalable=no' />
+    
+    <script src='https://api.tiles.mapbox.com/mapbox-gl-js/v1.3.0/mapbox-gl.js'></script>
+    <link href='https://api.tiles.mapbox.com/mapbox-gl-js/v1.3.0/mapbox-gl.css' rel='stylesheet' />
+
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+        }
+        
+        #map {
+            position: absolute;
+            top: 0;
+            bottom: 0;
+            width: 100%;
+        }
+
+        #map2 {
+            /*position: absolute;*/
+            top: 30px;
+            left: 15px;
+            width: 400px;
+            height: 300px;
+            background: rgba(0, 0, 0, 0.6);
+
+        }
+        
+        #sidebar {
+            position: absolute;
+            top: 15px;
+            left: 15px;
+            bottom: 15px;
+            width: 450px;
+            overflow: auto;
+            background: rgba(80, 80, 80, 0.8);
+            font-family: "Arial";
+            padding-left: 10px;
+        }
+
+
+        .specialColor { 
+            /* Whatever color  you want */
+            background-color: rgba(80, 80, 80, 0.8);
+        }
+    </style>
+
+</head>
+
+<body>
+
+    <div id='map'></div>
+    <div id='sidebar'>
+        <h1>Mapping: Work-in-Progress</h1> 
+        <h2>Percent Owner-Occupied, 2000</h2>
+        <div id="tooltip-name"></div>
+        <div id='tooltip'></div>
+        <div id="buttons">
+            <hr>
+            <p><b>Variables: </b><br>
+                <input type="radio" name="queryRadios" onclick="handleQueryOptionClick(this);" value="OWNOCC" checked="checked"/> Owner Occupied
+            <input type="radio" name="queryRadios" onclick="handleQueryOptionClick(this);" value="DEGREE" /> Degree
+            <input type="radio" name="queryRadios" onclick="handleQueryOptionClick(this);" value="WHITE" />Non-Hispanic White
+            
+            </p>
+            <hr>
+            <p><b>Years: </b><br>
+            <input type="radio" name="yearRadios" onclick="handleYearClick(this);" value="2000" checked="checked"/> 2000
+            <input type="radio" name="yearRadios" onclick="handleYearClick(this);" value="2010" /> 2010
+            <input type="radio" name="yearRadios" onclick="handleYearClick(this);" value="2015" /> 2015
+            <input type="radio" name="yearRadios" onclick="handleYearClick(this);" value="2017" /> 2017
+            </p>
+            <hr>
+
+        </div>
+        <div id='map2'>Testing</div>
+    </div>
+
+    <script>
+        //replace with YOUR access token
+        mapboxgl.accessToken = 'pk.eyJ1Ijoia3Jpc3RpbmhlbnJ5IiwiYSI6ImNqMWdxMjd5aDAwM28zM2xtaGV2azYwcjYifQ.NTJiOqcnhP-_3etf4aZYmQ';
+
+        //globals for the choropleth
+        // var COLORS = ["#f1eef6", "#d0d1e6", "#a6bddb", "#74a9cf", "#2b8cbe", "#045a8d"],
+        //     BREAKS = [10, 20, 30, 40, 50, 60],
+        //     FILTERUSE;
+
+        var DATAFILE = 'newarktractpolygon_temp_4.json';
+
+
+        var COLORS1 = ["#f1eef6", "#ebc0c5", "#d9989f", "#c76b75", "#b84b56", "red"],
+            COLORS2 = ["#f1eef6", "#d0d1e6", "#a6bddb", "#74a9cf", "#2b8cbe", "#045a8d"],
+            COLORS = ["red", "#b84b56", "#c76b75", "#d9989f", "#ebc0c5", "#f1eef6"],
+            BREAKS = [10, 20, 30, 40, 50, 60],
+            YEAR = "2000",
+            QUERYOPTION = "OWNOCC",
+            FILTERUSE;
+
+
+        COLORS = COLORS2;
+           
+
+        // this is variable for drawing on map
+        var OPTION = QUERYOPTION + YEAR; //'OWNOCC2000';
+        var OPTION2 = QUERYOPTION + YEAR; //'OWNOCC2000';
+
+        
+
+        //create a map using the Mapbox Dark theme, zoomed in to Newark
+        var map = new mapboxgl.Map({
+            container: 'map',
+            style: 'mapbox://styles/mapbox/dark-v8',
+            pitch: 40, //60, // pitch in degrees
+            zoom: 11,
+            center: [-74.2624, 40.7357] // offset this a bit to the right of screen
+        });
+
+
+
+        //create a second map for choropleth
+        var map2 = new mapboxgl.Map({
+            container: 'map2',
+            style: 'mapbox://styles/mapbox/dark-v8',
+            pitch: 0, //40, //60, // pitch in degrees
+            zoom: 10,
+            center: [-74.1724, 40.7357] // offsetting, so extrusions to the right of screen
+        });
+
+        
+           
+
+
+        function drawChoropleth(map, value){    
+
+            map2.removeLayer('tracts')
+
+            map2.addLayer({
+                    "id": "tracts",
+                    "type": "fill",
+                    "source": "newark",
+                    "paint": {
+                        'fill-color': [
+                            'interpolate',
+                            ['linear'],
+                            ['get', value],
+                            0, COLORS[0],
+                            100, COLORS[5]
+                        ],
+                        // 'fill-color': {
+                        //     property: value,
+                        //     stops: [
+                        // [BREAKS[0], COLORS[0]],
+                        // [BREAKS[1], COLORS[1]],
+                        // [BREAKS[2], COLORS[2]],
+                        // [BREAKS[3], COLORS[3]],
+                        // [BREAKS[4], COLORS[4]],
+                        // [BREAKS[5], COLORS[5]]]
+                        // },
+                        "fill-opacity": 0.7,
+                        "fill-outline-color": "#ffffff"
+                    }
+                })//;
+
+                // completely hide our basemap here
+                // ToDo: do this more cleanly...
+                // ...edit basemap or no basemap, instead of removing it this way
+                map2.style.stylesheet.layers.forEach(function(layer) {
+                    map2.removeLayer(layer.id)   
+                });
+            
+        }
+
+
+
+        function drawExtrusions(map, value){
+
+            map.removeLayer('extrusions')
+
+            // add our extrusions
+            map.addLayer({
+                'id': 'extrusions',
+                'source': 'newark',
+                'type': 'fill-extrusion',
+                'paint': {
+                    'fill-extrusion-height': [
+                        'interpolate',
+                        ['linear'],
+                        ['get', value],
+                        0, 10,
+                        100, 11000
+
+                    ],
+                    'fill-extrusion-base': 0,
+                    'fill-extrusion-color': [
+                        'interpolate',
+                        ['linear'],
+                        ['get', value],
+                        0, COLORS[0],
+                        100, COLORS[5]
+                    ],
+                    
+                    'fill-extrusion-opacity': .55,   
+                }
+                
+            })
+        }
+
+
+        map2.on('load', function () {
+                map2.addSource('newark', {
+                    type: 'geojson',
+                    data: DATAFILE
+                });
+
+                drawChoropleth(map2, OPTION2);
+        }); 
+
+
+        // create map for extrusions
+        map.on('load', function () {
+            map.addSource('newark', {
+                type: 'geojson',
+                data: DATAFILE
+            });
+
+            // Hiding street labels and other symbols
+            // could also do this in mapbox tools and create new basemap style
+            map.style.stylesheet.layers.forEach(function(layer) {
+                
+                if (layer.type === 'symbol') {
+                    map.removeLayer(layer.id);
+                }
+            });
+
+            drawExtrusions(map, OPTION);
+  
+        });
+
+
+
+
+        
+        function handleYearClick(myRadio) {
+            
+            console.log('New value: ' + myRadio.value);
+
+            //QUERYOPTION + YEAR
+
+            YEAR = myRadio.value;
+
+            drawChoropleth(map2, QUERYOPTION + YEAR)
+            drawExtrusions(map, QUERYOPTION + YEAR)
+        }
+        
+
+        function handleQueryOptionClick(myRadio) {
+            
+            console.log('New value: ' + myRadio.value);
+
+            QUERYOPTION = myRadio.value;
+
+            drawChoropleth(map2, QUERYOPTION + YEAR)
+            drawExtrusions(map, QUERYOPTION + YEAR)
+        }
+        
+
+
+        // optionButton.addEventListener('click', function(){
+        //     console.log(options.value)
+
+        //     OPTION = options.value;
+        //     drawChoropleth(map2, OPTION)
+        //     drawExtrusions(map, OPTION)
+        // })
+
+
+
+
+
+        // map2.on("mousemove", function (e) {
+        //     var features = map.queryRenderedFeatures(e.point, {
+        //         layers: ["tracts"]
+        //     });
+
+        //     if (features.length) {
+        //         //show name and value in sidebar
+        //         document.getElementById('tooltip-name').innerHTML = "Tract " + features[0].properties.NAME; //FEDTRACTNO;
+        //         document.getElementById('tooltip').innerHTML = Math.round(features[0].properties.OWNOCC2000) + "% Owner-Occupied";
+        //         //properties.TOTPOPCHG);
+        //         //for troubleshooting - show complete features info
+        //         //document.getElementById('tooltip').innerHTML = JSON.stringify(features, null, 2);
+        //     } else {
+        //         //if not hovering over a feature set tooltip to empty
+        //         document.getElementById('tooltip-name').innerHTML = "";
+        //         document.getElementById('tooltip').innerHTML = "";
+        //     }
+        // });
+    </script>
+
+</body>
+
+</html>
