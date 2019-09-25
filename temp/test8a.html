@@ -67,10 +67,16 @@
             <!-- <input type="text" id="mapstyle" name="mapstyle" value="paste map style here">
             <input type="button" onclick="handleStyleChange('mapstyle')" value="Change Map Style">
             <hr> -->
+            <p><b>Opacity:</b>
+                <input type="radio" name="opacityRadios" onclick="handleOpacityOptionClick(this);" value=".55" checked="checked"/> .55
+                <input type="radio" name="opacityRadios" onclick="handleOpacityOptionClick(this);" value=".70"/> .70
+                <input type="radio" name="opacityRadios" onclick="handleOpacityOptionClick(this);" value=".90"/> .90
+            </p>
             <p><b>Colors:</b>
                 <input type="radio" name="colorRadios" onclick="handleColorOptionClick(this);" value="COLORS2" checked="checked"/> Blue
                 <input type="radio" name="colorRadios" onclick="handleColorOptionClick(this);" value="COLORS3"/> Red
             </p>
+            <hr>
             <p><b>Variables: </b><br>
                 <input type="radio" name="queryRadios" onclick="handleQueryOptionClick(this);" value="OWNOCC" checked="checked"/> Owner Occupied
             <input type="radio" name="queryRadios" onclick="handleQueryOptionClick(this);" value="DEGREE" /> Degree
@@ -104,6 +110,8 @@
 
         var DATAFILE = 'newarktractpolygon_temp_4.json';
 
+
+        var FILLOPACITY =  .55;
 
         var COLORS2 = ["#f1eef6", "#d0d1e6", "#a6bddb", "#74a9cf", "#2b8cbe", "#045a8d"],
             COLORS3 = ["#f1eef6", "#9b827f", "#ad746d", "#be655c", "#d0574a",  "#ea4230"],
@@ -218,7 +226,7 @@
                         100, COLORS[5]
                     ],
                     
-                    'fill-extrusion-opacity': .55,   
+                    'fill-extrusion-opacity': FILLOPACITY,   
                 }
                 
             })
@@ -262,6 +270,24 @@
 
         //     console.log('change map style', elem)
         // }
+
+        function handleOpacityOptionClick(myRadio) {
+            
+            // console.log('New value: ' + myRadio.value);
+
+            //QUERYOPTION + YEAR
+
+            if(myRadio.value == ".55") FILLOPACITY = .55;
+            if(myRadio.value == ".70") FILLOPACITY = .70;
+            if(myRadio.value == ".90") FILLOPACITY = .90;
+
+            // COLORS = myRadio.value;
+
+            // console.log('reset', COLORS)
+
+            drawChoropleth(map2, QUERYOPTION + YEAR)
+            drawExtrusions(map, QUERYOPTION + YEAR)
+        }
 
 
         function handleColorOptionClick(myRadio) {
