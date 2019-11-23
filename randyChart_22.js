@@ -12,10 +12,12 @@ ToDo: add annotations for important dates:
 //-------------------------------------------
 // update these, when new video data added
 var first_transcript = "suckers.txt";
-var datafile = "randy_20.csv";
-var views_date = "2019-08-29"; // is this working now?
+var datafile = "randy_22.csv";
+var views_date = "2019-11-22"; // is this working now?
 
 //-------------------------------------------
+
+console.log('loading data')
 
 var svg = d3.select("#chart").append("svg");
 var lastCell;
@@ -122,7 +124,11 @@ function cleanDate(d){
 d3.csv(datafile, function(error, data) {
   if (error) throw error;
 
+
+
   data.forEach(function(d){
+
+    console.log(d)
 
     d['Date_str'] = cleanDate(d['Date_str'])
 
@@ -154,6 +160,7 @@ d3.csv(datafile, function(error, data) {
 
 
    data.forEach(function(d){
+    console.log(d)
     d.r = r(d.views)
    })
 
