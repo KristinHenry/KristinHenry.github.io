@@ -5,13 +5,11 @@ ToDo: add annotations for important dates:
         Inauguration: Friday, Jan. 20, 2017
 
         protest? crowd sizes?
-
-
 */
 
 //-------------------------------------------
 // update these, when new video data added
-var first_transcript = "suckers.txt";
+var first_transcript = "quidproquo.txt";
 var datafile = "randy_22.csv";
 var views_date = "2019-11-22"; // is this working now?
 
