@@ -9,7 +9,7 @@ ToDo: add annotations for important dates:
 
 //-------------------------------------------
 // update these, when new video data added
-var first_transcript = "ifEverGotImpeached.txt";
+var first_transcript = "noRules.txt";
 var datafile = "randy_24.csv";
 var views_date = "2020-02-18"; // is this working now?
 
