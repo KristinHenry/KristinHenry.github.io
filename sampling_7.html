@@ -1,0 +1,1074 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <title>Sampling</title>
+    <meta name="Sampling" content="Scrollytelling Data Viz on sampling from a population" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <!-- Bootstrap core CSS -->
+    <link href="vendor/bootstrap/css/bootstrap.min.css" rel="stylesheet">
+
+    <link rel="stylesheet" href="../style.css" />
+    <link rel="stylesheet" type="text/css" href="weepeople.css">
+    <style>
+      #scrolly {
+        position: relative;
+        display: -webkit-box;
+        display: -ms-flexbox;
+        display: flex;
+        background-color: #f3f3f3;
+        padding: 1rem;
+      }
+
+      #scrolly > * {
+        -webkit-box-flex: 1;
+        -ms-flex: 1;
+        flex: 1;
+      }
+
+      article {
+        position: relative;
+        padding: 0 1rem;
+        max-width: 20rem;
+      }
+
+      figure {
+        position: -webkit-sticky;
+        position: sticky;
+        width: 100%;
+        margin: 0;
+        -webkit-transform: translate3d(0, 0, 0);
+        -moz-transform: translate3d(0, 0, 0);
+        transform: translate3d(0, 0, 0);
+        /*background-color: #8a8a8a;*/
+        z-index: 0;
+      }
+
+      figure p {
+        text-align: center;
+        padding: 1rem;
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        -moz-transform: translate(-50%, -50%);
+        -webkit-transform: translate(-50%, -50%);
+        transform: translate(-50%, -50%);
+        font-size: 8rem;
+        font-weight: 900;
+        color: #fff;
+      }
+
+      .step {
+        margin: 0 auto 2rem auto;
+        /*background-color: #3b3b3b;*/
+        color: #fff;
+        opacity: 0;
+      }
+
+      .step:last-child {
+        margin-bottom: 0;
+      }
+
+      .step.is-active {
+        /*background-color: goldenrod;*/
+        /*background-color: #fff;*/
+        color: #3b3b3b;
+        opacity: 1;
+      }
+
+      .step p {
+        /*text-align: center;*/
+        padding: 1rem;
+        font-size: 1.2rem;
+      }
+    </style>
+  </head>
+
+  <body>
+    <!-- Navigation -->
+    <nav class="navbar navbar-expand-lg navbar-dark bg-dark fixed-top">
+      <div class="container">
+        <a class="navbar-brand" href="index.html">ArtAtomic: Art + Code + Science</a>
+        <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarResponsive" aria-controls="navbarResponsive" aria-expanded="false" aria-label="Toggle navigation">
+          <span class="navbar-toggler-icon"></span>
+        </button>
+        <div class="collapse navbar-collapse" id="navbarResponsive">
+          <ul class="navbar-nav ml-auto">
+            <li class="nav-item active">
+              <a class="nav-link" href="index.html">Home
+                <span class="sr-only">(current)</span>
+              </a>
+            </li>
+            <li class="nav-item">
+              <a class="nav-link" href="about.html">About</a>
+            </li>
+            <li class="nav-item">
+              <a class="nav-link" href="https://docs.google.com/forms/d/e/1FAIpQLSeNsnK06KPxxdOmU2qEYxb_TcCjexijBw_nK3UM1MHiCIECyA/viewform">Contact</a>
+            </li>
+          </ul>
+        </div>
+      </div>
+    </nav>
+
+
+   <!-- Page Content -->
+    <div class="container">
+
+    <main>
+      
+      <section id="intro">
+        <!-- <h1 class="intro__hed">How sampling reflects the whole.</h1> -->
+        <!-- <p class="intro__dek">
+          Start scrolling to see how it works.
+        </p> -->
+      </section>
+
+      <section id="scrolly">
+        <article>
+          <div class="step" data-step="1">
+            
+            <p></p>
+            <p>Let’s say we’re looking at a crowd of people.</p>
+            
+            <p>We want to find out something about them, but we don’t have enough time or resources to ask them all. What do we do? We choose a few people, and only ask this sample of the population.</p>
+            <p>What does the way we sample a population impact what we find out?</p>
+
+          </div>
+          <div class="step" data-step="2">
+            
+            <p>What if our crowd was just exposed to a virus? Let’s say it’s the covid-19 virus. Some of the people in our crowd are showing symptoms. Some are infected, but not showing any symptoms yet. Some have even recovered.</p>
+            <p>This is a new disease, and we don’t yet know how to predict anything about it: how it will spread, or who is in need of most urgent care, and so on.</p>
+            <p>We need to know, so that we can prepare and be ready to care for those who will become most ill.</p>
+           
+          </div>
+          <div class="step" data-step="3">
+            
+            <p>Let’s select people randomly. Does the sample reflect the rest of the crowd? Sometimes, but usually not</p>
+            <div id="legend"></div>
+            <p>Generate a new simulation.</p>
+            <div id="option">
+                <input name="randomSampleButton" 
+                       type="button" 
+                       value="Random Sample" 
+                       onclick="randomSample()" />
+                <input name="sickSampleButton" 
+                       type="button" 
+                       value="Sick Sample" 
+                       onclick="sickSample()" />
+            </div>
+            <div id="option">
+                <input name="updateButton" 
+                       type="button" 
+                       value="Start Over With New Population" 
+                       onclick="updatePeople()" />
+            </div>
+            <p></p>
+            <p></p>
+            <p></p>
+            <p></p>
+            <p>.</p>
+          </div>
+        </article>
+
+        <figure>
+          <div id="chart"></div>
+        </figure>
+      </section>
+
+      <section id="outro"></section>
+    </main>
+
+  </div>
+
+
+  <!-- /.container -->
+
+    <!-- Footer -->
+    <footer class="py-5 bg-dark">
+      <div class="container">
+        <p class="m-0 text-center text-white">Copyright &copy; Kristin Henry 2020</p>
+        <p>.</p>
+      </div>
+      <div class="container text-center">
+        <p class="m-0 text-center text-white">Support this project with <a href="https://github.com/sponsors/KristinHenry">Github Sponsors</a></p>
+        <p>.</p>
+        <p class="m-0 text-center text-white">or</p>
+        <p>.</p>
+        <a href="https://www.patreon.com/bePatron?u=74769"><img src="imgs/become_a_patron_button.png"></a>
+      </div>
+
+      <!-- /.container -->
+    </footer>
+
+    <!-- <div class='debug'></div> -->
+    <!-- Bootstrap core JavaScript -->
+    <script src="vendor/jquery/jquery.min.js"></script>
+    <script src="vendor/bootstrap/js/bootstrap.bundle.min.js"></script>
+    <script src="https://unpkg.com/d3@5.9.1/dist/d3.min.js"></script>
+    <script src="https://unpkg.com/intersection-observer@0.5.1/intersection-observer.js"></script>
+    <script src="stickyfill.min.js"></script>
+    <script src="scrollama.min.js"></script>
+    <script src="d3.v4.min.js"></script>
+    <script src="https://d3js.org/d3-random.v2.min.js"></script>
+    <script>
+
+
+      var arr = ["a", "b", "c", "d", "e", "f", "g", "h", "i", "j", 
+                  "k", "l", "m", "n", "o", "p", "q", "r", "s", "t", 
+                  "u", "v", "w", "x", "y", "z", "A", "B", "C", "D", 
+                  "E", "F", "G", "H", "I", "J", "K", "L", "M", "N", 
+                  "O", "P", "Q", "R", "S", "T", "U", "V", "W", "X"]//, 
+                  //"Y", "Z"]
+
+      var black = "#2f2f30" 
+      // var c1 = "#748ed6"
+      // var grey = "#469c9a"; //"#49494a"
+      // var red = "#7360db" //"#9c1e2c"
+
+      var size = '100'
+
+      var minAlpha = .03
+
+      var data_people = [];
+      // var colors = [black, c1, grey, red] 
+
+      var colors = ["#7a8091", "#8ea5e6", "#4862ab", "#042582", "#010e33"]
+
+      var sampleType = "random";  // default setting. Can also be set to 'sick'
+
+      var y1 = 20
+      var y2 = 200
+
+      /*
+      // dev notes
+
+      About colors: 
+        - Originally, I used red to indicate infections+sick. 
+        - Then used purple to indicate infections, to make it less alarming
+        - But then increased categories by including 'recovered', so need more colors
+        - No longer using red outline to indicated 'infected, not sick'
+        - Color pallate broken now....need to come up with better one for this viz
+
+        ToDo:
+          - make chart size, and everything in it, relative to inner window size
+
+      */
+      
+
+      //============================================================  
+
+
+      // using d3 for convenience
+      var main = d3.select("main");
+      var scrolly = main.select("#scrolly");
+      var figure = scrolly.select("figure");
+      var article = scrolly.select("article");
+      var step = article.selectAll(".step");
+      var chartWidth = 0;
+
+      // initialize the scrollama
+      var scroller = scrollama();
+
+      // generic window resize listener event
+      function handleResize() {
+        // 1. update height of step elements
+        var stepH = Math.floor(window.innerHeight * 0.75);
+        step.style("height", stepH + "px");
+
+        var figureHeight = window.innerHeight / 2;
+        var figureMarginTop = (window.innerHeight - figureHeight) / 2;
+
+        chartWidth = window.innerWidth/2; //(window.innerWidth/3)*2;
+
+        figure
+          .style("height", figureHeight + "px")
+          .style("top", figureMarginTop + "px")
+          
+
+        console.log('figure', figure)
+
+        // 3. tell scrollama to update new element dimensions
+        scroller.resize();
+      }
+
+      // scrollama event handlers
+      function handleStepEnter(response) {
+        console.log(response);
+        // response = { element, direction, index }
+
+        // add color to current step only
+        step.classed("is-active", function(d, i) {
+          return i === response.index;
+        });
+
+        // update graphic based on step
+        // figure.select("p").text('Testing' + (response.index + 1));
+        changeChart(response.index);
+      }
+      //=======================================================
+
+      function changeChart(step){
+
+
+        console.log('step', step)
+
+
+        // var chart = d3.select("#chart").select("svg")
+
+        
+        // var people = chart.selectAll('g').select("text")
+        var people = d3.selectAll(".pop")
+        var info = d3.selectAll(".info")
+        var sample = d3.selectAll(".sample")
+
+        if(step == 0){
+                        people.transition()
+                        .duration(1000)
+                        .attr("x", function(d){ return d.x1; })
+                        .attr("y", function(d){ return d.y1; })
+                        .style("fill", black)
+                        .style("opacity", function(d){return d.alpha; })
+                        .style("stroke-opacity", 0)
+                        .style('font-size', function(d){ return d.fontsize1})
+
+                        sample.transition()
+                          .duration(500)
+                          .attr("x", function(d){ return d.x1; })
+                          .attr("y", function(d){ return d.y1; }) 
+                          .style('font-size', function(d){ return d.fontsize1})
+                          .style("opacity", function(d){return 0; })
+
+                        info.transition()
+                            .duration(500)
+                            .attr("opacity", 0)
+                      }
+
+        if(step == 1){
+          people.transition()
+              .duration(1000)
+              .attr("x", function(d){ return d.x1; })
+              .attr("y", function(d){ return d.y1; })
+              .style('fill', function(d){ return colors[d.health]; })
+              .style("opacity", function(d){return d.alpha; })
+              // .style("stroke-opacity", .8)
+              // .style('stroke', function(d){ return d.outline })
+              .style('font-size', function(d){ return d.fontsize1})
+
+          sample.transition()
+                .duration(500)
+                .style('fill', function(d){ return colors[d.health]; })
+                .attr("x", function(d){ return d.x1; })
+                .attr("y", function(d){ return d.y1; }) 
+                .style('font-size', function(d){ return d.fontsize1})
+                .style("opacity", function(d){return 0; })
+
+          info.transition()
+                .duration(500)
+                .attr("opacity", 0)
+        }
+
+
+        if(step == 2){
+                        people.transition()
+                        .duration(1000)
+                        .attr("x", function(d){ return d.x2; })
+                        .attr("y", function(d){ return d.y2; })
+                        .style('fill', function(d){ return colors[d.health]; })
+                        // .style("stroke-opacity", .4)
+                        .style("opacity", 1)
+                        .style("font-size", function(d){ return d.fontsize2; })
+
+                        sample.transition()
+                              .duration(500)
+                              .style('fill', function(d){ return colors[d.health]; })
+                              .attr("x", function(d){ return d.x2; })
+                              .attr("y", function(d){ return d.y2; }) 
+                              .style('font-size', function(d){ return d.fontsize1})
+                              .style("opacity", function(d){return 1; })
+
+
+                        info.transition()
+                            .duration(500)
+                            .attr("opacity", 1)
+                      }
+
+      }
+
+     
+
+
+
+      //=======================================================
+      function setupStickyfill() {
+        d3.selectAll(".sticky").each(function() {
+          Stickyfill.add(this);
+        });
+      }
+
+      function init() {
+        setupStickyfill();
+
+        // 1. force a resize on load to ensure proper dimensions are sent to scrollama
+        handleResize();
+
+        // 2. setup the scroller passing options
+        //    this will also initialize trigger observations
+        // 3. bind scrollama event handlers (this can be chained like below)
+        scroller
+          .setup({
+            step: "#scrolly article .step",
+            offset: 0.33,
+            debug: true
+          })
+          .onStepEnter(handleStepEnter);
+
+        // setup resize event
+        window.addEventListener("resize", handleResize);
+
+
+        // initialize chart
+        // figure.select("p").text('Testing initialization');
+        var chart = d3.select("#chart").append("svg")
+                      .attr("width", chartWidth)  
+                      .attr("height", 290)
+
+
+        makePeople()
+        drawPeople(1)
+        drawLegend()
+        
+      }
+
+      function updatePeople(){
+
+        d3.select("#chart").select("svg").selectAll("*").remove(); // ToDo: clear old 
+        data_people = [];
+        makePeople();
+        drawPeople();
+
+
+        // go to top of page
+        // document.body.scrollTop = 0; // For Safari
+        // document.documentElement.scrollTop = 0; // For Chrome, Firefox, IE and Opera
+      }
+
+      function randomSample(){
+        console.log('take random sample')
+
+        d3.select("#chart").select("svg").selectAll("*").remove(); // ToDo: clear old
+
+        sampleType = "random";
+        clearSample();
+        takeSample();
+        sortSample();
+        drawPeople();
+
+      }
+
+      function sickSample(){
+
+        d3.select("#chart").select("svg").selectAll("*").remove(); // ToDo: clear old
+
+        sampleType = "sick";
+        clearSample();
+        takeSample();
+        // sortSample();
+        drawPeople();
+
+      }
+
+
+      function setHealth(){
+
+        // health is about clear (0) vs recovered(1), carriers (2), vs sick (3)
+
+        // set default health for all people
+        for(var i in data_people){
+            data_people[i]["health"] = 0;
+        }
+
+        // temp array for pop, so we don't assign dif health to same person
+        var arr = [];
+        for(var i=0; i<data_people.length; i++){
+          arr.push(i);
+        }
+
+        
+
+        // To make sure we get 10 (or 5) randoms in each category, and not 
+        // reassign a category to the sampe person, we're 
+        // splicing out the 'assigned' of an array of indexes of our people
+
+        var numRecovered = randomRange(5,15)
+
+        // people to assign as 'recovered'
+        var nums = numArray(numRecovered)
+        for(var n in nums){
+          var i = d3.randomInt(arr.length)();
+          data_people[arr[i]]["health"] = 1;
+          arr.splice(i,1)
+        }
+
+        // people to assign as 'carrier'
+        var numCarrier = randomRange(5,15)
+        var nums = numArray(numCarrier)
+        for(var n in nums){
+          var i = d3.randomInt(arr.length)();
+          data_people[arr[i]]["health"] = 2;
+          arr.splice(i,1)
+        }
+
+        // people to assign as 'sick'
+        var numSick = randomRange(2,10)
+        var nums = numArray(numSick)
+        for(var n in nums){
+          var i = d3.randomInt(arr.length)();
+          data_people[arr[i]]["health"] = 3;
+          arr.splice(i,1)
+        }
+
+
+        // people to assign as 'fatality'
+        var numSick = randomRange(0,3)
+        var nums = numArray(numSick)
+        for(var n in nums){
+          var i = d3.randomInt(arr.length)();
+          data_people[arr[i]]["health"] = 4;
+          arr.splice(i,1)
+        }
+
+        
+        // set health indicator as color for all people
+        for(i in data_people){
+            var cell = data_people[i]
+            cell["color"] = colors[cell.health];
+            // cell["outline"] = cell.health == 2 ? red : black;
+        }
+      }
+
+
+      function clearSample(){
+        // remove people marked as 'sample' from last run
+        data_people = data_people.filter(d => d.sample != true)
+      }
+
+      function numArray(n){
+        var arr = [];
+        var i = 0;
+        while(i<n){ 
+          arr.push(i); 
+          i+=1;
+        }
+        return arr;
+      }
+
+
+      function takeSample(){
+
+        var height = 260;
+
+        // console.log('take sample')
+
+        // Set default 'not-sample' status-->most of the cells will drop and shrink
+        for(var i in data_people){
+          var cell = data_people[i];
+              cell["sample"] = false;
+              cell["y2"] = height;
+              cell["fontsize2"] = '36px';
+        }
+
+
+        // set up temp-population, to take samples from
+        var arr = [];
+        for(var i=0; i<data_people.length; i++){
+          arr.push(i);
+        }
+
+        
+        //pick sample indices randomly
+        var sample_indices = []
+        if(sampleType == "random"){
+
+          var nums = numArray(10)
+          for(var i in nums){
+              // chose a random person, and remove from our temp array
+              // so that we don't sample the same person repeatedly
+              var j = d3.randomInt(arr.length)();
+              sample_indices.push(arr[j])
+              arr.splice(j,1)
+          }
+
+        } else {
+
+          var temp = data_people;
+          temp.sort(function(a, b){
+              return a["health"]-b["health"];
+          });
+
+          temp.reverse();
+
+          var nums = numArray(10)
+          for(var i in nums){
+              // choose most-sick people in our now-sorted population
+              sample_indices.push(arr[i]) 
+          }
+        }
+
+        
+
+        // make copied people for 'sampled' people
+        for(var i in sample_indices){          
+
+            var cell = data_people[sample_indices[i]];
+            // cell.y2 -= 10;
+            cell['opacity'] = .3
+
+            var newcell = {"txt": cell.txt}
+              newcell["sample"] = true;
+              newcell["x1"] = cell.x1;
+              newcell["y1"] = cell.y1;
+              newcell["health"] = cell.health;      
+              newcell["fontsize1"] = '120px'
+              newcell["fontsize2"] = '120px'
+              newcell["class"] = 'weepeople sample'
+              
+            data_people.push(newcell)  
+        }
+
+      }
+
+
+      function sortSample(){
+
+        console.log('sort sample---------')
+
+         // sort into samples vs population and their health groups
+          // this is so we can arrange them in the chart
+          var sample_0 = [];
+          var sample_1 = [];
+          var sample_2 = [];
+          var sample_3 = [];
+          var sample_4 = [];
+          var pop_0 = [];
+          var pop_1 = [];
+          var pop_2 = [];
+          var pop_3 = [];
+          var pop_4 = [];
+
+
+
+          for(cell in data_people){
+            var p = data_people[cell]
+
+            if(p.sample){
+
+              console.log('sorting sample', p)
+
+              if(p.health == 0) sample_0.push(p)
+              if(p.health == 1) sample_1.push(p)
+              if(p.health == 2) sample_2.push(p)
+              if(p.health == 3) sample_3.push(p)
+              if(p.health == 4) sample_4.push(p)
+            } else {
+              if(p.health == 0) pop_0.push(p)
+              if(p.health == 1) pop_1.push(p)
+              if(p.health == 2) pop_2.push(p)
+              if(p.health == 3) pop_3.push(p)
+              if(p.health == 4) pop_4.push(p)
+            }
+          }
+
+
+          // combine them in new ordering
+          var samples = sample_0.concat(sample_1.concat(sample_2.concat(sample_3.concat(sample_4))))
+          var pops = pop_0.concat(pop_1.concat(pop_2.concat(pop_3.concat(pop_4))))
+
+           // calculate position based on sorted by health index
+          for(s in samples){
+            // console.log(s)
+            samples[s].x2 = s*50;
+            samples[s].y2 = y1 + 100;
+
+            samples[s].sortedIndex = s;
+          }
+
+          for(p in pops){
+            
+            pops[p].sortedIndex = p;
+            pops[p].x2 = p*9.5;
+          }
+
+          
+          var sample_clear = Math.floor((sample_0.length/samples.length)*100);
+          var sample_recovered = Math.floor((sample_1.length/samples.length)*100);
+          var sample_infection = Math.floor((sample_2.length/samples.length)*100);
+          var sample_sick = Math.floor((sample_3.length/samples.length)*100);
+          var sample_fatal = Math.floor((sample_4.length/samples.length)*100);
+          var pop_clear = Math.floor((pop_0.length/pops.length)*100);
+          var pop_recovered = Math.floor((pop_1.length/pops.length)*100);
+          var pop_infection = Math.floor((pop_2.length/pops.length)*100);
+          var pop_sick = Math.floor((pop_3.length/pops.length)*100);
+          var pop_fatal = Math.floor((pop_4.length/pops.length)*100);
+
+        
+          // var pop_infection  = (pop_1.length),
+          //     pop_sick = (pop_2.length)
+
+          return {"sample_clear": sample_clear,
+                  "sample_recovered": sample_recovered,
+                  "sample_infection": sample_infection,
+                  "sample_sick": sample_sick,
+                  "sample_fatal": sample_fatal,
+                  "pop_clear": pop_clear,
+                  "pop_recovered": pop_recovered,
+                  "pop_infection": pop_infection,
+                  "pop_sick" : pop_sick,
+                  "pop_fatal" : pop_fatal
+                }
+
+      }
+
+
+
+      function makePeople(){
+
+        // ToDo: change these to figure values
+        var width = chartWidth;
+        var height = 260;
+       
+        for(p in arr){
+          // starting positions for people
+          var x1 = d3.randomInt(20, width-80)();
+          var y1 = height-20 - 2*p;
+
+          var cell = {"txt": arr[p]}
+              cell["x1"] = x1;
+              cell["y1"] = y1;
+              cell["alpha"] = 1-(p*.02);        
+              cell["fontsize1"] = '120px'
+              cell["class"] = 'weepeople pop'
+              cell["isPop"] = true;
+
+
+          data_people.push(cell)
+        }
+
+        setHealth();
+        takeSample();
+
+      }
+
+      function drawPeople(version){
+        rates = sortSample();
+
+        var width = chartWidth;
+        var height = 260;
+
+        
+        var chart = d3.select("#chart").select("svg")
+
+        var people = chart.selectAll('g')
+                        .data(data_people)
+                        .enter()
+                        .append('g')              
+
+        people.append('text')
+              .text(function(d){ return d.txt; })
+              .style('font-size', function(d){ return version == 1 ? d.fontsize1: d.fontsize2; })//'120px')
+              .style('fill', function(d){ return version == 1 ? black: colors[d.health]})
+              .style('opacity', function(d){ return  version == 1 ? d.alpha : .8; })
+              .attr('x', function(d){ return version == 1 ? d.x1 : d.x2; })
+              .attr('y', function(d){ return version == 1 ? d.y1 : d.y2; })
+              // .attr('class', 'weepeople pop')
+              .attr('class', function(d){ return d.class;})
+
+        // estimated width of legend
+        var w = 5*65;
+        var x1 = chartWidth/2-w/2
+
+        // sample/population labels
+        chart.append('text')
+              .text("Sample")
+              .style('font-size', 18)
+              .attr('font-weight', 700)
+              .attr('text-anchor', 'middle')
+                          .attr('x', Math.floor(width/2))
+              .attr('y', 14)
+              .attr('opacity', function(){ return version==1 ? 0:1})
+              .attr('class', 'info')
+
+        chart.append('text')
+              .text("Population")
+              .style('font-size', 18)
+              .attr('font-weight', 700)
+              .attr('text-anchor', 'middle')
+                          .attr('x', Math.floor(width/2))
+              // .attr('x', 100)
+              .attr('y', y1 + 265)
+              .attr('opacity', function(){ return version==1 ? 0:1})
+              .attr('class', 'info')
+
+
+
+        // display sample stats 
+        t = 0;
+        chart.append('rect')
+              .attr('x', x1 + t*60)
+              .attr('y', y1 + 120)
+              .attr('width', 10)
+              .attr('height', 10)
+              .style('fill', colors[t])
+              .attr('opacity', function(){ return version==1 ? 0:1})
+              .attr('class', 'info')
+
+        chart.append('text')
+              .text(rates.sample_clear + "%")
+              .attr('x', x1 + (t*60)+15)
+              .attr('y', y1 + 130)
+              .attr('opacity', function(){ return version==1 ? 0:1})
+              .attr('class', 'info')
+
+        t = 1
+        chart.append('rect')
+              .attr('x', x1 + t*60)
+              .attr('y', y1 + 120)
+              .attr('width', 10)
+              .attr('height', 10)
+              .style('fill', colors[t])
+              .attr('opacity', function(){ return version==1 ? 0:1})
+              .attr('class', 'info')
+
+        chart.append('text')
+              .text(rates.sample_recovered + "%")
+              .attr('x', x1 + (t*60)+15)
+              .attr('y', y1 + 130)
+              .attr('opacity', function(){ return version==1 ? 0:1})
+              .attr('class', 'info')
+
+        t = 2
+        chart.append('rect')
+              .attr('x', x1 + t*60)
+              .attr('y', y1 + 120)
+              .attr('width', 10)
+              .attr('height', 10)
+              .style('fill', colors[t])
+              .attr('opacity', function(){ return version==1 ? 0:1})
+              .attr('class', 'info')
+
+        chart.append('text')
+              .text(rates.sample_infection + "%")
+              .attr('x', x1 + (t*60)+15)
+              .attr('y', y1 + 130)
+              .attr('opacity', function(){ return version==1 ? 0:1})
+              .attr('class', 'info')
+
+        t = 3
+        chart.append('rect')
+              .attr('x', x1 + t*60)
+              .attr('y', y1 + 120)
+              .attr('width', 10)
+              .attr('height', 10)
+              .style('fill', colors[t])
+              .attr('opacity', function(){ return version==1 ? 0:1})
+              .attr('class', 'info')
+
+        chart.append('text')
+              .text(rates.sample_sick + "%")
+              .attr('x', x1 + (t*60)+15)
+              .attr('y', y1 + 130)
+              .attr('opacity', function(){ return version==1 ? 0:1})
+              .attr('class', 'info')
+
+
+        t = 4
+        chart.append('rect')
+              .attr('x', x1 + t*60)
+              .attr('y', y1 + 120)
+              .attr('width', 10)
+              .attr('height', 10)
+              .style('fill', colors[t])
+              .attr('opacity', function(){ return version==1 ? 0:1})
+              .attr('class', 'info')
+
+        chart.append('text')
+              .text(rates.sample_fatal + "%")
+              .attr('x', x1 + (t*60)+15)
+              .attr('y', y1 + 130)
+              .attr('opacity', function(){ return version==1 ? 0:1})
+              .attr('class', 'info')
+
+
+        // display population stats
+        t = 0
+        chart.append('rect')
+              .attr('x', x1 +  t*60)
+              .attr('y', 200)
+              .attr('width', 10)
+              .attr('height', 10)
+              .style('fill', colors[t])
+              .attr('opacity', function(){ return version==1 ? 0:1})
+              .attr('class', 'info')
+
+        chart.append('text')
+              .text(rates.pop_clear + "%")
+              .attr('x', x1 +  (t*60)+15)
+              .attr('y', 210)
+              .attr('opacity', function(){ return version==1 ? 0:1})
+              .attr('class', 'info')
+
+        t=1
+        chart.append('rect')
+              .attr('x', x1 +  t*60)
+              .attr('y', 200)
+              .attr('width', 10)
+              .attr('height', 10)
+              .style('fill', colors[t])
+              .attr('opacity', function(){ return version==1 ? 0:1})
+              .attr('class', 'info')
+
+        chart.append('text')
+              .text(rates.pop_recovered + "%")
+              .attr('x', x1 +  (t*60)+15)
+              .attr('y', 210)
+              .attr('opacity', function(){ return version==1 ? 0:1})
+              .attr('class', 'info')
+
+        t = 2
+        chart.append('rect')
+              .attr('x', x1 +  t*60)
+              .attr('y', 200)
+              .attr('width', 10)
+              .attr('height', 10)
+              .style('fill', colors[t])
+              .attr('opacity', function(){ return version==1 ? 0:1})
+              .attr('class', 'info')
+
+        chart.append('text')
+              .text(rates.pop_infection + "%")
+              .attr('x', x1 +  (t*60)+15)
+              .attr('y', 210)
+              .attr('opacity', function(){ return version==1 ? 0:1})
+              .attr('class', 'info')
+
+        t = 3
+        chart.append('rect')
+              .attr('x', x1 +  t*60)
+              .attr('y', 200)
+              .attr('width', 10)
+              .attr('height', 10)
+              .style('fill', colors[3])
+              .attr('opacity', function(){ return version==1 ? 0:1})
+              .attr('class', 'info')
+
+        chart.append('text')
+              .text(rates.pop_sick + "%")
+              .attr('x', x1 +  (t*60)+15)
+              .attr('y', 210)
+              .attr('opacity', function(){ return version==1 ? 0:1})
+              .attr('class', 'info')
+
+
+        t = 4
+        chart.append('rect')
+              .attr('x', x1 +  t*60)
+              .attr('y', 200)
+              .attr('width', 10)
+              .attr('height', 10)
+              .style('fill', colors[4])
+              .attr('opacity', function(){ return version==1 ? 0:1})
+              .attr('class', 'info')
+
+        chart.append('text')
+              .text(rates.pop_fatal + "%")
+              .attr('x', x1 +  (t*60)+15)
+              .attr('y', 210)
+              .attr('opacity', function(){ return version==1 ? 0:1})
+              .attr('class', 'info')
+
+      }
+
+
+      function drawLegend(){
+
+        var legend = d3.select('#legend').append('svg')
+
+        legend.append('rect')
+              .attr('x',20)
+              .attr('y',0)
+              .attr('width', 20)
+              .attr('height',20)
+              .style('fill', colors[0])
+
+        legend.append('text')
+              .text('Healthy')
+              .attr('x', 45)
+              .attr('y', 15)
+
+        legend.append('rect')
+              .attr('x',20)
+              .attr('y',25)
+              .attr('width', 20)
+              .attr('height',20)
+              .style('fill', colors[1])
+
+        legend.append('text')
+              .text('Recovered (previously infected)')
+              .attr('x', 45)
+              .attr('y', 40)
+
+
+        legend.append('rect')
+              .attr('x',20)
+              .attr('y',50)
+              .attr('width', 20)
+              .attr('height',20)
+              .style('fill', colors[2])
+
+        legend.append('text')
+              .text('Asymptomatic (infected)')
+              .attr('x', 45)
+              .attr('y', 65)
+
+
+        legend.append('rect')
+              .attr('x',20)
+              .attr('y',75)
+              .attr('width', 20)
+              .attr('height',20)
+              .style('fill', colors[3])
+
+        legend.append('text')
+              .text('Sick (infected)')
+              .attr('x', 45)
+              .attr('y', 90)
+
+
+        legend.append('rect')
+              .attr('x',20)
+              .attr('y',100)
+              .attr('width', 20)
+              .attr('height',20)
+              .style('fill', colors[4])
+
+        legend.append('text')
+              .text('Fatality')
+              .attr('x', 45)
+              .attr('y', 115)
+        
+
+      }
+
+
+
+      function randomRange(min, max){ 
+        return Math.floor((Math.random() * (max - min + 1)) + min); 
+      }
+
+
+
+      // kick things off
+      init();
+    </script>
+  </body>
+</html>
