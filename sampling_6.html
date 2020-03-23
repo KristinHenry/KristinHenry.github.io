@@ -145,8 +145,15 @@
           <div class="step" data-step="3">
             
             <p>Let’s select people randomly. Does the sample reflect the rest of the crowd? Sometimes, but usually not</p>
-            <p>Generate a new simulation.</p>
-            <div id="option">
+            <div id="legend"></div>
+            <p></p>
+            
+          </div>
+          <div class="step" data-step="4">
+            
+            <p>What happens in our model, if we take another random sample of our population? Or only sample people who are sick?</p>
+
+            <div>
                 <input name="randomSampleButton" 
                        type="button" 
                        value="Random Sample" 
@@ -156,17 +163,16 @@
                        value="Sick Sample" 
                        onclick="sickSample()" />
             </div>
-            <div id="option">
-                <input name="updateButton" 
+                
+            
+            <p>We can see that sampling from only extreme cases in the population will give us different results than with random testing.</p>
+            <input name="updateButton" 
                        type="button" 
                        value="Start Over With New Population" 
                        onclick="updatePeople()" />
-            </div>
-            <p></p>
-            <p></p>
-            <p></p>
-            <p></p>
-            <p>.</p>
+
+          </div>
+          <div class="step" data-step="5">
           </div>
         </article>
 
@@ -435,6 +441,7 @@
 
         makePeople()
         drawPeople(1)
+        drawLegend()
         
       }
 
@@ -450,6 +457,7 @@
         // document.body.scrollTop = 0; // For Safari
         // document.documentElement.scrollTop = 0; // For Chrome, Firefox, IE and Opera
       }
+
 
       function randomSample(){
         console.log('take random sample')
@@ -986,6 +994,88 @@
 
       }
 
+
+      function drawLegend(){
+
+        var legend = d3.select('#legend').append('svg')
+
+        legend.append('rect')
+              .attr('x',20)
+              .attr('y',0)
+              .attr('width', 20)
+              .attr('height',20)
+              .style('fill', colors[0])
+
+        legend.append('text')
+              .text('Healthy')
+              .attr('x', 45)
+              .attr('y', 15)
+
+        legend.append('rect')
+              .attr('x',20)
+              .attr('y',25)
+              .attr('width', 20)
+              .attr('height',20)
+              .style('fill', colors[1])
+
+        legend.append('text')
+              .text('Recovered (previously infected)')
+              .attr('x', 45)
+              .attr('y', 40)
+
+
+        legend.append('rect')
+              .attr('x',20)
+              .attr('y',50)
+              .attr('width', 20)
+              .attr('height',20)
+              .style('fill', colors[2])
+
+        legend.append('text')
+              .text('Asymptomatic (infected)')
+              .attr('x', 45)
+              .attr('y', 65)
+
+
+        legend.append('rect')
+              .attr('x',20)
+              .attr('y',75)
+              .attr('width', 20)
+              .attr('height',20)
+              .style('fill', colors[3])
+
+        legend.append('text')
+              .text('Sick (infected)')
+              .attr('x', 45)
+              .attr('y', 90)
+
+
+        legend.append('rect')
+              .attr('x',20)
+              .attr('y',100)
+              .attr('width', 20)
+              .attr('height',20)
+              .style('fill', colors[4])
+
+        legend.append('text')
+              .text('Fatality')
+              .attr('x', 45)
+              .attr('y', 115)
+        
+
+      }
+
+
+      //-----------------------------------------------------------------
+      function handleClick(myRadio) {
+          // alert('Old value: ' + currentValue);
+          // alert('New value: ' + myRadio.value);
+
+          // var sampleType = "random"
+          // currentValue = myRadio.value;
+
+          sampleType = myRadio.value;
+      }
 
 
       function randomRange(min, max){ 
