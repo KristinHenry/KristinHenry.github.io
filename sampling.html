@@ -266,7 +266,7 @@
       var city_people = [];
       // var colors = [black, c1, grey, red] 
 
-      var colors = ["#7a8091", "#8ea5e6", "#4862ab", "#042582", "#010e33"]
+      var colors = ["#9fabcc", "#8ea5e6", "#4862ab", "#042582", "#010e33"]
 
       var sampleType = "random";  // default setting. Can also be set to 'sick'
 
@@ -378,7 +378,7 @@
               .duration(1000)
               .attr("x", function(d){ return d.x1; })
               .attr("y", function(d){ return d.y1; })
-              .style('fill', function(d){ return colors[d.health]; })
+              .style('fill', function(d){ return d.health == 1 ? colors[d.health] : black })
               .style("opacity", function(d){return d.alpha; })
               // .style("stroke-opacity", .8)
               // .style('stroke', function(d){ return d.outline })
