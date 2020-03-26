@@ -361,12 +361,16 @@
                   .style("stroke-opacity", 0)
                   .style('font-size', function(d){ return d.fontsize1})
 
-            sample.attr("x", function(d){ return d.x1; })
+            sample.transition()
+                  .duration(0)
+                  .attr("x", function(d){ return d.x1; })
                   .attr("y", function(d){ return d.y1; }) 
                   .style('font-size', function(d){ return d.fontsize1})
                   .style("opacity", function(d){return 0; })
 
-            info.attr("opacity", 0)
+            info.transition()
+                .duration(1)
+                .attr("opacity", 0)
         }
 
         if(step == 1){
@@ -381,7 +385,7 @@
               .style('font-size', function(d){ return d.fontsize1})
 
           sample.transition()
-                .duration(100)
+                .duration(0)
                 .style('fill', function(d){ return colors[d.health]; })
                 .attr("x", function(d){ return d.x1; })
                 .attr("y", function(d){ return d.y1; }) 
@@ -389,7 +393,7 @@
                 .style("opacity", function(d){return 0; })
 
           info.transition()
-                .duration(100)
+                .duration(1)
                 .attr("opacity", 0)
         }
 
@@ -404,7 +408,7 @@
                   .style("font-size", function(d){ return d.fontsize2; })
 
             sample.transition()
-                  .duration(500)
+                  .duration(1500)
                   .style('fill', function(d){ return colors[d.health]; })
                   .attr("x", function(d){ return d.x2; })
                   .attr("y", function(d){ return d.y2; }) 
@@ -413,7 +417,7 @@
 
 
             info.transition()
-                .duration(500)
+                .duration(1500)
                 .attr("opacity", 1)
         }
 
@@ -486,6 +490,12 @@
         drawPeople(2, data_people, "set_1");
         drawStats(2, data_people, "set_1")
         drawLabels(2);
+
+
+         var info = d3.selectAll(".info")
+                    info.style('opacity', 1)
+
+
       }
 
 
@@ -503,6 +513,9 @@
         drawPeople(2, data_people, "set_1");
         drawStats(2, data_people, "set_1")
         drawLabels(2);
+
+        var info = d3.selectAll(".info")
+        info.style('opacity', 1)
       }
 
 
@@ -519,6 +532,9 @@
         drawStats(2, data_people, "set_1")
         drawLabels(2);
 
+        var info = d3.selectAll(".info")
+        info.style('opacity', 1)
+
       }
 
       function sickSample(){
@@ -533,6 +549,9 @@
         drawPeople(2, data_people, "set_1");
         drawStats(2, data_people, "set_1")
         drawLabels(2);
+
+        var info = d3.selectAll(".info")
+        info.style('opacity', 1)
 
       }
 
