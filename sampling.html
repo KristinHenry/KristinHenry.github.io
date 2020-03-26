@@ -361,16 +361,12 @@
                   .style("stroke-opacity", 0)
                   .style('font-size', function(d){ return d.fontsize1})
 
-            sample.transition()
-                  .duration(500)
-                  .attr("x", function(d){ return d.x1; })
+            sample.attr("x", function(d){ return d.x1; })
                   .attr("y", function(d){ return d.y1; }) 
                   .style('font-size', function(d){ return d.fontsize1})
                   .style("opacity", function(d){return 0; })
 
-            info.transition()
-                .duration(500)
-                .attr("opacity", 0)
+            info.attr("opacity", 0)
         }
 
         if(step == 1){
@@ -385,7 +381,7 @@
               .style('font-size', function(d){ return d.fontsize1})
 
           sample.transition()
-                .duration(500)
+                .duration(100)
                 .style('fill', function(d){ return colors[d.health]; })
                 .attr("x", function(d){ return d.x1; })
                 .attr("y", function(d){ return d.y1; }) 
@@ -393,7 +389,7 @@
                 .style("opacity", function(d){return 0; })
 
           info.transition()
-                .duration(500)
+                .duration(100)
                 .attr("opacity", 0)
         }
 
@@ -844,6 +840,15 @@
               .attr('class', function(d){ return d.class;})
 
 
+        if(version == 1){
+
+          var sample = d3.selectAll(".sample")
+
+          sample.style('opacity', 0)
+
+        }
+
+
       }
 
       function drawStats(version, data, set){
@@ -865,14 +870,14 @@
               .attr('width', 10)
               .attr('height', 10)
               .style('fill', colors[t])
-              .attr('opacity', function(){ return version==1 ? 0:1})
+              .attr('opacity', 0)
               .attr('class', 'info')
 
         chart.append('text')
               .text(rates.sample_clear + "%")
               .attr('x', x1 + (t*60)+15)
               .attr('y', y1 + 130)
-              .attr('opacity', function(){ return version==1 ? 0:1})
+              .attr('opacity', 0)
               .attr('class', 'info')
 
 
@@ -883,14 +888,14 @@
               .attr('width', 10)
               .attr('height', 10)
               .style('fill', colors[t])
-              .attr('opacity', function(){ return version==1 ? 0:1})
+              .attr('opacity', 0)
               .attr('class', 'info')
 
         chart.append('text')
               .text(rates.sample_recovered + "%")
               .attr('x', x1 + (t*60)+15)
               .attr('y', y1 + 130)
-              .attr('opacity', function(){ return version==1 ? 0:1})
+              .attr('opacity', 0)
               .attr('class', 'info')
 
         t = 2
@@ -900,14 +905,14 @@
               .attr('width', 10)
               .attr('height', 10)
               .style('fill', colors[t])
-              .attr('opacity', function(){ return version==1 ? 0:1})
+              .attr('opacity', 0)
               .attr('class', 'info')
 
         chart.append('text')
               .text(rates.sample_infection + "%")
               .attr('x', x1 + (t*60)+15)
               .attr('y', y1 + 130)
-              .attr('opacity', function(){ return version==1 ? 0:1})
+              .attr('opacity', 0)
               .attr('class', 'info')
 
         t = 3
@@ -917,14 +922,14 @@
               .attr('width', 10)
               .attr('height', 10)
               .style('fill', colors[t])
-              .attr('opacity', function(){ return version==1 ? 0:1})
+              .attr('opacity', 0)
               .attr('class', 'info')
 
         chart.append('text')
               .text(rates.sample_sick + "%")
               .attr('x', x1 + (t*60)+15)
               .attr('y', y1 + 130)
-              .attr('opacity', function(){ return version==1 ? 0:1})
+              .attr('opacity', 0)
               .attr('class', 'info')
 
 
@@ -935,14 +940,14 @@
               .attr('width', 10)
               .attr('height', 10)
               .style('fill', colors[t])
-              .attr('opacity', function(){ return version==1 ? 0:1})
+              .attr('opacity', 0)
               .attr('class', 'info')
 
         chart.append('text')
               .text(rates.sample_fatal + "%")
               .attr('x', x1 + (t*60)+15)
               .attr('y', y1 + 130)
-              .attr('opacity', function(){ return version==1 ? 0:1})
+              .attr('opacity', 0)
               .attr('class', 'info')
 
 
@@ -954,14 +959,14 @@
               .attr('width', 10)
               .attr('height', 10)
               .style('fill', colors[t])
-              .attr('opacity', function(){ return version==1 ? 0:1})
+              .attr('opacity', 0)
               .attr('class', 'info')
 
         chart.append('text')
               .text(rates.pop_clear + "%")
               .attr('x', x1 +  (t*60)+15)
               .attr('y', 210)
-              .attr('opacity', function(){ return version==1 ? 0:1})
+              .attr('opacity', 0)
               .attr('class', 'info')
 
         t=1
@@ -971,14 +976,14 @@
               .attr('width', 10)
               .attr('height', 10)
               .style('fill', colors[t])
-              .attr('opacity', function(){ return version==1 ? 0:1})
+              .attr('opacity', 0)
               .attr('class', 'info')
 
         chart.append('text')
               .text(rates.pop_recovered + "%")
               .attr('x', x1 +  (t*60)+15)
               .attr('y', 210)
-              .attr('opacity', function(){ return version==1 ? 0:1})
+              .attr('opacity', 0)
               .attr('class', 'info')
 
         t = 2
@@ -988,14 +993,14 @@
               .attr('width', 10)
               .attr('height', 10)
               .style('fill', colors[t])
-              .attr('opacity', function(){ return version==1 ? 0:1})
+              .attr('opacity', 0)
               .attr('class', 'info')
 
         chart.append('text')
               .text(rates.pop_infection + "%")
               .attr('x', x1 +  (t*60)+15)
               .attr('y', 210)
-              .attr('opacity', function(){ return version==1 ? 0:1})
+              .attr('opacity', 0)
               .attr('class', 'info')
 
         t = 3
@@ -1005,14 +1010,14 @@
               .attr('width', 10)
               .attr('height', 10)
               .style('fill', colors[3])
-              .attr('opacity', function(){ return version==1 ? 0:1})
+              .attr('opacity', 0)
               .attr('class', 'info')
 
         chart.append('text')
               .text(rates.pop_sick + "%")
               .attr('x', x1 +  (t*60)+15)
               .attr('y', 210)
-              .attr('opacity', function(){ return version==1 ? 0:1})
+              .attr('opacity', 0)
               .attr('class', 'info')
 
 
@@ -1023,14 +1028,14 @@
               .attr('width', 10)
               .attr('height', 10)
               .style('fill', colors[4])
-              .attr('opacity', function(){ return version==1 ? 0:1})
+              .attr('opacity', 0)
               .attr('class', 'info')
 
         chart.append('text')
               .text(rates.pop_fatal + "%")
               .attr('x', x1 +  (t*60)+15)
               .attr('y', 210)
-              .attr('opacity', function(){ return version==1 ? 0:1})
+              .attr('opacity', 0)
               .attr('class', 'info')
         
 
@@ -1059,7 +1064,7 @@
               .attr('x', 45)
               // .attr('x', 0)
               .attr('y', 150)
-              .attr('opacity', function(){ return version==1 ? 0:1})
+              .attr('opacity', 0)
               .attr('class', 'info')
 
         chart.append('text')
@@ -1070,7 +1075,7 @@
               // .attr('text-anchor', 'right')
               .attr('x', 10)
               .attr('y', 210)
-              .attr('opacity', function(){ return version==1 ? 0:1})
+              .attr('opacity', 0)
               .attr('class', 'info')
 
       }
