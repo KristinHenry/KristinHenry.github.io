@@ -349,7 +349,7 @@ var config = {
             alignment: 'left',
             title: 'Domestic USPS Mail',
             image: '',
-            description: 'Delivery times of domestic mail varies quite a bit.',
+            description: 'Delivery times of domestic mail varies quite a bit.<br/><br/>These dots represent individual letters I have mailed. The color represents the numbr of days it took to arrive. The more orange, the more days.',
             location: {
                 center: [-110.44486, 34.77139],
                 zoom: 2.6,
@@ -382,7 +382,7 @@ var config = {
             alignment: 'left',
             title: 'USPS Sorting Centers',
             image: '',
-            description: 'Delivery times of domestic mail varies quite a bit.',
+            description: 'The US Postal Service contains many regional sorting centers. Your mail going in and out through the center that serves your zip code.<br/><br/>Some areas have several sorting centers nearby, and others are served by sorting centers in another state! <br/><br/>Here, the sorting centers my letters have passed through are drawn as open circles. The lines connect the town where the letter was delivered to the regional sorting center.',
             location: {
                 center: [-110.44486, 34.77139],
                 zoom: 2.6,
@@ -602,7 +602,7 @@ var config = {
             alignment: 'center',
             title: 'The project continues:',
             image: '',
-            description: '<ul><li><a href="https://forms.gle/5KpX1yWLr5TnKorK9">Sign up</a> to get a sticker and help fill in more of this map</li><li>Updates and Work-in-progress <a href="https://www.patreon.com/KristinHenry/posts?filters%5Btag%5D=Stickers%20%26%20Stamps">posts</a></li><li><a href="https://kristinhenry.medium.com/stickers-and-stamps-project-faq-505f7d85e79d">Frequently Asked Questions</a></li><li>Static version of this story, on Medium.</li></ul>',
+            description: '<ul><li><a href="https://forms.gle/5KpX1yWLr5TnKorK9">Sign up</a> to get a sticker and help fill in more of this map</li><li>Updates and Work-in-progress <a href="https://www.patreon.com/KristinHenry/posts?filters%5Btag%5D=Stickers%20%26%20Stamps">posts</a></li><li><a href="https://kristinhenry.medium.com/stickers-and-stamps-project-faq-505f7d85e79d">Frequently Asked Questions</a></li><li>Static version of this <a href="https://kristinhenry.medium.com/stickers-and-stamps-a-bright-spot-in-2020-d3011afefa09">story, on Medium</a>.</li></ul>',
             location: {
                 center: [-82.44486, 37.77139],
                 zoom: 3,
