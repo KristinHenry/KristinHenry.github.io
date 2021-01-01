@@ -929,7 +929,7 @@ function drawScatter2(data, targ, color_by, legend_x, legend_y){
     var containerWidth = +d3.select(targ).style('width').slice(0, -2)
 
 
-  var margin = {top: 20, right: 60, bottom: 40, left: 50},
+  var margin = {top: 20, right: 60, bottom: 40, left: 60},
     width = containerWidth - margin.left - margin.right,
     height = 300 - margin.top - margin.bottom;
 
@@ -976,11 +976,21 @@ function drawScatter2(data, targ, color_by, legend_x, legend_y){
       .attr("class", "axis")
       .call(yAxis)
 
+
+// // text label for the y axis
+//   svg.append("text")
+//       .attr("x", 0)
+//       .attr("y", margin.top)
+//       .attr("dy", "1em")
+//       .style("text-anchor", "Right")
+//       .style('fill', '#ccc')
+//       .text("Envelopes");
+
   // text label for the y axis
   svg.append("text")
       .attr("transform", "rotate(-90)")
-      .attr("x", -80)
-      .attr("y", -50)
+      .attr("x", -120)
+      .attr("y", -60)
       .attr("dy", "1em")
       .style("text-anchor", "middle")
       .style('fill', '#ccc')

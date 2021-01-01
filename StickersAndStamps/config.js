@@ -472,7 +472,7 @@ var config = {
             alignment: 'left',
             title: 'Western States',
             image: '',
-            description: 'Being less densely populated, the western states have fewer sorting centers than Eastern states.',
+            description: 'Being less densely populated, the western states have fewer sorting centers than Eastern states.<br/><br/>Note that not all sorting centers are shown on this map. Only the sorting centers that my letters passed through are shown.',
             location: {
                 center: [-104.9903, 39.7392],
                 zoom: 4,
