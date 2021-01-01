@@ -349,7 +349,7 @@ var config = {
             alignment: 'left',
             title: 'Domestic USPS Mail',
             image: '',
-            description: 'Delivery times of domestic mail varies quite a bit.<br/><br/>These dots represent individual letters I have mailed. The color represents the numbr of days it took to arrive. The more orange, the more days.',
+            description: 'Delivery times of domestic mail varies quite a bit.<br/><br/>These dots represent individual letters I have mailed. The color represents the number of days it took to arrive. The more orange, the more days.',
             location: {
                 center: [-110.44486, 34.77139],
                 zoom: 2.6,
@@ -413,9 +413,9 @@ var config = {
         {
             id: 'phoenix1',
             alignment: 'left',
-            title: 'Phoenix, AZ',
+            title: 'Zooming in',
             image: '',
-            description: 'Phoenix story....',
+            description: 'My data set is small, but even with approximately 300 letters (data points), we can already see that some sorting centers deliver promptly. Others do not. If I had more data, I could possibly dismiss some of the slow deliveries from centers that are usually quick. Or maybe it differs by zipcode? I may look at that, if I get more participants. ',
             location: {
                 center: [-112.0740, 33.4484],
                 zoom: 4,
@@ -444,7 +444,7 @@ var config = {
             alignment: 'left',
             title: 'Phoenix',
             image: '',
-            description: 'Phoenix, part 2....',
+            description: 'All but one letter I sent to Arizona arrived on the late side.',
             location: {
                 center: [-112.0740, 33.4484],
                 zoom: 5.92,
@@ -470,9 +470,9 @@ var config = {
         {
             id: 'denver1',
             alignment: 'left',
-            title: 'Denver, CO',
+            title: 'Western States',
             image: '',
-            description: 'denver story.',
+            description: 'Being less densely populated, the western states have fewer sorting centers than Eastern states.',
             location: {
                 center: [-104.9903, 39.7392],
                 zoom: 4,
@@ -501,7 +501,7 @@ var config = {
             alignment: 'left',
             title: 'Denver, CO',
             image: '',
-            description: 'denver part 2.... .',
+            description: 'Denver has some prompt deliveries and some slow ones, and these are all passing through the same sorting center.',
             location: {
                 center: [-104.9903, 39.7392],
                 zoom: 5.92,
@@ -524,9 +524,9 @@ var config = {
         {
             id: 'dc1',
             alignment: 'left',
-            title: 'DC',
+            title: 'East Coast',
             image: '',
-            description: 'Dc story....',
+            description: 'So many sorting centers, and slow sorting centers right next to prompt centers.',
             location: {
                 center: [-77.0369, 38.9072],
                 zoom: 5.92,
@@ -553,9 +553,9 @@ var config = {
         {
             id: 'dc2',
             alignment: 'left',
-            title: 'DC',
+            title: 'DC Area',
             image: '',
-            description: 'DC part 2....',
+            description: 'This view has a lot going on. On my ToDo list: get more relevant data on this area.<br/><br/>USPS sorting centers are assigned by zip code, so there should be a lot of relevant data to work with.',
             location: {
                 center: [-77.0369, 38.9072],
                 zoom: 6.51,
