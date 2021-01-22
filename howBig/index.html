@@ -1,0 +1,378 @@
+<!doctype html>
+<meta charset="utf-8">
+<head>
+  <title>How big is 400,000? by Kristin Henry</title>
+  <link rel="stylesheet" type="text/css" href="weepeople.css">
+  <style>
+    body { margin: 0; }
+    svg {
+      position: absolute;
+      top: 0;
+      left: 0;
+    }
+    rect { fill: transparent; }
+
+    h2 {
+      font-size: 64px;
+      color: #657c9e;
+      font-family: 'Inter', sans-serif;
+    }
+
+    p {
+    	font-size: 14px;
+    	color: #657c9e;
+    	font-family: 'Inter', sans-serif;
+
+    }
+
+    a:link {
+	  color: #657c9e;
+	  background-color: transparent;
+	  text-decoration: none;
+	  font-weight:bold
+	}
+
+	a:visited {
+	  color: #657c9e;
+	  background-color: transparent;
+	  text-decoration: none;
+	}
+
+	a:hover {
+	  color: white;
+	  background-color: transparent;
+	  text-decoration: underline;
+	}
+
+    .container {
+            position: relative;
+            background: '#333'
+        }
+     
+        .txtCanvas {
+            position: absolute;
+            left: 0px;
+            top: 0px;
+            /*z-index: 10;*/
+            background:transparent;
+        }
+  </style>
+  <script src='d3.v4.min.js'></script> 
+</head>
+<body style="background-color: #85afd6">
+	<div id="container"><canvas id='txtCanvas' class='txtCanvas'></canvas>
+		<div id="infoDiv" style="position: absolute; bottom: 5px; left: 120px"></div>
+    <div id="counterDiv" style="position: absolute;"></div>
+	</div>
+<script type='text/javascript'>
+
+var timer; // initialize for later use
+var count = 0; // 
+
+var w = 40;
+var width = window.innerWidth//-w, 
+    height = window.innerHeight//-w ;
+
+
+var xmin = w,
+	xmax = width-w,
+	ymin = w*2,
+	ymax = height-2*w;
+
+var rmin = 2;
+
+var dots = [];
+var color = 0;
+var colors = ["#fff", "#369", "#d1d1cd", "#95a9bd"];
+
+var people = ["a", "b", "c", "d", "e", "f", "g", "h", "i", "j", 
+                  "k", "l", "m", "n", "o", "p", "q", "r", "s", "t", 
+                  "u", "v", "w", "x", "y", "z", "A", "B", "C", "D", 
+                  "E", "F", "G", "H", "I", "J", "K", "L", "M", "N", 
+                  "O", "P", "Q", "R", "S", "T", "U", "V", "W", "X", 
+                  "Y", "Z"]
+
+var canvas = d3.select('body')
+    			.append('canvas')
+      			.attr('width', width)
+     			.attr('height', height)
+     			.node().getContext('2d');
+
+function makeDot(){
+
+	return  {
+      img: people[randomRange(0,people.length-1)],
+      angle: randomRange(0, 2*Math.PI),
+      dx: 0,
+      dy: 0, //getDir(),
+      x: randomRange(xmin,xmax), 
+      y: randomRange(ymin,ymax)
+  	};
+}
+
+
+function randomRange(min, max){ 
+	return Math.floor((Math.random() * (max - min + 1)) + min); 
+}
+
+
+function update(){
+
+  if(count>1 && count%5000==0) {
+
+    if(color >= colors.length-1){
+      color = 0;
+    } else {
+      color+=1;
+    }
+  }
+
+}
+
+
+function draw() {
+   
+   for(var i=0; i<dots.length; i+=1){
+
+   		var d = dots[i];
+
+      canvas.font = "60px weepeople"
+      canvas.fillStyle = colors[color];
+      canvas.textAlign = "center"
+      canvas.fillText(d.img, d.x, d.y)
+
+   		canvas.globalAlpha = 0.5;
+
+      count+=1;
+	 }
+
+   dots = [];
+};
+
+
+var button_msg_1 = "How big is 400,000?"
+var button_msg_2 = " || "
+
+makeButton_1();
+
+
+function writeCounter(msg){
+
+  var w = window.innerWidth;
+  var left = 0;
+  var top = window.innerHeight/3; //(40*1.5);
+
+  var p = document.getElementById('counter')
+
+  if(p != null){
+
+    p.innerHTML = msg;
+
+  } else {
+
+    var counter = document.createElement("H2");
+    counter.innerHTML = msg
+    counter.id = "counter"
+    counter.style="position: absolute; top:" + top +
+                  "px; left:" + left + "px; width:" + w + "px;" +
+                  "text-align: center"
+
+    var targ = document.getElementById('counterDiv')
+    targ.appendChild(counter)
+  }
+
+}
+
+
+function makeButton_1(){
+
+    // intro button
+
+        var button_width = 340;
+        var button_height = 90;
+        var left = (width/2) - (button_width/2);
+        var top = (height/2) - (button_height/2);
+
+        var btn = document.createElement("BUTTON");   
+        btn.innerHTML = button_msg_1;                   
+        btn.id = "btn"
+        btn.style="position: absolute; top:"+
+              top+"px; left:"+left+"px; width:"+ 
+              button_width+ "px; height:"+button_height+ "px;" +
+             "font-size: 16px;" +
+              "border-radius:" + 36 +"px;" +
+            "background: #657c9e;" + 
+            "color: white;" +
+             "font-family: 'Inter', sans-serif;" +
+             "font-size: 25px;" +
+             "font-weight: 500;" +
+             // "text-transform: uppercase;"+
+              "letter-spacing: 1px;" +
+              "border: none;"+
+               " box-shadow: 0 18px 32px #00000030;"
+        document.body.appendChild(btn);
+
+        document.getElementById('btn').onclick = btnFunction_1;
+
+        make_button = false;
+    }
+
+function makeButton_2(button_msg, btnFunction){
+    // pause/play button
+
+        var button_width = 40;
+        var button_height = 40;
+        var left = (button_width/2);
+        var top = (height) - (button_height*1.5);
+
+        var btn = document.createElement("BUTTON");   
+        btn.innerHTML = button_msg;                   
+        btn.id = "btn"
+        btn.style="position: absolute; top:"+
+              top+"px; left:"+left+"px; width:"+ 
+              button_width+ "px; height:"+button_height+ "px;" +
+             "font-size: 16px;" +
+              "border-radius:" + 36 +"px;" +
+            "background: #657c9e;" + 
+            "color: white;" +
+             "font-family: 'Inter', sans-serif;" +
+             "font-size: 15px;" +
+             "font-weight: 500;" +
+              "letter-spacing: 1px;" +
+              "border: none;"+
+               " box-shadow: 0 18px 32px #00000030;"
+        document.body.appendChild(btn);
+
+        document.getElementById('btn').onclick = btnFunction;
+
+        make_button = false;
+    }
+
+function makeButton_3(button_msg, btnFunction){
+    // info button
+
+        var button_width = 40;
+        var button_height = 40;
+        var left = (width - button_width*1.6);
+        var top = (height) - (button_height*1.5);
+
+        var btn = document.createElement("BUTTON");   
+        btn.innerHTML = button_msg;                   
+        btn.id = "btn2"
+        btn.style="position: absolute; top:"+
+              top+"px; left:"+left+"px; width:"+ 
+              button_width+ "px; height:"+button_height+ "px;" +
+             "font-size: 16px;" +
+              "border-radius:" + 36 +"px;" +
+            "background: #657c9e;" + 
+            "color: white;" +
+             "font-family: 'Inter', sans-serif;" +
+             "font-size: 15px;" +
+             "font-weight: 500;" +
+             // "text-transform: uppercase;"+
+              "letter-spacing: 1px;" +
+              "border: none;"+
+               " box-shadow: 0 18px 32px #00000030;"
+        document.body.appendChild(btn);
+
+        document.getElementById('btn2').onclick = btnFunction;
+
+    }
+
+function btnFunction_1(){
+        
+        var btn = document.getElementById('btn');
+        btn.parentNode.removeChild(btn)
+
+        timer_elapsed = max_time; // make sure timer is done
+
+        max_time = 5000000;
+        timer = d3.timer(tickFxn)
+
+        makeButton_2(" || ", btnFunction_2)
+
+
+        var btn2 = document.getElementById('btn2');
+        if(btn2 == null) makeButton_3(" ? ", btnFunction_3);
+
+
+        writeCounter("0");
+
+}
+
+
+function btnFunction_2(){
+
+        timer.stop()
+
+        var btn = document.getElementById('btn');
+        btn.parentNode.removeChild(btn);
+
+        makeButton_2(" > ", btnFunction_1)       
+}
+
+
+function btnFunction_3(){
+
+  var w = width/2;
+
+  var p = document.getElementById('info')
+  var left = width/2 - ((w/2)*1.5);
+  var top = -60; 
+
+
+  if(p == null){ 
+    
+    var info = document.createElement("P"); 
+    info.innerHTML = "As of Jan 20, 2021, over 400,000 Americans have died of Covid-19.<br /><br /> Visualization by <a href='http://kristinhenry.github.io/'>Kristin Henry</a>, with <a href='https://github.com/propublica/weepeople'>Propublica's WeePeople font.</a>"
+    info.id = 'info' 
+    info.style="position: absolute; top:"+top+
+              "px; left:"+left+"px; width:"+ w + "px;" +
+                  "text-align: center"
+
+
+    var targ = document.getElementById('infoDiv')
+    targ.appendChild(info);
+
+  } else {
+    p.parentNode.removeChild(p)
+  }
+
+}
+
+//------------------------------------------------------------
+// This portion controls the timer loop
+var timer_elapsed = 0;
+var max_time = 1000; //50000;
+
+var dotsToMake = 10;
+var countTick = 10;
+
+// Kick off the timer, and the action begins: 
+timer = d3.timer(tickFxn);
+
+function tickFxn(elapsed) {
+
+  timer_elapsed = elapsed;
+
+  if(count >= 1000) dotsToMake = 50
+  var i = 0;
+  while(i<dotsToMake){
+    dots.push(makeDot());
+    i++;
+  }
+
+  if(count%countTick == 0) writeCounter(count)
+
+  update();
+  draw();
+  
+  if (timer_elapsed > max_time) { timer.stop(); } // comment this out, if we want animation to not stop
+
+
+  if(count >= 400050){ timer.stop();}
+
+}
+//---------------------------------------------------
+</script>
+</body>
