@@ -1,7 +1,7 @@
 <!doctype html>
 <meta charset="utf-8">
 <head>
-  <title>How big is 400,000? by Kristin Henry</title>
+  <title>How big is 500,000? by Kristin Henry</title>
   <link rel="stylesheet" type="text/css" href="weepeople.css">
   <style>
     body { margin: 0; }
@@ -14,7 +14,6 @@
 
     h2 {
       font-size: 64px;
-      /*color: #657c9e;*/
       color: #ccc;
       font-family: 'Inter', sans-serif;
       text-shadow: 2px 2px 8px #000000;
@@ -90,7 +89,9 @@ var rmin = 2;
 
 var dots = [];
 var color = 0;
-var colors = ["#fff", "#369", "#d1d1cd", "#95a9bd"];
+// var colors = ["#fff", "#369", "#d1d1cd", "#95a9bd"];
+
+var colors = ["#e1eaf2", "#b5bdc4", "#73787d", "#3d4042", "#73787d", "#b5bdc4"]
 
 var people = ["a", "b", "c", "d", "e", "f", "g", "h", "i", "j", 
                   "k", "l", "m", "n", "o", "p", "q", "r", "s", "t", 
@@ -157,10 +158,10 @@ function draw() {
 };
 
 
-var button_msg_1 = "How big is 400,000?"
+var button_msg_1 = "How big is 500,000?"
 var button_msg_2 = " || "
 
-makeButton_1();
+makeIntroButton();
 
 
 function writeCounter(msg){
@@ -191,7 +192,7 @@ function writeCounter(msg){
 }
 
 
-function makeButton_1(){
+function makeIntroButton(){
 
     // intro button
 
@@ -202,7 +203,7 @@ function makeButton_1(){
 
         var btn = document.createElement("BUTTON");   
         btn.innerHTML = button_msg_1;                   
-        btn.id = "btn"
+        btn.id = "introBtn"
         btn.style="position: absolute; top:"+
               top+"px; left:"+left+"px; width:"+ 
               button_width+ "px; height:"+button_height+ "px;" +
@@ -217,12 +218,12 @@ function makeButton_1(){
              // "text-transform: uppercase;"+
               "letter-spacing: 1px;" +
               "border: none;"+
-               " box-shadow: 0 18px 32px #00000030;" +
+               " box-shadow: 0 18px 32px #000000;" +
                " z-index: 10000;"
              
         document.body.appendChild(btn);
 
-        document.getElementById('btn').onclick = btnFunction_1;
+        document.getElementById('introBtn').onclick = btnFunction_1;
 
         make_button = false;
     }
@@ -274,8 +275,7 @@ function makeButton_3(button_msg, btnFunction){
               top+"px; left:"+left+"px; width:"+ 
               button_width+ "px; height:"+button_height+ "px;" +
              "font-size: 16px;" +
-              "border-radius:" + 36 +"px;" +
-            // "background: #657c9e;" + 
+              "border-radius:" + 36 +"px;" + 
             "background: #666;" + 
             "color: white;" +
              "font-family: 'Inter', sans-serif;" +
@@ -293,7 +293,7 @@ function makeButton_3(button_msg, btnFunction){
 
 function btnFunction_1(){
         
-        var btn = document.getElementById('btn');
+        var btn = document.getElementById('introBtn');
         btn.parentNode.removeChild(btn)
 
         timer_elapsed = max_time; // make sure timer is done
@@ -336,7 +336,7 @@ function btnFunction_3(){
   if(p == null){ 
     
     var info = document.createElement("P"); 
-    info.innerHTML = "As of Jan 20, 2021, over 400,000 Americans have died of Covid-19.<br /><br /> Visualization by <a href='http://kristinhenry.github.io/'>Kristin Henry</a>, with <a href='https://github.com/propublica/weepeople'>Propublica's WeePeople font.</a>"
+    info.innerHTML = "As of Feb 22, 2021, over 500,000 Americans have died of Covid-19.<br /><br /> Visualization by <a href='http://kristinhenry.github.io/'>Kristin Henry</a>, with <a href='https://github.com/propublica/weepeople'>Propublica's WeePeople font.</a>"
     info.id = 'info' 
     info.style="position: absolute; top:"+top+
               "px; left:"+left+"px; width:"+ w + "px;" +
@@ -361,7 +361,7 @@ var dotsToMake = 10;
 var countTick = 10;
 
 // Kick off the timer, and the action begins: 
-timer = d3.timer(tickFxn);
+// timer = d3.timer(tickFxn);
 
 function tickFxn(elapsed) {
 
@@ -382,7 +382,7 @@ function tickFxn(elapsed) {
   if (timer_elapsed > max_time) { timer.stop(); } // comment this out, if we want animation to not stop
 
 
-  if(count >= 400050){ timer.stop();}
+  if(count >= 500050){ timer.stop();}
 
 }
 //---------------------------------------------------
