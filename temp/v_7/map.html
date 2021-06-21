@@ -1,0 +1,687 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset='utf-8' />
+    <title>Mapping the DRIM</title>
+    <meta name='viewport' content='initial-scale=1,maximum-scale=1,user-scalable=no' />
+    
+    <script src='https://api.tiles.mapbox.com/mapbox-gl-js/v1.3.0/mapbox-gl.js'></script>
+    <link href='https://api.tiles.mapbox.com/mapbox-gl-js/v1.3.0/mapbox-gl.css' rel='stylesheet' />
+
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+        }
+        
+        #map {
+            position: absolute;
+            top: 0;
+            bottom: 0;
+            width: 100%;
+        }
+
+        #map2 {
+            /*position: absolute;*/
+            top: 30px;
+            left: 15px;
+            width: 400px;
+            height: 200px;
+            background: rgba(0, 0, 0, 0.6);
+
+        }
+        
+        #sidebar {
+            position: absolute;
+            top: 15px;
+            left: 15px;
+            bottom: 15px;
+            /*width: 450px;*/
+            width: 40%;
+            overflow: auto;
+            background: rgba(80, 80, 80, 0.8);
+            font-family: "Arial";
+            font-size: 14px; 
+            padding-left: 10px;
+        }
+
+
+        #multiples {
+            position: absolute;
+            top: 15px;
+            left: 45%;
+            bottom: 15px;
+            /*width: 450px;*/
+            width: 50%;
+            overflow: auto;
+            background: rgba(80, 80, 80, 0.8);
+            font-family: "Arial";
+            font-size: 14px; 
+            padding-left: 10px;
+        }
+
+        .smallmap {
+            /*position: relative;*/
+            /*left:5%;*/
+            padding-left: 5%;
+            width: 45%;
+            height: 45%;
+            background: rgba(80, 80, 80, 0.9);
+            float:left;
+
+        }
+
+
+
+        /* pretty radio */
+        label > input[type="radio"] {
+          display: none;
+        }
+        label > input[type="radio"] + *::before {
+          content: "";
+          display: inline-block;
+          vertical-align: bottom;
+          width: 1rem;
+          height: 1rem;
+          margin-right: 0.5rem;
+          border-radius: 30%; /* this controls button shape, 50%->circle  */
+          border-style: solid;
+          border-width: 0.1rem;
+          border-color: black;
+        }
+
+        label > input[type="radio"]:disabled + * {
+            color: rgba(85, 85, 85, 1);
+        }
+        label > input[type="radio"]:disabled + *::before {
+          
+          border-color: rgba(85, 85, 85, 1);
+        }
+
+        label > input[type="radio"]:checked + * {
+          color: white;
+        }
+        label > input[type="radio"]:checked + *::before {
+          background: radial-gradient(white 0%, white 40%, transparent 50%, transparent);
+          border-color: white;
+        }
+
+        /* basic layout */
+        fieldset {
+          margin: 10px;
+          max-width: 400px;
+        }
+        label > input[type="radio"] + * {
+          display: inline-block;
+          padding: 0.5rem 0.5rem;
+        }
+
+        
+    </style>
+
+</head>
+
+<body>
+
+    <div id='map'>
+        
+        <div></div>
+        <div></div>
+    </div>
+    <div id='sidebar'>
+        <h1>Mapping the DRIM</h1> 
+        <div id="tooltip-name"></div>
+        <div id='tooltip'></div>
+        <div id="buttons">
+           
+            <hr>
+            <label>
+                <input type="radio" name="dimensions" id="2d" value="2d" onclick="handle3dClick(this);"  /><span>2D</span>
+            </label>
+            <label>
+                <input type="radio" name="dimensions" id="3d" value="3d" onclick="handle3dClick(this);" checked="checked" /><span>3D</span>
+                
+            </label>
+            <span> | </span>
+            <label>
+                <input type="radio" name="numMaps" id="single" value="single" onclick="handleViewClick(this);" checked="checked"><span>single</span>
+            </label>
+            <label>
+                <input type="radio" name="numMaps" id="multi" value="multi" onclick="handleViewClick(this);"><span>multi</span>
+            </label>
+
+            <hr>
+            <label>
+            <input type="radio" name="yearRadios" id="2009"  onclick="handleYearClick(this);"  value="2009" /><span>2009</span>
+            </label>
+            <label>
+            <input type="radio" name="yearRadios" id="2010" onclick="handleYearClick(this);" checked="checked" value="2010" /><span>2010</span>
+            </label>
+            <label>
+            <input type="radio" name="yearRadios" id="2012" onclick="handleYearClick(this);" value="2012" disabled=true /><span>2012</span>
+            </label>
+            <label>
+            <input type="radio" name="yearRadios" id="2015" onclick="handleYearClick(this);" value="2015" /><span>2015</span>
+            </label>
+            <label>
+            <input type="radio" name="yearRadios" id="2017" onclick="handleYearClick(this);" value="2017" /><span>2017</span>
+            </label>
+
+            <hr>
+            <p><b>Vulnerability Indicators</b></p>
+            <label>
+            <input type="radio" name="queryRadios" onclick="handleQueryOptionClick(this);" value="RentBurdenPercent" checked="checked"/><span>Extreme Rent Burden %</span>
+            </label>
+            <br>
+            <label>
+            <input type="radio" name="queryRadios" onclick="handleQueryOptionClick(this);" value="GrossRent"/><span>Median Gross Rent</span>
+            </label>
+            <br>
+            <label>
+            <input type="radio" name="queryRadios" onclick="handleQueryOptionClick(this);" value="HouseholdIncome"/><span>Household Income</span>
+            </label>
+            <br>
+            <label>
+            <input type="radio" name="queryRadios" onclick="handleQueryOptionClick(this);" value="PovertyPercent"/><span>Poverty %</span>
+            </label>
+            <br>
+            <hr>
+            <p><b>Market Dynamics Indicators</b></p>
+            <label>
+            <input type="radio" name="queryRadios" onclick="handleQueryOptionClick(this);" value="AffordableRentPercent"/><span>Affordable Rent %</span>
+            </label>
+            <br>
+            <label>
+            <input type="radio" name="queryRadios" onclick="handleQueryOptionClick(this);" value="HighRentPercent"/><span>High Rent %</span>
+            </label>
+            <br>
+            <label>
+            <input type="radio" name="queryRadios" onclick="handleQueryOptionClick(this);" value="Permits"/><span>Occupancy Permits Issued</span>
+            </label>
+            <br>
+
+            <hr>
+            <p><b>"Gentrifier" Population Indicators</b></p>
+            <label>
+            <input type="radio" name="queryRadios" onclick="handleQueryOptionClick(this);" value="OWNEROCC" /><span>Owner Occupied Households</span>
+            </label>
+            <br>
+            <label>
+            <input type="radio" name="queryRadios" onclick="handleQueryOptionClick(this);" value="OWNEROCCPERCENT"/><span>Owner Occupied %</span>
+            </label>
+            <br>
+            <label>
+            <input type="radio" name="queryRadios" onclick="handleQueryOptionClick(this);" value="WHITE"/><span>Non-Hispanic White %</span>
+            </label>
+            <br>
+            <label>
+            <input type="radio" name="queryRadios" onclick="handleQueryOptionClick(this);" value="DEGREE"/><span>College Degree %</span>
+            </label>
+            
+            
+            <hr>
+
+        </div>        
+    </div>
+
+    <div id='multiples'>
+       
+        <div class='smallmap' id='smallmap_1'><p id='p_1'>1</p></div>
+        <div class='smallmap' id='smallmap_2'><p id='p_2'>2</p></div>
+        
+        <div class='smallmap' id='smallmap_3'><p id='p_3'>3</p></div>
+        <div class='smallmap' id='smallmap_4'><p id='p_4'>4</p></div>
+        
+    </div>
+
+    <script>
+       
+
+        //replace with YOUR access token
+        // mapboxgl.accessToken = 'pk.eyJ1Ijoia3Jpc3RpbmhlbnJ5IiwiYSI6ImNqMWdxMjd5aDAwM28zM2xtaGV2azYwcjYifQ.NTJiOqcnhP-_3etf4aZYmQ';
+
+        mapboxgl.accessToken = 'pk.eyJ1IjoiamVubmlmZXJiZXJuc3RlaW5ydXRnZXJzIiwiYSI6ImNqbzFwNzlrbjBlMGIza254YjJnNmxzZXQifQ.FXiFlcHGDHx0ArmX7hlnUQ';
+
+
+        var DATAFILE = 'newarktractpolygon_DRIM_2021.json'
+
+
+        var FILLOPACITY =  .55;
+
+        // var HEIGHTS = [0, 11000]
+        var HEIGHTS = [0, 5000]
+
+        var COLORS1 = ["#f1eef6", "#045a8d"],
+            COLORS2 = ["#f5ecda", "#e6a930"],
+            COLORS3 = ["#eddaf2", "#c83deb"],
+            YEAR = "2010",
+            QUERYOPTION = "RentBurdenPercent",
+            FILTERUSE;
+
+
+        // ToDo: get these scales computationally, this is a quick fix
+        var SCALE1 = [0, 100]
+        var SCALE_OCC = [0, 2900] // owner occupied households
+        var SCALE_RENT = [0, 1500] // Median Gross Rent
+        var SCALE_INCOME = [0, 75000] // Household Income
+        var SCALE_PERMITS = [0,25] // Occupancy Permits Issued
+
+
+        // default settings, on load
+        COLORS = COLORS1;
+        SCALE = SCALE1;
+           
+
+        // this is variable for drawing on map
+        var OPTION = QUERYOPTION + YEAR; //'OWNOCC2000';
+        var OPTION2 =  QUERYOPTION + YEAR; //'OWNOCC2000';
+
+        var DIMENSION = "3d";
+        var MAPVIEWS = "single"
+
+
+        var buttonYears = ["2009", "2010", "2012", "2015", "2017"]
+
+        var AvailableData = {"RentBurdenPercent": ["2009", "2010", "2015", "2017"],
+                            "GrossRent": ["2009", "2010", "2015", "2017"],
+                            "HouseholdIncome": ["2009", "2010", "2015", "2017"],
+                            "PovertyPercent": ["2015", "2017"],
+                            "AffordableRentPercent": ["2009", "2010", "2015", "2017"],
+                            "HighRentPercent": ["2009", "2010", "2015", "2017"],
+                            "Permits": ["2009", "2010", "2015", "2017"],
+                            "OWNEROCC": ["2015", "2017"],
+                            "OWNEROCCPERCENT": ["2015", "2017"],
+                            "WHITE": ["2015", "2017"],
+                            "DEGREE": ["2012", "2015", "2017"]  }
+
+        var colorSets = {"RentBurdenPercent": COLORS1,
+                            "GrossRent": COLORS1,
+                            "HouseholdIncome": COLORS1,
+                            "PovertyPercent": COLORS1,
+                            "AffordableRentPercent": COLORS2,
+                            "HighRentPercent": COLORS2,
+                            "Permits": COLORS2,
+                            "OWNEROCC": COLORS3,
+                            "OWNEROCCPERCENT": COLORS3,
+                            "WHITE": COLORS3,
+                            "DEGREE": COLORS3  }
+        
+
+        //create a map using the Mapbox Dark theme, zoomed in to Newark
+        var map = new mapboxgl.Map({
+            container: 'map',
+            // style: 'mapbox://styles/mapbox/dark-v8',
+            style: 'mapbox://styles/jenniferbernsteinrutgers/ck0uerdp72kzn1dliwposocey',
+            pitch: 40, // pitch in degrees
+            zoom: 11,
+            center: [-74.2624, 40.7357] // offset this a bit to the right of screen
+        });
+
+
+        function createMap(targ, info){
+
+            var map = new mapboxgl.Map({
+                container: targ,
+                // style: 'mapbox://styles/mapbox/dark-v8',
+                style: 'mapbox://styles/jenniferbernsteinrutgers/ck0uerdp72kzn1dliwposocey',
+                pitch: 40, // pitch in degrees
+                zoom: info.zoom,
+                center: info.center // offset this a bit to the right of screen
+            });
+
+            return map;
+        }
+
+        //=========================================================
+
+        var minimapSettings = { 'center': [-74.1624, 40.7257], 'zoom': 9.5}
+        var miniMaps = [];
+
+        createMultiMaps();
+
+        function refreshMaps(){
+
+            if(MAPVIEWS == "single"){
+                enableYearButtons();
+                
+                if(DIMENSION == "2d"){
+                    drawChoropleth(map, QUERYOPTION + YEAR);
+                } else if(DIMENSION == "3d"){
+                    drawExtrusions(map, QUERYOPTION + YEAR);
+                }
+            } 
+            else {
+                
+                disableYearButtons();
+                drawMultiMaps();
+            }
+        }
+
+
+
+        function disableYearButtons(){
+            for(i in buttonYears){
+                var temp = document.getElementById(buttonYears[i])
+                temp.disabled = true;
+                temp.checked = false;
+            }
+        }
+
+
+        function enableYearButtons(){
+            var years = AvailableData[QUERYOPTION];
+
+             // go through year buttons and disable any that we don't have data for 
+            for(i in buttonYears){
+                var temp = document.getElementById(buttonYears[i])
+                if(years.includes(buttonYears[i])){
+                    temp.disabled = false;
+                } else {
+                    temp.disabled = true;
+                }
+            }
+        }
+
+
+        function drawMultiMaps(){
+                        
+            // first, clear all the previous minimaps
+            for(var i in miniMaps){
+                clearMap(miniMaps[i])
+            }
+       
+
+            var ids = ['p_1', 'p_2', 'p_3', 'p_4']
+            // hide any 'years' text on minimaps, so they don't linger
+            for(var i in ids){
+                 document.getElementById(ids[i]).innerHTML = ".";
+            }
+
+            var years = AvailableData[QUERYOPTION]
+
+           
+
+           for(var i in years){
+
+                // Display date for this map
+                document.getElementById(ids[i]).innerHTML = years[i];
+                
+                // choose the right map
+                var targ = miniMaps[i]
+                
+                // now draw!
+                if(DIMENSION == "2d"){
+                    drawChoropleth(targ, QUERYOPTION + years[i]);
+                } else if(DIMENSION == "3d"){
+                    drawExtrusions(targ, QUERYOPTION + years[i]);
+                }
+
+           }
+
+        }
+
+       
+        function createMultiMaps(){
+
+            var minimap_1 = createMap('smallmap_1', minimapSettings);
+            var minimap_2 = createMap('smallmap_2', minimapSettings);
+            var minimap_3 = createMap('smallmap_3', minimapSettings);
+            var minimap_4 = createMap('smallmap_4', minimapSettings);
+            
+            miniMaps.push(minimap_1)
+            miniMaps.push(minimap_2)
+            miniMaps.push(minimap_3)
+            miniMaps.push(minimap_4)
+
+            hideRevealMuliples("single");
+
+            loadMiniMapAndDraw(minimap_1);
+            loadMiniMapAndDraw(minimap_2);
+            loadMiniMapAndDraw(minimap_3);
+            loadMiniMapAndDraw(minimap_4);
+        }
+
+
+        function loadMiniMapAndDraw(targ){
+
+            targ.on('load', function () {
+                targ.addSource('newark', {
+                    type: 'geojson',
+                    data: DATAFILE
+                });
+
+                // Hiding street labels and other symbols
+                // could also do this in mapbox tools and create new basemap style
+                targ.style.stylesheet.layers.forEach(function(layer) { 
+                    if (layer.type === 'symbol') {
+                        targ.removeLayer(layer.id);
+                    }
+                });
+
+                drawMultiMaps();
+      
+            });
+
+        }
+
+
+        //=========================================================
+        
+           
+        function clearMap(map){
+             // remove both 2d and 3d layers, first
+            var mapLayer = map.getLayer('tracts');
+            if(typeof mapLayer !== 'undefined') {
+                map.removeLayer('tracts');
+            }
+
+            var mapLayer = map.getLayer('extrusions');
+            if(typeof mapLayer !== 'undefined') {
+                map.removeLayer('extrusions')
+            }
+        }
+
+
+        function drawChoropleth(map, value){  
+           
+            clearMap(map);
+           
+            map.addLayer({
+                    "id": "tracts",
+                    "type": "fill",
+                    "source": "newark",
+                    "paint": {
+                        'fill-color': [
+                            'interpolate',
+                            ['linear'],
+                            ['get', value],
+                            SCALE[0], COLORS[0],
+                            SCALE[1], COLORS[1]
+                        ],
+                        "fill-opacity": 0.7,
+                        "fill-outline-color": "#ffffff"
+                    }
+                })//;      
+            
+        }
+
+
+
+        function drawExtrusions(map, value){
+
+            clearMap(map);
+
+            // add our extrusions
+            map.addLayer({
+                'id': 'extrusions',
+                'source': 'newark',
+                'type': 'fill-extrusion',
+                'paint': {
+                    'fill-extrusion-height': [
+                        'interpolate',
+                        ['linear'],
+                        ['get', value],
+                        SCALE[0], HEIGHTS[0],
+                        SCALE[1], HEIGHTS[1]
+
+                    ],
+                    'fill-extrusion-base': 0,
+                    'fill-extrusion-color': [
+                        'interpolate',
+                        ['linear'],
+                        ['get', value],
+                        SCALE[0], COLORS[0],
+                        SCALE[1], COLORS[1]
+                    ],
+                    
+                    'fill-extrusion-opacity': FILLOPACITY,   
+                }
+                
+            })
+        }
+
+
+        // create map for extrusions, this is default view when page loads
+        map.on('load', function () {
+            map.addSource('newark', {
+                type: 'geojson',
+                data: DATAFILE
+            });
+
+            // Hiding street labels and other symbols
+            // could also do this in mapbox tools and create new basemap style
+            map.style.stylesheet.layers.forEach(function(layer) {
+                
+                if (layer.type === 'symbol') {
+                    map.removeLayer(layer.id);
+                }
+            });
+
+            drawExtrusions(map, OPTION);
+  
+        });
+
+
+
+
+        function manageScales(option){
+
+            SCALE = SCALE1 // default scale, for percentages
+
+            if(option == 'OWNEROCC'){
+                SCALE = SCALE_OCC;
+            } else if(option == 'GrossRent'){
+                SCALE = SCALE_RENT;
+            } else if(option == 'HouseholdIncome'){
+                SCALE = SCALE_INCOME;
+            } else if(option == 'Permits'){
+                SCALE = SCALE_PERMITS;
+            }
+        }
+
+
+        function handle3dClick(myRadio){
+           
+            DIMENSION = myRadio.value;
+
+            refreshMaps();
+
+        }
+
+
+        function handleViewClick(myRadio){
+            
+            MAPVIEWS = myRadio.value;
+
+            hideRevealMuliples(MAPVIEWS);
+        }
+
+
+        function hideRevealMuliples(views){
+            var x = document.getElementById("multiples");
+
+
+            if(views == "single"){
+                // hide multi maps
+                x.style.display = "none";
+                enableYearButtons();
+
+            } 
+            else if(views == "multi"){
+                // show multi maps
+                x.style.display = "block"
+                disableYearButtons();
+            }
+
+        }
+
+        
+        function handleYearClick(myRadio) {
+            
+            YEAR = myRadio.value;
+
+            manageScales(QUERYOPTION)
+
+            refreshMaps();
+
+        }
+
+        
+        
+
+        function handleQueryOptionClick(myRadio) {
+
+            QUERYOPTION = myRadio.value;
+
+            // get the years with available data for this indicator
+            years = AvailableData[myRadio.value]
+            COLORS = colorSets[myRadio.value]
+
+            // set first year of data for this indicator 
+            var radio = document.getElementById(years[0]);
+            radio.checked = true
+            YEAR = years[0]
+                    
+
+           
+            enableYearButtons();
+
+            manageScales(QUERYOPTION)
+
+            refreshMaps();
+
+           
+        }
+
+
+       
+        
+
+
+
+
+
+        // map2.on("mousemove", function (e) {
+        //     var features = map.queryRenderedFeatures(e.point, {
+        //         layers: ["tracts"]
+        //     });
+
+        //     if (features.length) {
+        //         //show name and value in sidebar
+        //         document.getElementById('tooltip-name').innerHTML = "Tract " + features[0].properties.NAME; //FEDTRACTNO;
+        //         document.getElementById('tooltip').innerHTML = Math.round(features[0].properties.OWNOCC2000) + "% Owner-Occupied";
+        //         //properties.TOTPOPCHG);
+        //         //for troubleshooting - show complete features info
+        //         //document.getElementById('tooltip').innerHTML = JSON.stringify(features, null, 2);
+        //     } else {
+        //         //if not hovering over a feature set tooltip to empty
+        //         document.getElementById('tooltip-name').innerHTML = "";
+        //         document.getElementById('tooltip').innerHTML = "";
+        //     }
+        // });
+    </script>
+
+</body>
+
+</html>
