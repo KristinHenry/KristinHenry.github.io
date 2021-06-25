@@ -1,0 +1,1577 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset='utf-8' />
+  <title>Diffusion, the game. V1</title>
+  <style>
+    body { margin: 0; font-family: sans-serif; background-color: 'white'}
+    svg {
+      position: absolute;
+      top: 0;
+      left: 0;
+    }
+    /*rect { fill: transparent; }*/
+
+    .buttons {
+      float: left;
+      padding-right: 2em;
+      padding-left: 2em;
+    }
+
+    #menu_panel {
+      float: right;
+      /*padding-left: 50em;*/
+    }
+
+    /*.stats {
+      position: absolute;
+      top: 0;
+      float:left;
+      padding-right: 50em;
+    }*/
+
+    #wrapper {
+      display: flex;
+    }
+    #left {
+      flex: 0 0 40%;
+    }
+    #right {
+      flex: 1;
+    }
+  </style>
+  <script src='https://d3js.org/d3.v3.min.js'></script>
+</head>
+<body>
+
+<div id="main_div" >
+  <div id="wrapper">
+    <div id="left"><div id="game_div"></div></div>
+  </div>
+
+<!-- 
+  <div id="menu_panel">
+    <div>
+      <div class="buttons" id="restartBtn">
+          <input name="restartButton" 
+                 type="button" 
+                 value="Restart" 
+                 onclick="restartLevel(0)" />
+      </div>
+      <div class="buttons" id="restartNewBtn">
+          <input name="restartButton" 
+                 type="button" 
+                 value="New Game" 
+                 onclick="restartLevel(1)" />
+      </div>
+
+       <div>
+      <input type="radio" name="difficulty" value="0" onclick ="resetDifficulty(0)"> Sparse
+      <input type="radio" name="difficulty" value="1" onclick ="resetDifficulty(1)"> Medium
+      <input type="radio" name="difficulty" value="2" onclick="resetDifficulty(2)"  checked> Crowded<br>
+      </div> 
+
+    </div>
+    
+  </div>  -->
+</div>
+<script type='text/javascript'>
+
+
+var filler = '#eee';
+var prp1 = '#7b3294';
+var prp2 = '#c2a5cf';
+var gry  = '#f7f7f7';
+var grn1 = '#a6dba0';
+var grn2 = '#008837';
+var dyingColor = '#ff0000';
+var colors = [filler, prp1, prp2, grn1, grn2, dyingColor];
+
+var isMovingCellToTarg = false;
+var canEmit = true;
+var targetAcquired = false;
+var isRemovingNode = false;
+var dropTime = false;
+var winTime = false;
+var waveOfColor = false;
+
+var wavePoints = [];
+var waveRadius = 0;
+var waveDirection = 0;
+
+var width = 640; //500; //400; //500;
+var height = 360; //340;
+
+var menu = {}
+menu.r = 10; // made this big, so it's easily click-able
+menu.width = 40;
+menu.height = height;
+menu.x = width-menu.width;
+
+var map = {};
+map.width = width-menu.width; //960;
+map.height = height; //500;
+var initialCellPosition = {'x':map.width/2, 'y': map.height/2};
+var initialTargPosition = {'x':100, 'y':100};
+map.stats_svg;
+
+var boxBuffer = 100;
+var xmin = 20-boxBuffer;
+var xmax = map.width-menu.width+boxBuffer;
+var ymin = 20-boxBuffer;
+var ymax = map.height+boxBuffer;
+var s = 1; //.5; //1;
+
+var receptorType = randomRange(1,colors.length-2); //1; //3;
+var numReceptors = 8; //6;
+var receptorMaxLife = 20; //12;
+var receptors;
+var cells = [];
+var rCell = 26;//20;
+var rRec = 5;
+var cellColor = '#045E85';
+
+var cell;
+var targ;
+var targetType = receptorType; //1;
+
+var source_ang, source_x, source_y;  // for positioning emission point on target surface
+
+var maxNodesCan = 2000;//2200; //600; //100; //250; //3; //42; //25;//5;//22; //100;
+var maxNodesSVG = 0; //3; //5; //10; //20;
+var root; // root of nodes
+
+var molID = 0;
+
+// background molecule sizes
+var minCanRadius = 2; //3; //8; //3;
+var maxCanRadius = 4; //6; //8; //15; //8;
+
+// game data
+var game_timer_running = true;
+var game_start_time;
+var game_current_time;
+var game_seconds_elapsed;
+var game_timer_seconds_max = 60; //20; //60;
+var game_timer_seconds = 60;
+var game_level = 0;
+var game_molecules_used = 0;
+var game_molecules_dropped = 0;
+var game_targets_digested = 0;
+var max_molecule_drops = 8;
+
+
+
+
+//-----------------------------------------
+var drag = d3.behavior.drag()
+    .origin(function(d){ return d3.select(this); })
+    .on('dragstart', dragstarted)
+    .on('drag', dragmove)
+    .on('dragend', dragended);
+
+//-----------------------------------------
+
+
+//------------------------------------------------------------------
+function init(){
+  // console.log('-------------------------------');
+  // console.log("initialize");
+
+  receptorType = randomRange(1,colors.length-2);
+  targetType = receptorType;
+  source_ang = degToRad( randomRange(0,360));
+
+  //map = {};
+  var date = new Date();
+  game_start_time = date.getTime();
+  game_timer_seconds = game_timer_seconds_max;
+  
+  game_molecules_dropped = 0;
+  wavePoints = [];
+  waveRadius = 0;
+  waveDirection = randomRange(0,1);
+  droppedOff = [];
+  
+
+  cell = {radius: rCell, type: 0, color: cellColor, x: initialCellPosition.x, y:initialCellPosition.y, 
+          dx:0, dy:0, ripples: []};
+
+  targ = {radius: rCell, type: 0, color: colors[0], x: initialTargPosition.x, y:initialTargPosition.y};
+
+  initMap();
+  initNodes();
+
+  drawCanvasParticles(); //map.canvas.draw();
+  drawSVGParticles(); //map.svg.draw();
+  drawSVGCell();
+  reDraw();
+  drawStats();
+  redrawStats();
+}
+
+init();
+//------------------------------------------------------------------
+
+
+
+
+
+
+
+// INIT functions
+//------------------------------------------------------
+function initMap(){
+  //console.log("init map");
+
+  d3.select('body').style("background-color", "white");
+
+  //map_div = d3.select('body').append('div').attr('id', 'map');
+  map_div = d3.select('body').select('#main_div').select("#game_div").append('div').attr('id', 'map')
+              .style("position", "relative");
+              
+
+  map.art = map_div//d3.select('body')
+      .append('canvas')
+        .style('z-index', -2)
+        .style('position', 'absolute')
+        .style('left', '0px')
+        .style('top', '0px')
+
+        .attr('width', map.width)
+        .attr('height', map.height)
+        .node().getContext('2d');
+
+  map.canvas = map_div//d3.select('body')
+      .append('canvas')
+        .style('z-index', -1)
+        .style('position', 'absolute')
+        .style('left', '0px')
+        .style('top', '0px')
+        .attr('width', map.width)
+        .attr('height', map.height)
+        .node().getContext('2d');
+
+  map.svg = map_div//d3.select('body')
+      .append('svg')
+        .attr('class', 'svg_holder')
+        .attr('width', map.width)
+        .attr('height', map.height)
+        .append('g');
+        
+
+  map.svg.append('rect')
+    .attr('class', 'overlay')
+    .attr('width', map.width)
+    .attr('height', map.height)
+    .attr('fill', 'transparent')
+    .attr('stroke', filler);
+
+  //map.svg.on("click", function(d){ onClickEvent(); })
+}
+
+
+function initNodes(){
+  //console.log("init nodes");
+
+  //  background molecules 
+  map.canvas.nodes = d3.range(maxNodesCan).map(function(d, i) {
+    return {
+      x: randomRange(xmin,xmax), 
+      y: randomRange(ymin,ymax), 
+      r: randomRange(minCanRadius, maxCanRadius), 
+      t: 0,
+      id: molID++,
+      dx: getDir(),
+      dy: getDir(),
+      hasWaved: false
+    };
+  });
+
+  // interactive molecules
+  map.svg.nodes = d3.range(maxNodesSVG).map(function(d, i) {
+    var t = receptorType; //randomRange(1,colors.length-2);
+    var x = randomRange(xmin,xmax);
+    var y = randomRange(ymin,ymax);
+    return makeMolecule(t,x,y);
+  });
+
+  // combine lists, for collision detection
+  map.nodes = map.svg.nodes.concat( map.canvas.nodes );
+  root = map.nodes[0];  // Do we really need this? It's not a tree
+  //root.fixed = true;
+}
+
+//-------------------------------------------------------
+//  Datastructures/Objects
+//-------------------------------------------------------
+
+function Molecule(x1, y1, t, r, id, color, dx, dy, life, bound){
+  this.dx = dx;
+  this.dy = dy;
+  this.x = x1;
+  this.y = y1;
+  this.t = t;
+  this.r = r;
+  this.id = id;
+  this.color = color;
+  this.life = life;
+  this.bound = bound;
+  this.hasWaved = false;
+  this.selected = false;
+  this.svg = false;
+}
+
+//-----------------------------------------------------
+// Drawing 
+//-----------------------------------------------------
+function reDraw(){
+  drawCanvasParticles(); //map.canvas.draw();
+  map.circle.attr('transform', svgTransform); //map.svg.transform);
+  map.cell_svg.attr('transform', cellTransform);
+  //drawCell(cell.x, cell.y, cell.radius, cellColor, '#999');
+  drawMultiReceptors(cell.x, cell.y, cell.radius, rRec, numReceptors, receptorType);
+
+};
+
+function svgTransform(d) {
+  if(isNaN(d.x)){ return 'translate(' + map.width + ',' + map.height + ')'; }
+  return 'translate(' + d.x + ',' + d.y  +  ')';
+};
+
+function cellTransform(d) {
+  //if(isNaN(cell.x)){ return 'translate(' + map.width + ',' + map.height + ')'; }
+  //console.log(d);
+  // console.log('cell: ', cell)
+  // console.log('translate(' + cell.x + ',' + cell.y  +  ')')
+  return 'translate(' + cell.x + ',' + cell.y  +  ')';
+};
+
+
+
+
+
+
+
+
+// draw particles
+function drawCanvasParticles() {
+    map.canvas.clearRect(0, 0, map.width, map.height);
+
+    
+    var i = -1, cx, cy;
+    while (++i < map.canvas.nodes.length) {
+      map.canvas.beginPath();
+      d = map.canvas.nodes[i];
+      map.canvas.fillStyle = colors[d.t];
+      cx = d.x; 
+      cy = d.y; 
+      map.canvas.moveTo(cx, cy);
+      map.canvas.arc(cx, cy, d.r, 0, 2 * Math.PI);
+      map.canvas.fill();
+
+    }
+    
+    drawTarg(targ.x, targ.y, targ.radius, targ.color, '#333');
+};
+
+
+function drawSVGCell(){
+  // console.log('draw svg cell');
+
+  map.cell_svg = map.svg.append('g')
+    .attr('transform', cellTransform)
+    .attr('class', 'cell_svg');
+
+  map.cell_svg.append('circle')
+    .attr('r', cell.radius)
+    .attr('fill', cellColor)
+    .attr('opacity', .3)
+    .on("click", function(){ drawCellPanel(); });    
+}
+
+function drawCellPanel(){
+  var panelWidth = 300;
+  // console.log('draw cell panel');
+  map.cell_panel = map.svg.append('g')
+    
+
+  // for clicking outside to close panel
+  map.cell_panel.append('rect')
+    .attr('width', map.width)
+    .attr('height', map.height)
+    .attr('x', 0)
+    .attr('y', 0)
+    .attr('fill', 'white')
+    .attr('opacity', .1)
+    .on('click', function(){ d3.select(this.parentNode).remove();  })
+
+
+  // show options for cell----menu panel
+  map.cell_panel.append('rect')
+    .attr('width', panelWidth)
+    .attr('height', 100)
+    .attr('x', map.width/2 - panelWidth/2)
+    .attr('y', 200)
+    .attr('rx', 4)
+    .attr('ry', 4)
+    .attr('fill', 'grey')
+    .attr('opacity', .4)
+
+
+  // buttons for switching receptor types
+  map.cell_panel.append('rect')
+    .attr('width', 40)
+    .attr('height', 40)
+    .attr('x', map.width/2)
+    .attr('y', 200)
+    .attr('fill', colors[3])
+    .on('click', function(){ receptorType = 3; d3.select(this.parentNode).remove();})
+
+
+   map.cell_panel.append('rect')
+    .attr('width', 40)
+    .attr('height', 40)
+    .attr('x', map.width/2 + 50)
+    .attr('y', 200)
+    .attr('fill', colors[1])
+    .on('click', function(){ receptorType = 1; d3.select(this.parentNode).remove();})
+
+
+   // map.cell_panel.append('text')
+   //  .text(function(){ return 'Drag molecules to receptors to move Cell'; })
+   //  .attr('x', map.width/2)// - panelWidth/2)
+   //  .attr('y', 200+50)
+   //  .attr('width', panelWidth)
+   //  .attr('height', 100)
+   //  .style("text-anchor", "middle")
+   //  .style('font-size', '.8em')
+
+}
+
+
+
+function drawSVGParticles() {
+    map.circle = map.svg.selectAll('.mol')
+      .data(map.svg.nodes).enter()
+      .append('g')
+      .attr('id', function(d){ return 'mol'+d.id})
+      .attr('transform', svgTransform)
+      .attr('class', 'mol')
+      .call(drag)
+
+      map.circle.append('circle')
+        .attr('r', function(d) { return d.r; })
+        .attr('fill', function(d){return colors[d.color];})
+
+      // to increase click area of molecule
+      map.circle.append('circle')
+        .attr('r', 20)
+        .attr('fill', gry)
+        .attr('opacity', 0)
+        .attr('id', 'halo')
+};
+
+
+function drawSVGParticlesChanged() {
+  //ToDo: must find better way to do this!!
+  d3.selectAll('.mol').remove(); 
+  drawSVGParticles(); //map.svg.draw();
+};
+
+
+// draw Cell--ToDo: integrate this into svg?
+function drawCell(xCell, yCell, rCell, fill, stroke){
+   map.canvas.moveTo(xCell, yCell);
+   map.canvas.beginPath();
+   map.canvas.fillStyle = fill;
+   map.canvas.globalAlpha = .4;
+   map.canvas.arc(xCell, yCell, rCell, 0, 2*Math.PI);
+   map.canvas.fill();
+   map.canvas.lineWidth = 1; //.5;
+   map.canvas.globalAlpha = 1;
+}
+
+
+function drawMultiReceptors(xCell, yCell, rCell, rRec, num, receptorType){
+  var radians = degToRad(360/num); 
+  var rTravel = rCell + 40; // this is distance cell with move when receptor binds to molecule
+  receptors = [];
+
+  var gap1 = 2;//7;
+  var gap2 = gap1 +2;//9; //12;
+  var gap3 = gap2 +8;
+  
+  for(var i=0; i<num; i++){ 
+    var ang = radians*i;
+    var rx = Math.floor(xCell - (rCell * Math.cos(ang))); 
+    var ry = Math.floor(yCell + (rCell * Math.sin(ang)));
+
+    var rx2 = Math.floor(xCell - ((rCell+gap1) * Math.cos(ang))); 
+    var ry2 = Math.floor(yCell + ((rCell+gap1) * Math.sin(ang)));
+
+    var rx3 = Math.floor(xCell - ((rCell+gap2) * Math.cos(ang))); 
+    var ry3 = Math.floor(yCell + ((rCell+gap2) * Math.sin(ang)));
+
+    var rx4 = Math.floor(xCell - ((rCell+gap3) * Math.cos(ang))); 
+    var ry4 = Math.floor(yCell + ((rCell+gap3) * Math.sin(ang)));
+
+    // get movement directions for this receptor -- use this to move cell when receptor binds
+    var dx = Math.floor(xCell - (rTravel * Math.cos(ang))) - rx; 
+    var dy = Math.floor(yCell + (rTravel * Math.sin(ang))) - ry;
+
+    receptors.push({'x': rx, 'y':ry, 'x2':rx2, 'y2':ry2, 'x3':rx3, 'y3':ry3, 'x4':rx4, 'y4':ry4,
+                    'id': i, 'dirX': dx, 'dirY': dy, 'rTravel': rTravel, 'ang':ang}); 
+    drawReceptor(rx, ry, rRec, receptorType, rx2, ry2, rx3, ry3);
+  }
+}
+
+
+function drawReceptor(rx, ry, rRec, receptorType, rx2, ry2, rx3, ry3){
+
+  // map.canvas.beginPath();
+  // map.canvas.moveTo(rx,ry);
+  // map.canvas.lineTo(rx2,ry2);
+  // map.canvas.stroke();
+
+  map.canvas.beginPath();
+  map.canvas.fillStyle = colors[receptorType];
+  map.canvas.moveTo(rx2, ry2);
+  map.canvas.arc(rx2, ry2, rRec, 0, 2*Math.PI);
+  map.canvas.fill();
+
+  //make cup shape;  // ToDo: make this a modification of shape, instead of mask
+  map.canvas.beginPath();
+  map.canvas.fillStyle = 'white';
+  map.canvas.moveTo(rx3, ry3);
+  map.canvas.arc(rx3, ry3, rRec, 0, 2*Math.PI);
+  map.canvas.fill();
+}
+
+
+
+
+
+function drawTarg(x, y, r, fill, stroke){
+
+  // calculate emission point
+  // var radians = 60;
+  // source_ang = radians;
+  source_x = Math.floor(x - (r * Math.cos(source_ang))); 
+  source_y = Math.floor(y + (r * Math.sin(source_ang)));
+
+  // draw target organism
+  map.canvas.moveTo(x, y);
+  map.canvas.beginPath();
+  map.canvas.fillStyle = colors[targetType];//fill;
+  map.canvas.globalAlpha = .6;
+  map.canvas.arc(x, y, r, 0, 2*Math.PI);
+  map.canvas.fill();
+  map.canvas.lineWidth = 1; //.5;
+ 
+  // draw emmision point
+  map.canvas.moveTo(source_x, source_y);
+  map.canvas.beginPath();
+  map.canvas.fillStyle = colors[targetType];//fill;
+  map.canvas.globalAlpha = .3;
+  map.canvas.arc(source_x, source_y, 4, 0, 2*Math.PI);
+  map.canvas.fill();
+  map.canvas.lineWidth = 1; //.5;
+
+  map.canvas.globalAlpha = 1; //.5;
+
+  
+}
+
+//-------------------------------------------------
+
+function drawCanvasArt(){
+  map.art.clearRect(0, 0, map.width, map.height);
+
+  map.art.globalAlpha = .1;
+  growingCircle(cell.x, cell.y, waveRadius, colors[4]);
+
+
+  map.art.globalAlpha = .9;
+  var r = waveRadius-100;
+  if(r<=0){ r = 10; }
+  growingCircle(cell.x, cell.y, r, '#FFFFFF')
+
+  map.art.globalAlpha = .8;
+
+  Spiro(8, rCell-5, cell.x, cell.y, colors[2], 1, waveRadius/10);
+  //Spiro(9, rCell+100, cell.x, cell.y, colors[1], .2, waveRadius/14);
+
+  multiSpiro(8, 4, 190, cell.x, cell.y, 20, colors[3], 1, waveRadius/30);
+  multiSpiro(8, 1, 190, cell.x, cell.y, 0, colors[2], 1, waveRadius/14);
+  //multiSpiro(16, 5, 280, cell.x, cell.y, 10, colors[3], 1, waveRadius/70);
+
+}
+
+function growingCircle(cx, cy, r, color){
+  map.art.beginPath();
+  map.art.fillStyle = color;
+  map.art.moveTo(cx,cy);
+  map.art.arc(cx,cy, r, 0,2*Math.PI);
+  map.art.fill();
+}
+
+function Spiro(num, r, cx, cy, color, lineThickness, circleSize){
+  var radians = degToRad(360/num);
+  for(var i=0; i<num; i++){ 
+    var ang = radians*i;
+    var rx = Math.floor(cx - (r * Math.cos(ang))); 
+    var ry = Math.floor(cy + (r * Math.sin(ang)));
+
+    map.art.beginPath();
+    map.art.strokeStyle = color;
+    map.art.lineWidth = lineThickness;
+    map.art.arc(rx,ry, circleSize, 0, 2*Math.PI);
+    map.art.stroke();
+  }
+}
+
+
+function multiSpiro(numClusters, numCircles, r, cx, cy, rCluster, color, lineThickness, circleSize){
+  var num = numClusters; //8;
+  var radians = degToRad(360/num);
+  for(var i=0; i<num; i++){
+    var ang = radians*i;
+    var rx = Math.floor(cx - (r * Math.cos(ang)));
+    var ry = Math.floor(cy - (r * Math.sin(ang)));
+
+    Spiro(numCircles, rCluster, rx, ry, color, lineThickness, circleSize);
+  } 
+}
+
+//--------------------------------------------------
+function drawBorder(w, h, x, y, color, opacity){
+  var border = map.svg.append('g');
+  border.append('rect')
+    .attr('width', w)
+    .attr('height', h)
+    .attr('x', x)
+    .attr('y', y)
+    .style('fill', color)
+    .style('opacity', opacity)
+
+  return border;
+}
+
+function drawText(targ, x, y, fontSize, txt){
+  var txt = targ.append('text')
+    .attr('x', x)
+    .attr('y', y)
+    .attr('font-size', fontSize)
+    .text(function(){ return txt; })
+  return txt;
+}
+
+
+function drawStats(){
+  var border_w = 3;
+  var border_h = 5;
+  var border_top_h = 18;
+
+  map.stats_svg = drawBorder(map.width, border_top_h, 0, 0, '#999', .4);
+  map.footer_svg = drawBorder(map.width-2*border_w, border_h, border_w, map.height-5, '#999', .4);
+  map.left_svg = drawBorder(border_w, map.height-border_w, 0, border_top_h, '#999', .4);
+  map.right_svg = drawBorder(border_w, map.height-border_w, map.width-border_w, border_top_h, '#999', .4);
+
+  map.brand = drawText(map.svg, border_w, border_w+10, '.8em', 'D i f f u s i o n'); 
+
+  
+}
+
+function drawClock(){
+  var border_w = 3;
+  var border_h = 5;
+  var border_top_h = 18;
+
+  d3.select('#game_clock').remove();
+  var map_clock = map.svg.append('g').attr('id', 'game_clock');
+
+  // ToDo: do this more efficiently!
+  if(game_timer_seconds < 10){
+    drawText(map_clock, border_w, border_top_h+14, '.9em', '00:0'+ game_timer_seconds);
+  } else {
+    drawText(map_clock, border_w, border_top_h+14, '.9em', '00:'+ game_timer_seconds);
+  }
+}
+
+function redrawStats(){
+
+  var border_w = 3;
+  var border_h = 5;
+  var border_top_h = 18;
+
+  d3.select('#game_stats').remove();
+  
+  var stats = map.svg.append('g').attr('id', 'game_stats');
+
+
+  map.stats_level = drawText(stats, 120, border_w+10, '.6em', 'Level: ' + game_level);
+  map.stats_targets = drawText(stats, 180, border_w+10, '.6em', 'Targets Acquired: ' + game_targets_digested);
+  map.stats_used = drawText(stats, 300, border_w+10, '.6em', 'Molecule Moves: ' + game_molecules_dropped + '/'+ max_molecule_drops);
+}
+
+
+
+//------------------------------------------------------
+//  manage collisions and animation positions
+//------------------------------------------------------
+var droppedOff = [];
+
+function dropMolecules(){
+  canEmit = false;
+  
+
+  for(var i=0; i<map.canvas.nodes.length; i++){
+    if(d.y > map.height){
+      if(droppedOff.indexOf(d.id) == -1){
+        droppedOff.push(d.id);
+      }
+    }
+
+    d = map.canvas.nodes[i];
+    d.dy = s + randomRange(0,3);
+    d.x += d.dx;
+    d.y += (d.dy*2);
+  }
+
+  for(var i=0; i<map.svg.nodes.length; i++){
+      d = map.svg.nodes[i];
+      d.dy = s + randomRange(0,3);
+      d.x += d.dx;
+      d.y += (d.dy*2);
+  }
+
+  if(droppedOff.length > map.canvas.nodes.length-10){
+    // console.log('done dropping');
+    dropTime = false;
+    map.canvas.nodes = [];
+    map.svg.nodes = [];
+
+    //ToDo:  make button for restarting game, after this loosing!!!
+    timer_ret_val = true;
+    drawPlayButtons();
+
+  }
+
+  
+    
+  
+
+
+}
+
+// from http://bl.ocks.org/mbostock/4343214
+//-----------------------------------------------------
+// Collapse the quadtree into an array of rectangles.
+function nodes(quadtree) {
+  var nodes = [];
+  quadtree.visit(function(node, x1, y1, x2, y2) {
+    nodes.push({x: x1, y: y1, width: x2 - x1, height: y2 - y1});
+  });
+  return nodes;
+}
+// Find the nodes within the specified rectangle.
+function search(quadtree, x0, y0, x3, y3) {
+  quadtree.visit(function(node, x1, y1, x2, y2) {
+    var p = node.point;
+    if (p) {
+      p.scanned = true;
+      p.selected = (p[0] >= x0) && (p[0] < x3) && (p[1] >= y0) && (p[1] < y3);
+    }
+    return x1 >= x3 || y1 >= y3 || x2 < x0 || y2 < y0;
+  });
+}
+
+function searchCircle(quadtree, x0, y0, rad) {
+  var x3 = x0+rad;
+  var y3 = y0+rad;
+  x0 -= rad;
+  y0 -= rad;
+
+  quadtree.visit(function(node, x1, y1, x2, y2) {
+    var p = node.point;
+
+    if (p) {
+      p.scanned = true;
+      //p.selected = (p[0] >= x0) && (p[0] < x3) && (p[1] >= y0) && (p[1] < y3);
+      p.selected = (getDistance(node.x,node.y, x0,y0) < rad);
+    }
+
+    // var cx = x1 + (x2-x1)/2;
+    // var cy = y1 + (y2-y1)/2;
+    // var r = x2 - cx;
+    // var dist = getDistance(node.x, node.y, cx, cy);
+
+
+    //return dist > r;
+    //return x1 >= x3 || y1 >= y3 || x2 < x0 || y2 < y0;
+    //return (x1 >= x3 ) || x2 < x0 ;
+
+    // ToDo expand this with circular waves...not just squares
+    if(waveDirection == 0){
+      return (x1 >= x3 ) || x2 < x0 ;
+    }
+    return y1 >= y3 || y2 < y0;
+
+  });
+}
+//------------------------------------------------------
+
+
+function animateWin(q){
+  //console.log('wining!!! --------------------');
+
+  var faded = 0;
+  var dr = .01;
+  waveRadius += 10; //4; //10;
+
+
+  var rad = cell.radius/2;
+
+  var x1 = cell.x  -waveRadius; //50;
+  var y1 = cell.y  -waveRadius; //50;
+  var x2 = cell.x + waveRadius;
+  var y2 = cell.y + waveRadius;
+  var extent = [[x1, y1], [x2, y2]]; 
+  
+
+  for(var i=0; i<map.nodes.length; i++){
+    map.nodes[i].scanned = false;
+    map.nodes[i].selected = false;
+  }
+
+  //search(q, x1,y1,x2,y2);
+  searchCircle(q, cell.x, cell.y, waveRadius);
+
+  for(var i=0; i<map.nodes.length; i++){
+    if (map.nodes[i].scanned){ map.nodes[i].t = receptorType;}
+  }
+
+  
+
+//-------------------------------------------
+
+  // shrink the molecules
+  for(var i=0; i<map.nodes.length; i++){
+    if(map.nodes[i].r > .1){ 
+      map.nodes[i].r -= dr; 
+      
+      if(map.nodes[i].scanned){ map.nodes[i].r -= .05; } else { map.nodes[i].r -= dr; }
+      
+    } else {
+      map.nodes[i].r = 0; 
+      faded++;
+    } 
+  }
+
+  for(var i=0; i<map.svg.nodes.length; i++){
+    if(map.svg.nodes[i].r <= 1){
+      removeMolecule(map.svg.nodes[i].id);
+    }
+  }
+
+  drawSVGParticlesChanged();
+
+  // we're done animating win effects, can play again now
+  if(faded > map.nodes.length-20 && map.svg.nodes.length == 0){
+    
+    winTime = false;
+
+    timer_ret_val = true;
+    drawPlayButtons();
+  }
+
+}
+
+function drawPlayButtons(){
+  // console.log('draw play button');
+  var dx = (map.width/2)-50;
+
+  var buttons = map.svg.append('g');
+  buttons.attr('width', 100)
+          .attr("transform", "translate(" + dx + "," + 100 + ")");
+
+
+
+  var button = buttons.append('g');
+  button.append('text')
+    .text(function(){ return 'play again'})
+    .attr('x', 50)
+    .attr('y', 25)
+    .attr('width', 100)
+    .attr('height', 40)
+    .style("text-anchor", "middle")
+
+  button.append('rect')
+    .attr("x", 0)
+    .attr("y", 0)
+    .attr('width', 100)
+    .attr('height', 40)
+    .attr('rx', 10)
+    .attr('ry', 10)
+    .style('opacity', .5)
+    .style('fill', 'purple')
+    .on("click", function(){ d3.select(this).remove(); restartLevel(1); 
+                              timer_ret_val = false; 
+                              var timer_elapsed = 0;
+                              d3.timer(tickFxn);});
+
+  // var button2 = buttons.append('g')
+  // button2.append('text')
+  //   .text(function(){ return 'next level'})
+  //   .attr('x', 50)
+  //   .attr('y', 125)
+  //   .attr('width', 100)
+  //   .attr('height', 40)
+  //   .style("text-anchor", "middle")
+
+  // button2.append('rect')
+  //   .attr("x", 0)
+  //   .attr("y", 100)
+  //   .attr('width', 100)
+  //   .attr('height', 40)
+  //   .attr('rx', 10)
+  //   .attr('ry', 10)
+  //   .style('opacity', .5)
+  //   .on("click", function(){ d3.select(this).remove(); restartLevel(2); 
+  //                             timer_ret_val = false; 
+  //                             var timer_elapsed = 0;
+  //                             d3.timer(tickFxn);});
+
+}
+
+
+function updatePositions(q){
+  var d;
+  
+  var q1 = d3.geom.quadtree(map.svg.nodes); // just the active molecules
+  var q2 = d3.geom.quadtree(receptors);
+
+  checkTarget(targ); // check if cell is close to target, and move if within range
+  checkReceptors(q1,q2); // look for potential receptor-molecule bonds
+  
+  
+  for(var i=0; i<map.canvas.nodes.length; i++){
+    d = map.canvas.nodes[i];
+
+      collideBodies(d, cell, 15);
+      collideBodies(d, targ, 12);
+      q.visit(collide(d));
+      testBounds(d);  // ToDo: integrate this into the collide fxn
+   
+  }
+
+  for(var i=0; i<map.svg.nodes.length; i++){
+    d = map.svg.nodes[i];
+
+    testBounds(d);  // ToDo: integrate this into the collide fxn
+   
+    if(d.bound == -1){ 
+      collideBodies(d, cell, 12);
+      collideBodies(d, targ, 12);
+      q.visit(collide(d)); 
+      
+    } 
+  }
+
+}
+
+
+function checkTarget(targ){
+  var gapX = 70; //100; //50;
+  var gapY = 70; //100; //50;
+  var dx = Math.abs(cell.x - targ.x);
+  var dy = Math.abs(cell.y - targ.y);
+
+  if(dx < gapX && dy < gapY){ canEmit = false; moveCell2targ(targ); }
+
+  if(!targetAcquired){
+    if(dx < 2 && dy < 2){ acquireTarget(targ); }
+  }
+}
+
+
+function checkReceptors(q1,q2){
+  var mol = q1.find([cell.x, cell.y]);
+  if(mol){
+    var rec = q2.find([mol.x, mol.y]);
+    var maxDist = 25;
+    var dist = getDistance(mol.x, mol.y, rec.x, rec.y);
+
+    if(dist < maxDist){
+
+        if(mol.t == receptorType){
+          if(mol.bound == rec.id){
+            mol.life>0 ? useBond(mol, rec) : killBond(mol);
+            return;
+          }
+          
+          formBond(mol, rec);
+        }
+    }
+  }  
+}
+
+
+function getDistanceInfo(node, obj, r_pad){
+  var dx = node.x - obj.x;
+  var dy = node.y - obj.y;
+  var l1 = Math.sqrt(dx*dx + dy*dy);
+  var r1 = node.r + obj.radius + r_pad;
+
+  return {'dx':dx, 'dy':dy, 'l1':l1, 'r1': r1};
+}
+
+function collideBodies(node, c_body, r_pad){
+  var b = .6; //.8; //.5; // bounce factor
+  
+  var info = getDistanceInfo(node, c_body, r_pad);
+  var l1 = info.l1; 
+  var r1 = info.r1; 
+  if (l1 < r1) {
+      l1 = (l1 - r1) / l1 * b;  //ToDo: need to make this more bouncing off of, instead of sliding past
+      node.x -= info.dx *= l1;
+      node.y -= info.dy *= l1;
+  }  
+}
+
+// modified from bostock's force directed layout d3 example.
+function collide(node) {
+  var b = .4; //.6; //.8; //.5; // bounce factor
+ 
+  var r = node.r *3, //+ 1,
+      nx1 = node.x - r,
+      nx2 = node.x + r,
+      ny1 = node.y - r,
+      ny2 = node.y + r;
+
+    //check nearby particles in quadtree
+    return function(quad, x1, y1, x2, y2) {
+      //console.log('nodes of node: ', quad.nodes);
+      if (quad.point && (quad.point !== node)) {
+        //console.log(node);
+          //console.log('nodes: ', node.nodes);
+
+           var x = node.x - quad.point.x,
+                y = node.y - quad.point.y,
+                l = Math.sqrt(x * x + y * y),
+                r = node.r + quad.point.r + 8;//6; //4; //3;
+           
+            if (l < r) {
+              l = (l - r) / l * b;
+              node.x -= x *= l;
+              node.y -= y *= l;
+              // quad.point.x += x;
+              // quad.point.y += y;
+
+            }           
+      }
+      return x1 > nx2 || x2 < nx1 || y1 > ny2 || y2 < ny1;
+    };
+}
+
+// modified from bostock's force directed layout d3 example.
+// ToDo: use this with visit, to make wave of color on animate win
+function wave(node) {
+  // console.log("    wave: ", node);
+  var b = .4; //.6; //.8; //.5; // bounce factor
+ 
+  var r = node.r *3, //+ 1,
+      nx1 = node.x - r,
+      nx2 = node.x + r,
+      ny1 = node.y - r,
+      ny2 = node.y + r;
+
+    //check nearby particles in quadtree
+    return function(quad, x1, y1, x2, y2) {
+      //console.log('nodes of node: ', quad.nodes);
+      if (quad.point && (quad.point !== node)) {
+        //console.log(node);
+          //console.log('nodes: ', node.nodes);
+
+           var x = node.x - quad.point.x,
+                y = node.y - quad.point.y,
+                l = Math.sqrt(x * x + y * y),
+                r = node.r + quad.point.r + 8;//6; //4; //3;
+
+            //ToDo: do the color changing here
+            //      maybe check if original points has already changed, as test?
+
+            node.t = 4;
+            wavePoints.push(node);
+           
+            // if (l < r) {
+            //   l = (l - r) / l * b;
+            //   node.x -= x *= l;
+            //   node.y -= y *= l;
+            //   // quad.point.x += x;
+            //   // quad.point.y += y;
+
+            // }           
+      }
+      return x1 > nx2 || x2 < nx1 || y1 > ny2 || y2 < ny1;
+    };
+}
+
+
+//--------------------------------------
+function moveCell2targ(targ){
+  
+  var dxCell = (targ.x-cell.x)/receptorMaxLife;
+  var dyCell = (targ.y-cell.y)/receptorMaxLife;
+
+  if(Math.abs(dxCell) < 400){
+    cell.x += dxCell;
+  } else {
+    cell.x += 1; 
+  }
+
+  if(Math.abs(dyCell) < 400){
+    cell.y += dyCell;
+  } else {
+    cell.y += 1;
+  }
+
+}
+
+function acquireTarget(targ){
+  // ToDo: make sure cell is centered on target
+  // ToDo: might want to remove target when acquired by cell...could become degistion triger in higher game levels
+  game_targets_digested++;
+  redrawStats();
+
+  targetAcquired = true;
+  canEmit = false;
+
+  makeRipple(targ.x, targ.y, 2500, 4, 50, "blue");
+  winTime = true;
+  //animateWin();
+}
+
+//------------------------------------------------------
+function formBond(mol, rec){
+  //console.log("form bond");
+  game_molecules_used++;
+  redrawStats();
+
+  mol.bound = rec.id;
+  mol.dx = 0;
+  mol.dy = 0;
+
+  var ringColor = 'grey'; //colors[mol.t];
+  makeRipple(rec.x4, rec.y4, 800, 3, 20, ringColor);
+}
+
+function useBond(mol,rec){
+    moveMol(mol,rec);
+    moveCell(mol,rec);
+    decrLife(mol);
+}
+
+function killBond(mol){
+  var mol_id = mol.id;
+  //console.log("kill molecule ", mol_id);
+
+  killMolecule(mol_id); 
+}
+
+function moveMol(mol,rec){
+  if(mol.x < rec.x2){
+    mol.x +=1;
+  }  else if(mol.x > rec.x2){
+    mol.x -=1;
+  }
+
+  if(mol.y < rec.y2){
+    mol.y +=1;
+  } else if(mol.y > rec.y2){
+    mol.y -=1;
+  }
+  
+}
+
+function moveCell(mol, rec){
+
+  var dx = rec.dirX/receptorMaxLife;
+  var dy = rec.dirY/receptorMaxLife;
+
+  cell.x += dx; //rec.dirX/receptorMaxLife;
+  cell.y += dy; //rec.dirY/receptorMaxLife;
+
+  mol.x += dx; //rec.dirX/receptorMaxLife;
+  mol.y += dy; //rec.dirY/receptorMaxLife;
+
+  //console.log(cell.ripples);
+  for(var i=0; i<cell.ripples.length; i++){
+    //console.log(i);
+    cell.ripples[i].x += dx;
+    cell.ripples[i].y += dy;
+  }
+}
+
+//---------------------------------------------------
+
+function testBounds(mol){
+  //  ToDo: rewrite this in shorter syntax
+  // brownian motion + going round to other side if over boundry
+
+
+  // console.log(mol["svg"])
+
+
+    var wrap = false; // use this to signal when a mol is out of bounds
+
+    if(mol.x <= (xmin+mol.r-boxBuffer) ){
+        mol.x = width;// + boxBuffer/2;  
+        wrap = true; 
+    } else if(mol.x >= (xmax+boxBuffer) ){
+        mol.x = -(mol.r*2); //0-boxBuffer/2;
+        wrap = true;
+    } 
+
+    if(mol.y < (ymin+mol.r-boxBuffer)){
+      mol.y = height;
+      wrap = true;
+    } else if(mol.y >= (ymax+boxBuffer)){
+      mol.y = - (mol.r*2);
+      wrap = true;
+    } 
+
+    if(wrap && mol["svg"]){
+      // remove this molecule, because we don't want emitted molecules to wrap
+      // console.log('remove this emitted molecule', mol.id)
+      removeMolecule(mol.id)
+    } else {
+  
+      mol.x += mol.dx;//*randomRange(1,maxdx);
+      mol.y += mol.dy;//*randomRange(1,maxdy);
+    }
+
+}
+
+
+
+
+//----------------------------------------------------
+//   Molecule fxns
+//----------------------------------------------------
+function makeMolecule(t, x, y){
+  var id = molID++;
+  var r = t*1.2 + 2;// + 7; //2;
+  var color = t;  
+  var dx = getDir();
+  var dy = getDir();
+  var life = receptorMaxLife;
+  var bound = -1;
+   
+  return new Molecule(x, y, t, r, id, color, dx, dy, life, bound);
+}
+
+function addMolecule(mol, x1,y1){
+    //console.log(" -----------add molecule");
+    //var mol = makeMolecule(receptorType, x1, y1);
+
+    map.svg.nodes.push(mol);
+    map.nodes.push(mol);
+    drawSVGParticlesChanged(); //map.svg.drawChange();
+}
+
+function emitMolecule(){
+
+    canEmit = false;
+
+    // var mol = makeMolecule(receptorType, targ.x, targ.y);
+    var mol = makeMolecule(targetType, source_x, source_y);
+    mol.svg = true;
+
+    map.svg.nodes.push(mol);
+    //console.log(map.nodes.length);
+    map.nodes.push(mol);
+    //console.log(map.nodes.length);
+    drawSVGParticlesChanged(); //map.svg.drawChange();
+
+    canEmit = true;
+}
+
+
+
+function decrLife(mol){
+  if(mol.life > 0){ mol.life-=1;}
+}
+
+function killMolecule(mol_id){
+  //console.log("     mol: ", mol_id);
+  if(!isRemovingNode){
+  isRemovingNode = true;
+  var d_id = mol_id;
+  d3.select("#mol"+mol_id)
+    .transition().duration(200)
+    .attr('r', 2)
+    .each('end', function(){ d3.select(this).remove(); removeFromNodes(d_id); })
+    ;
+  }
+}
+
+function removeMolecule(mol_id){
+  isRemovingNode = true;
+  d3.select("#mol" +mol_id).remove();
+  removeFromNodes(mol_id);
+
+}
+
+
+function removeFromNodes(mol_id){
+
+  var mol;
+  
+  for(var i=0; i<map.svg.nodes.length; i++){
+    if(map.svg.nodes[i].id == mol_id){
+      mol = map.svg.nodes[i];
+      map.svg.nodes.splice(i,1);
+      //console.log(' removing this node: ', mol);
+      break;
+    }
+  }
+  
+  for(var i=0; i<map.nodes.length; i++){
+    if(map.nodes[i].id == mol_id){
+      map.nodes.splice(i,1);
+      root = map.nodes[0];
+      break;
+    }
+  }
+
+  isRemovingNode = false;
+  return mol;
+}
+
+
+function resetDifficulty(dif){
+  
+  maxNodesCan = 100;
+  if(dif == 1){ maxNodesCan = 250 }
+  if(dif==2){ maxNodesCan = 600; }
+
+  restartLevel(0);
+}
+
+
+//-----------------------------------------------------
+// indicators
+//-----------------------------------------------------
+
+function makeRipple(x1,y1, dur, numRings, maxSize, ringColor){
+  //console.log("    make ripple");
+
+  var ripples = map.svg.append("g");
+
+  //var numRings = 4; //10;
+  var rings = d3.scale.ordinal()
+    .domain(d3.range(numRings))
+    .rangePoints([0, height]);
+
+  ripples.selectAll("rings")
+      .data(rings.domain())
+    .enter().append("circle")
+      .attr("r", 1)
+      .attr("cx", x1)
+      .attr("cy", y1)
+      .style("fill", 'transparent')
+      //.style("fill", "blue")
+      .style("stroke", ringColor)
+    .transition()
+      .duration(dur)
+      .delay(function(d) { return (d-1) * 200; })
+      .each(ripple);
+
+  function ripple() {
+    var ring = d3.select(this);
+    //console.log('         ripple');
+
+    ring.transition()
+          .attr("r", maxSize)
+          .style("opacity", .001)
+          .each("end", function(){ d3.select(this).remove(); });
+    
+  }
+
+  cell.ripples.push(ripple);
+}
+
+
+//------------------------------------------------------
+// User Interactions
+//------------------------------------------------------
+var mol_dragging;
+function dragmove() { 
+
+  mol_dragging.x = d3.event.sourceEvent.clientX;
+  mol_dragging.y = d3.event.sourceEvent.clientY;
+
+  d3.select(this)
+      .attr('cx', d.x = function(){ return d3.event.sourceEvent.clientX;} )
+      .attr('cy', d.y = function(){ return d3.event.sourceEvent.clientY;} )
+
+}
+
+function dragstarted(){
+  
+  //console.log('drag start');
+ 
+  var mol_id = d3.select(this).attr('id');
+  var mol = d3.select(this);
+  // console.log(mol.nodeType)
+  mol_id = Number(mol_id.substring(3));
+
+
+  
+  isRemovingNode = true;
+  mol_dragging = removeFromNodes(mol_id)  // have to re-add to nodes when done dragging
+  // console.log(mol_dragging);
+
+  var mol = d3.select(this);
+  d3.select(this).select('circle#halo')
+    .attr('opacity', .3)
+    .attr('fill', colors[mol_dragging.t])
+ 
+
+  // halo.attr('fill', mol_dragging.t );
+}
+
+function dragended(){
+  //console.log('drag end');
+  // console.log('mol_dragging');
+
+  game_molecules_dropped += 1;
+  redrawStats();
+  if(game_molecules_dropped > max_molecule_drops){ dropTime = true; }
+  
+  mol_dragging.x = d3.event.sourceEvent.clientX;
+  mol_dragging.y = d3.event.sourceEvent.clientY;
+  //mol_dragging.color = 3;
+
+  // need to add mol_id back to nodes
+  addMolecule(mol_dragging, mol_dragging.x, mol_dragging.y);
+
+  d3.select(this).selectAll('circle')
+    .attr('fill', colors[mol_dragging.t])
+    .attr('opacity', 0)
+    
+}
+
+//------------------------------------------------------
+
+
+
+
+
+//------------------------------------------------------
+// Helper functions
+//------------------------------------------------------
+
+function randomRange(min, max){
+  return Math.floor((Math.random() * (max - min + 1)) + min);
+}
+
+function getDir(){
+  var dir = -1;
+  if(randomRange(0,1) === 1){ dir = 1;} 
+  return dir;
+}
+
+function getDistance(x1,y1,x2,y2){
+  // ToDo: optimize this!!!
+  var dx = Math.pow((x2-x1),2);
+  var dy = Math.pow((y2-y1),2);
+  return Math.sqrt(dx + dy);
+}
+
+function degToRad(deg){
+  return (deg*Math.PI)/180;
+}
+
+
+
+//-------------------------------------------------------
+/*  timer-loop control   */
+// timer_ret_val: could be used to stop the timer, but not currently used in this code 
+var timer_ret_val = false;
+
+// Keeps a record of the elapsed time since the timer began.
+var timer_elapsed = 0;
+
+// Kick off the timer, and the action begins: 
+d3.timer(tickFxn);
+
+ 
+function tickFxn(_elapsed) {
+  timer_elapsed = _elapsed;
+
+  var currentTime = new Date();
+  game_timer_seconds = game_timer_seconds_max - Math.floor((currentTime.getTime() -game_start_time)/1000);
+  if(game_timer_seconds > -1 && game_timer_running){ 
+    drawClock(); 
+  } else { dropTime = true; game_timer_running = false; }
+
+
+  // ToDo: fix this!!!!!
+  var emitTime = randomRange(30, 40); //30; //40; //120;
+  //if(( Number(currentTime.getSeconds())%emitTime == 0) && canEmit){
+  if(timer_elapsed%emitTime == 0 && canEmit){
+    emitMolecule(); 
+  }
+
+  var qTree = d3.geom.quadtree(map.nodes);
+
+  if(dropTime){
+    dropMolecules();
+  } else if(winTime){
+    animateWin(qTree);
+    drawCanvasArt();
+  } else {
+    updatePositions(qTree);
+    wavePoints = [cell];
+    
+  }
+  reDraw(); 
+
+  return timer_ret_val;
+}
+
+
+
+function restartLevel(level){
+  //console.log("restarting level");
+
+
+  // clear state values of last run
+  isMovingCellToTarg = false;
+  canEmit = true;
+  targetAcquired = false;
+  isRemovingNode = false;
+  dropTime = false;
+  winTime = false;
+  game_timer_running = true;
+  
+  
+  
+  map_div.remove();
+
+  if(level > 0){
+    initialCellPosition = {'x':map.width/2 + randomRange(0,100), 'y': map.height/2 + randomRange(0,100)};
+    initialTargPosition = {'x':100 + randomRange(0,100), 'y':100 + randomRange(0,100)};
+  }
+  
+  // restart
+  init();
+}
+
+
+</script>
+</body>
+</html>
