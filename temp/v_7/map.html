@@ -542,6 +542,13 @@
         }
 
 
+        // // Create a popup, but don't add it to the map yet.
+        // var popup = new mapboxgl.Popup({
+        //     closeButton: false,
+        //     closeOnClick: false
+        // });
+       
+
         // create map for extrusions, this is default view when page loads
         map.on('load', function () {
             map.addSource('newark', {
@@ -559,6 +566,39 @@
             });
 
             drawExtrusions(map, OPTION);
+
+            // map.on('mouseenter', 'extrusions', function(e){
+
+            //         console.log('testing')
+
+            //         // change cursur style so user sees it's clickable
+            //         map.getCanvas().style.cursor = 'pointer';
+
+            //         var coordinates = e.features[0].geometry.coordinates[0][0].slice();
+            //         var description = "<h3>"+e.features[0].properties.NAMELSAD+"</h3><p>Rent Burden %:"+ 2 +" </p>"
+
+            //         // console.log(coordinates)
+            //         console.log(e.features[0].properties)
+
+            //         // Ensure that if the map is zoomed out such that multiple
+            //         // copies of the feature are visible, the popup appears
+            //         // over the copy being pointed to.
+            //         while (Math.abs(e.lngLat.lng - coordinates[0]) > 180) {
+            //             coordinates[0] += e.lngLat.lng > coordinates[0] ? 360 : -360;
+            //         }
+
+            //         popup.setLngLat(coordinates).setHTML(description).addTo(map);
+
+
+            
+
+            //  });
+
+            //  map.on('mouseleave', 'extrusions', function () {
+            //     map.getCanvas().style.cursor = '';
+            //     // popup.remove();
+            // });
+
   
         });
 
@@ -655,31 +695,13 @@
         }
 
 
-       
         
+       
 
 
 
 
-
-        // map2.on("mousemove", function (e) {
-        //     var features = map.queryRenderedFeatures(e.point, {
-        //         layers: ["tracts"]
-        //     });
-
-        //     if (features.length) {
-        //         //show name and value in sidebar
-        //         document.getElementById('tooltip-name').innerHTML = "Tract " + features[0].properties.NAME; //FEDTRACTNO;
-        //         document.getElementById('tooltip').innerHTML = Math.round(features[0].properties.OWNOCC2000) + "% Owner-Occupied";
-        //         //properties.TOTPOPCHG);
-        //         //for troubleshooting - show complete features info
-        //         //document.getElementById('tooltip').innerHTML = JSON.stringify(features, null, 2);
-        //     } else {
-        //         //if not hovering over a feature set tooltip to empty
-        //         document.getElementById('tooltip-name').innerHTML = "";
-        //         document.getElementById('tooltip').innerHTML = "";
-        //     }
-        // });
+        
     </script>
 
 </body>
