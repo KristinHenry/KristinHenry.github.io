@@ -1,0 +1,226 @@
+<html>
+<head>
+<meta http-equiv="Content-type" content="text/html;charset=UTF-8">
+<title>Show Image Dimensions Locally</title>
+<style type='text/css'>
+body {
+    font-family: sans-serif;
+}
+</style>
+
+</head>
+<body>
+<form action='#' onsubmit="return false;">
+    <input type='file' id='imgfile' onChange='loadImage();'/>
+    <!-- <input type='button' id='btnLoad' value='Load Image' onclick='loadImage();' /> -->
+    <input type='button' id='drawBox' value='Add Sassy Watermark' onclick="drawText()" />
+    <a id="downloadLnk" download="YourFileName.jpg">Click Here to Download</a>
+
+</form>
+    <canvas id="canvas"></canvas>
+
+<script type='text/javascript'>
+
+    var img;
+
+    var txt;
+
+    var maxWidth = 600;
+    var maxHeight = 500;
+
+    var maxTextWidth = 200;
+
+    var txtWidth = maxWidth/2;
+    var txtHeight = maxHeight/4;
+
+    var x1 = 0-maxWidth/2; //(maxWidth-txtWidth)/2;
+    var y1 = (maxHeight-txtHeight)/2;
+    // var x2 = maxWidth*2; //x1/2 + txtWidth;
+    // var y2 = y1-10;
+
+
+
+
+    var canvas = document.getElementById("canvas")
+            canvas.width = maxWidth;
+            canvas.height = maxHeight;
+    var ctx = canvas.getContext("2d");
+
+    var sassyText = [
+        "Helloooo? Are you there World?",
+        "This is Art, Not Marketing.",
+        "Fair warning. Feeling a bit sassy today.",
+        "Shhhhhhhh. I'm thinking here.",
+        "Mansplaining? I asked my wife. It doesn't happen.", 
+        "I was in my zone",
+        "I'm so tired of dudes who don't get what I'm doing.",
+        "When is my work Art? When I decide it is.",
+        "I'm busy here. Could you buzz off, please.",
+        "Sassy watermark wonders what it would be like to be heard the first time.",
+        "Sassy watermark is feeling sassy.",
+        "Sassy watermark isn't feeling very sassy today.",
+        "Why yes, I do have a Patreon. Thank you for not supporting it.",
+        "Look for the helpers, in disaster...and every day.",
+        "Watermarks can be so annoyingly silent sometimes",
+        "It's hard out here for a bitch -Lilly Allen",
+        "Sassy watermark would like a cookie right now.",
+        "Sassy watermark enjoys a chocolate stout now and then",
+        "Seriously.  F*ck off. I'm thinking here."
+    ]
+
+    var currentIndex = Math.floor(Math.random() * sassyText.length);
+
+    function getNewIndex(){
+        var i = Math.floor(Math.random() * sassyText.length);
+        if (i != currentIndex){
+            // console.log(currentIndex, i)
+            currentIndex = i;
+        } else {
+            // console.log('try again')
+            getNewIndex();
+        }
+    }
+
+
+    // modified from https://stackoverflow.com/questions/13938686/can-i-load-a-local-file-into-an-html-canvas-element?rq=1
+
+    function loadImage() {
+        var input, file, fr;
+
+        if (typeof window.FileReader !== 'function') {
+            write("The file API isn't supported on this browser yet.");
+            return;
+        }
+
+        input = document.getElementById('imgfile');
+        if (!input) {
+            write("Um, couldn't find the imgfile element.");
+        }
+        else if (!input.files) {
+            write("This browser doesn't seem to support the `files` property of file inputs.");
+        }
+        else if (!input.files[0]) {
+            write("Please select a file before clicking 'Load'");
+        }
+        else {
+            file = input.files[0];
+            fr = new FileReader();
+            fr.onload = createImage;
+            fr.readAsDataURL(file);
+        }
+
+        function createImage() {
+            img = new Image();
+            img.onload = imageLoaded;
+            img.src = fr.result;
+        }
+
+        function imageLoaded(){
+            drawImg();
+        }
+
+        function write(msg) {
+            var p = document.createElement('p');
+            p.innerHTML = msg;
+            document.body.appendChild(p);
+        }
+    }
+
+
+    function drawImg(){
+
+        ctx.drawImage(img,0,0, img.width, img.height, 0, 0, maxWidth, maxHeight);
+
+    }
+
+    function rotateWatermark(ctx){
+        ctx.translate(txtWidth, txtHeight);
+        ctx.rotate(45 * Math.PI / 180);
+        ctx.translate(-txtWidth, -txtHeight);
+
+    }
+
+    function drawRect(){
+        
+        // rotateWatermark(ctx)
+
+        ctx.beginPath();  //keeping this, just in case 
+        ctx.fillStyle = 'rgba(255,255,255,0.6)';
+        // ctx.rect(x1,y1, maxWidth+250+txt.length, txtHeight);
+        ctx.rect(x1,y1, maxWidth*2, txtHeight);
+        ctx.fill();
+
+        // undo global rotate by resetting transformation matrix to the identity matrix
+        ctx.setTransform(1, 0, 0, 1, 0, 0);
+    }
+
+
+    function getFontSizeToFit(txt, font, width, ctx){
+       ctx.font =  'italic 22px ' + font;
+       return (width/ctx.measureText(txt).width)*18;
+    }
+
+
+    function drawText(){
+
+        // var canvas = document.getElementById("canvas")
+        // var ctx = canvas.getContext("2d");
+
+        var btn = document.getElementById('drawBox');
+        btn.value = "Try Another Watermark";
+
+        getNewIndex();
+
+        txt = sassyText[currentIndex];
+
+        drawImg();
+        drawRect();
+
+        var canvas = document.getElementById('canvas');
+        var ctx = canvas.getContext('2d');
+
+        var fontSize = getFontSizeToFit(txt, 'Arial', 500-30, ctx);
+
+        // rotateWatermark(ctx)
+
+        // ctx.font = 'italic ' + fontSize + 'px Arial';
+        ctx.font = fontSize + 'px Courier';
+        ctx.textAlign = 'center';
+        ctx. textBaseline = 'middle';
+        ctx.fillStyle = 'black';  // a color name or by using rgb/rgba/hex values
+
+        // fillText(text, x, y [, maxWidth]);
+
+        ctx.fillText(txt, maxWidth-maxWidth/2, maxHeight/2, maxWidth); // text and position
+
+
+        drawWatermark(ctx);
+
+        // undo global rotate by resetting transformation matrix to the identity matrix
+        ctx.setTransform(1, 0, 0, 1, 0, 0);
+
+    }
+
+
+    function drawWatermark(ctx){
+
+        var watermark = 'Sassy Watermark'
+        ctx.font = 'italic 12px Courier'
+        ctx.textAlign = 'middle';
+        ctx. textBaseline = 'bottom';
+        ctx.fillStyle = 'white';  // a color name or by using rgb/rgba/hex values
+
+
+        ctx.fillText(watermark, maxWidth-maxWidth/2, maxHeight-maxHeight/2+txtHeight/2-txtHeight/8, maxWidth); // text and position
+    }
+
+
+    function download() {
+        var dt = canvas.toDataURL('image/jpeg');
+        this.href = dt;
+    };
+    downloadLnk.addEventListener('click', download, false);
+
+</script>
+</body>
+</html>
