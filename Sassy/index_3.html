@@ -1,0 +1,664 @@
+<html>
+<head>
+<meta http-equiv="Content-type" content="text/html;charset=UTF-8">
+<title>Sassy Watermark Maker</title>
+<style type='text/css'>
+body {
+    /*font-family: sans-serif;*/
+    font-family: Courier, sans-serif;
+    background: #cad9de;
+}
+
+.button {
+  font-family: 'Inter', sans-serif;
+  font-size: 15px;
+  font-weight: 500;
+  text-decoration: none;
+  color: white;
+  background: #a1aabf;
+  padding: 2px 6px 2px 6px;
+  border-radius: 36px;
+  border: none;
+  /*border-top: 1px solid #CCCCCC;
+  border-right: 1px solid #333333;
+  border-bottom: 1px solid #333333;
+  border-left: 1px solid #CCCCCC;*/
+  box-shadow: 0 18px 32px #00000030;
+}
+
+#customText {
+    visibility: hidden;
+}
+</style>
+
+</head>
+<body>
+<h1>Welcome to Sassy Watermark!</h1>
+<ol>
+    <li>Choose an image to watermark,</li>
+    <li>Add Sassy Watermark,</li>
+    <li>Save your watermarked image.</li>
+</ol>
+<form action='#' onsubmit="return false;">
+    <input type='file' id='imgfile'  onChange='loadImage();'/>
+    <input type='button' id='drawBox' class="button" value='Add Sassy Watermark' onclick="drawSassyText()" />
+    <a id="downloadLnk" class="button" download="SassyWatermark.jpg">Save Image</a>
+
+</form>
+<form action='#' onsubmit="return false;">
+    <input type='button' id='drawArtButton' class='button' value='?' onclick="addArt()" />
+    <input type='button' id='showTextField' class='button' value='+' onclick="showHideTextField()" />
+    <input type='text' id='customText' size='80' maxlength='80' value='Write your own Sassy text. Click Enter, to add to watermark' visibility='hidden' />
+</form>
+<canvas id="canvas"></canvas>
+<canvas id="canvas_2"></canvas>
+
+<script type='text/javascript'>
+
+    var colors = ["#39748544", "#8d5fb044", "#4287f544", "#9e9d9944"]
+
+    var trees = [];
+    var clusters = [];
+
+    var img;
+
+    var txt;
+
+    var usedTextIndices = [];
+
+    var maxWidth = 600;
+    var maxHeight = 400; //300;
+
+    var newWidth = maxWidth;
+    var newHeight = maxHeight;
+
+    var maxTextWidth = 200;
+
+    var txtWidth = maxWidth/2;
+    var txtHeight = maxHeight/4;
+
+    var x1 = 0-newWidth/2; //(maxWidth-txtWidth)/2;
+    var y1 = (newHeight-txtHeight)/2;
+    
+
+    var canvas_2 = document.getElementById("canvas_2")
+    canvas_2.width = maxWidth;
+    canvas_2.height = 100;
+    var ctx_2 = canvas_2.getContext("2d");
+
+
+    var canvas = document.getElementById("canvas")
+            canvas.width = maxWidth;
+            canvas.height = maxHeight;
+    var ctx = canvas.getContext("2d");
+
+    var sassyText = [
+        "Helloooo? Are you there World?",
+        "Anybody gotta peanut?",
+        "You keep using that word. I do not think it means what you think it means.",
+        "This is Art, Not Marketing.",
+        "Sassy Watermark says don't steal from artists!",
+        "I'll just be over in that corner, curled up in a ball for a while. Ok?",
+        "Sassy Watermark says if you like an artist's work, pay them for it.",
+        "Astroturf, which is fake Grass Roots, is usually funded by nefarious entities.",
+        "Fair warning. Feeling a bit sassy today.",
+        "Shhhhhhhh. I'm thinking here.",
+        "Mansplaining? I asked my wife. It doesn't happen.", 
+        "I was in my zone",
+        "Sassy Watermark says Get vaccinated and wear a mask!",
+        "When is my work Art? When I decide it is.",
+        "Sassy watermark wonders what's for dinner tonight.",
+        "I'm busy here. Could you buzz off, please.",
+        "Sassy Watermark wonders what it would be like to be heard the first time.",
+        "Sassy Watermark is feeling sassier than usual today.",
+        "Sassy Watermark isn't feeling very sassy today.",
+        "Sassy Watermark says it's fine to be self-contradictory when feeling sassy.",
+        "OK, does anyone really need to know *all* the lyrics to American Pie?",
+        "Yes, I do have a Patreon. Thank you for not supporting it.",
+        "Look for the helpers, in disaster...and every day.",
+        "Watermarks can be so annoyingly silent sometimes",
+        "It's hard out here for a bitch --Lilly Allen",
+        "I'd rather be sassy than cool, whatever cool is.",
+        "Sassy Watermark would like a cookie right now.",
+        "It's been a really long time since the last Randy Rainbow video.",
+        "Sassy Watermark enjoys a chocolate stout now and then",
+        "Sassy Watermark says you don't always have to do things the hard way",
+        "Sassy Watermark says the easy way is rarely the good way",
+        "How hard would it really be for folks to be less sexist?",
+        "Seriously, how hard would it be for folks to be less racist?",
+        "Everything you want is on the other side of fear. --Esther",
+        "I can't tell you what I think of etsy's 'Star Seller' program.",
+        "Sassy Watermark is so exhausted. But then isn't that the point of Misogyny?",
+        "Sassy Watermark is so exhausted. But then isn't that the point of Racism?",
+        "Sassy Watermark's exhausted. But then that's the point of Racism and Misogyny!"
+    ]
+
+    var currentIndex = null; //Math.floor(Math.random() * sassyText.length);
+
+    function getNewIndex(){
+         // need to clear saved indices and start over, or get 'too much recursion'
+        if(usedTextIndices.length >= sassyText.length){
+                usedTextIndices = [];
+        }
+
+        var i = Math.floor(Math.random() * sassyText.length);
+        if ((i != currentIndex) & (!usedTextIndices.includes(i))){   
+            currentIndex = i;
+            usedTextIndices.push(i);
+        } else {
+            getNewIndex();
+        }
+    }
+
+
+
+    function loadImage() {
+        var input, file, fr;
+
+        if (typeof window.FileReader !== 'function') {
+            write("The file API isn't supported on this browser yet.");
+            return;
+        }
+
+        input = document.getElementById('imgfile');
+        if (!input) {
+            write("Um, couldn't find the imgfile element.");
+        }
+        else if (!input.files) {
+            write("This browser doesn't seem to support the `files` property of file inputs.");
+        }
+        else if (!input.files[0]) {
+            write("Please select a file before clicking 'Load'");
+        }
+        else {
+            file = input.files[0];
+            fr = new FileReader();
+            fr.onload = createImage;
+            fr.readAsDataURL(file);
+        }
+
+        function createImage() {
+            img = new Image();
+            img.onload = imageLoaded;
+            img.src = fr.result;
+        }
+
+        function imageLoaded(){
+            drawImg();
+        }
+
+        function write(msg) {
+            var p = document.createElement('p');
+            p.innerHTML = msg;
+            document.body.appendChild(p);
+        }
+    }
+
+
+    function drawImg(){
+
+        ctx.clearRect(0, 0, canvas.width, canvas.height)
+
+        if(img){
+
+            newWidth = maxWidth;
+            newHeight = maxHeight;
+
+            if(img.width < img.height){
+                newWidth = maxWidth * (img.width/img.height);
+            }
+
+            if(img.width >= img.height){
+                newHeight = maxHeight * (img.height/img.width)
+            }
+
+            canvas.width = newWidth;
+            canvas.height = newHeight;
+
+            ctx.drawImage(img,0,0, img.width, img.height, 0, 0, newWidth, newHeight);
+        }
+
+    }
+
+    function rotateWatermark(ctx){
+        ctx.translate(txtWidth, txtHeight);
+        ctx.rotate(45 * Math.PI / 180);
+        ctx.translate(-txtWidth, -txtHeight);
+
+    }
+
+    function drawRect(){
+
+        x1 = 0-newWidth/2; //(maxWidth-txtWidth)/2;
+        y1 = (newHeight-txtHeight)/2;
+        
+        // rotateWatermark(ctx)
+
+        ctx.beginPath();  //keeping this, just in case 
+        ctx.fillStyle = 'rgba(255,255,255,0.6)';
+        ctx.rect(x1,y1, newWidth*2, txtHeight);
+        ctx.fill();
+
+        // undo global rotate by resetting transformation matrix to the identity matrix
+        ctx.setTransform(1, 0, 0, 1, 0, 0);
+    }
+
+
+    function getFontSizeToFit(txt, font, width, ctx){
+       ctx.font =  'italic 22px ' + font;
+       return (width/ctx.measureText(txt).width)*18;
+    }
+
+
+    function drawSassyText(){
+        getNewIndex();
+        txt = sassyText[currentIndex];
+        drawText();
+    }
+
+
+    function drawText(){
+
+        var btn = document.getElementById('drawBox');
+        btn.value = "Try Another Watermark";
+
+        drawImg();
+        redrawArt();
+
+        drawRect();
+
+        var canvas = document.getElementById('canvas');
+        var ctx = canvas.getContext('2d');
+
+        var fontSize = getFontSizeToFit(txt, 'Arial', 500-30, ctx);
+
+        // rotateWatermark(ctx)
+
+        // ctx.font = 'italic ' + fontSize + 'px Arial';
+        ctx.font = fontSize + 'px Courier';
+        ctx.textAlign = 'center';
+        ctx. textBaseline = 'middle';
+        ctx.fillStyle = 'black';  // a color name or by using rgb/rgba/hex values
+
+        ctx.fillText(txt, newWidth-newWidth/2, newHeight/2, newWidth); // text and position
+
+
+        drawWatermark(ctx);
+
+        // undo global rotate by resetting transformation matrix to the identity matrix
+        ctx.setTransform(1, 0, 0, 1, 0, 0);
+
+    }
+
+    function redrawText(){
+
+        if(txt){
+
+            drawRect();
+
+            var canvas = document.getElementById('canvas');
+            var ctx = canvas.getContext('2d');
+
+            var fontSize = getFontSizeToFit(txt, 'Arial', 500-30, ctx);
+
+            // rotateWatermark(ctx)
+
+            // ctx.font = 'italic ' + fontSize + 'px Arial';
+            ctx.font = fontSize + 'px Courier';
+            ctx.textAlign = 'center';
+            ctx. textBaseline = 'middle';
+            ctx.fillStyle = 'black';  // a color name or by using rgb/rgba/hex values
+
+            ctx.fillText(txt, newWidth-newWidth/2, newHeight/2, newWidth); // text and position
+
+
+            drawWatermark(ctx);
+
+            // undo global rotate by resetting transformation matrix to the identity matrix
+            ctx.setTransform(1, 0, 0, 1, 0, 0);
+
+        }
+
+
+    }
+
+
+    function drawWatermark(ctx){
+
+        var watermark = 'Sassy Watermark'
+        ctx.font = 'italic 12px Courier'
+        ctx.textAlign = 'middle';
+        ctx. textBaseline = 'bottom';
+        ctx.fillStyle = 'white';  // a color name or by using rgb/rgba/hex values
+
+        ctx.fillText(watermark, newWidth-newWidth/2, newHeight-newHeight/2+txtHeight/2-txtHeight/8, newWidth); // text and position
+    }
+
+
+    function showHideTextField(){
+        
+        var btn = document.getElementById('showTextField')
+        var fld = document.getElementById('customText')
+
+        if(btn.value == "+"){
+            fld.style.visibility= "visible";
+            btn.value = "<"
+        } else {
+            fld.style.visibility= "hidden";
+            btn.value = "+";
+        }
+    }
+
+
+    //-----------------------------------------------------
+    function Branch(){
+        Branch.makeNode = function(){
+            return {left: null, right: null, middle: null, data: null, size: null}
+        }
+
+        this.branch = [];
+
+        this.add = function(data){
+
+            var node = Branch.makeNode();
+            node.data = data;
+            // node.size = this.length;
+
+            this.branch.push(node);
+            // console.log(this)
+        };
+
+    }
+
+    //-----------------------------------------------------
+
+
+    function makeBranch(x,y,r, deg, linewidth, size, color, color_2){
+        var branch = new Branch();
+        
+        var x1 = x;
+        var y1 = y;
+        var r = r;
+        var deg = deg;
+        var lineWidth = linewidth;
+
+        // get coordinates for each line to draw...get 'shape' of tree
+        var i = size; //randomRange(20, 90);
+        while(i>0){
+            var x2 = Math.floor(x1 + r * Math.cos(Math.PI * (deg/180)));
+            var y2 = Math.floor(y1 + r * Math.sin(Math.PI * (deg/180)));
+
+            branch.add([x1,y1,x2,y2, lineWidth, deg, color, color_2]);
+
+            x1 = x2;
+            y1 = y2;
+            if(lineWidth > 1){ lineWidth -= .2;}
+            deg += randomRange(-4,4);
+            r -= 2;
+            i-=1;
+
+        }
+
+        return branch;
+
+    }
+
+
+    function makeFeather(x,y, color_2){
+
+        var branches = [];
+        
+
+        // first branch
+        var x1 = x; //maxWidth/2; //randomRange(0, maxWidth);
+        var y1 = y; //maxHeight/2; //randomRange(0, maxHeight);
+        var r = 50;
+        var deg = randomRange(0,360);
+        var lineWidth = 3;
+        var num = 15;
+        var color = "#ffffff44";
+        var color_2 = color_2;
+
+        branches.push( makeBranch(x1, y1, r, deg, lineWidth, num, color, color_2));
+
+
+        for(var i =0; i<10; i++){
+            // console.log(i)
+
+            //now try adding more branches to this one. 
+            var origin = branches[0].branch[i];   
+            // console.log(origin.data)  
+            x1 = origin.data[0];
+            y1 = origin.data[1];
+            r = 25;
+            deg = origin.data[5] + randomRange(20,50);
+            lineWidth = origin.data[4];
+            num = 15;
+
+
+            branches.push( makeBranch(x1, y1, r, deg, lineWidth, num, color, color_2));
+
+             //now try adding more braches to this one. 
+            var origin = branches[0].branch[i];   
+            // console.log(origin.data)  
+            x1 = origin.data[0];
+            y1 = origin.data[1];
+            r = 25;
+            deg = origin.data[5] - randomRange(20,50);
+            lineWidth = origin.data[4];
+            num = 15;
+
+            branches.push( makeBranch(x1, y1, r, deg, lineWidth, num, color, color_2));
+        }
+
+        return branches;
+
+    }
+
+
+    function makeCluster(){
+        var num = 10;
+        var x = randomRange(0, newWidth*2);
+        var y = randomRange(0, newHeight*2);
+        var color_2 = colors[randomRange(0,colors.length-1)]
+
+        var cluster = [];
+
+        while(num >0){
+            num--;
+            var branches = makeFeather(x, y, color_2);
+            cluster.push(branches);
+        }
+
+        clusters.push(cluster)
+
+        return cluster;
+    }
+
+
+    function addArt(){
+        var cluster = makeCluster();
+        drawCluster(cluster, clusters.length-1);
+    }
+
+
+    function drawCluster(cluster, c){
+        for(tree in cluster){
+
+            var branches = cluster[tree];
+
+            for(i in branches){
+                drawBranchLines(branches[i], ctx, .5, 0)
+            }
+
+            for(i in branches){
+                // draw mini tree with 'delete' buttons for each cluster
+                drawBranchLines(branches[i], ctx_2, .05, newWidth*(c)*2)
+            }
+        }
+
+        drawBox(ctx_2, .05, newWidth*(c))
+    }
+
+
+    function redrawArt(){
+        // with this function, we want to redraw all, except clusters we've removed
+       
+        ctx_2.clearRect(0, 0, canvas_2.width, canvas_2.height)
+
+        if(!img || !currentIndex){
+            ctx.clearRect(0, 0, canvas.width, canvas.height)
+        }
+
+        drawImg();
+        redrawText();
+
+        for(var c in clusters){
+            var cluster = clusters[c];
+            drawCluster(cluster, c);
+        }
+    }
+
+
+    function drawBox(targ, scale, shift_x){
+
+        targ.scale(scale, scale);
+        targ.translate(shift_x*2, 0);
+
+        // line down
+        targ.beginPath();
+        targ.moveTo(newWidth*2, 0)
+        targ.lineTo(newWidth*2, newHeight*2)
+        targ.lineWidth = 4;
+        targ.strokeStyle = "#000000"
+        targ.stroke();
+
+        // line on bottom
+        targ.beginPath();
+        targ.moveTo(1,newHeight*2)
+        targ.lineTo(newWidth*2, newHeight*2)
+        targ.lineWidth = 4;
+        targ.strokeStyle = "#333333"
+        targ.stroke();
+
+        // Reset current transformation matrix to the identity matrix
+        targ.setTransform(1, 0, 0, 1, 0, 0);
+
+    }
+
+
+    function drawBranchLines(branch, targ, scale, shift_x){
+
+        var data = branch.branch;
+
+        targ.scale(scale, scale);
+        targ.translate(shift_x, 0);
+
+        var flowerColor = "#ffffff77";
+        
+
+        for(i in data){
+
+            var node = data[i].data;
+
+            flowerColor = node[7];
+
+            targ.beginPath();
+            targ.moveTo(node[0],node[1]);
+            targ.lineTo(node[2],node[3]);
+            targ.lineWidth = node[4];
+            targ.strokeStyle = node[6];
+            targ.stroke();
+        }
+
+        // Reset current transformation matrix to the identity matrix
+        targ.setTransform(1, 0, 0, 1, 0, 0);
+
+        // draw circle at end of branch
+        var x = data[i].data[2];
+        var y = data[i].data[3];
+
+
+        drawFlower(x,y, targ, scale, shift_x, flowerColor)   
+        
+    }
+
+
+    function drawFlower(x,y, targ, scale, shift_x, color){
+
+
+        if((x < newWidth*2) && (x > 0) && (y<newHeight*2)){
+
+            // console.log(x, newWidth)
+
+            targ.scale(scale, scale);
+            targ.translate(shift_x, 0);
+        
+
+            targ.beginPath();
+            targ.arc(x,y, randomRange(10,30), 0, 2*Math.PI)
+            targ.fillStyle = color;//"#ffffff77";
+            targ.stroke();
+            targ.fill();
+
+            // Reset current transformation matrix to the identity matrix
+            targ.setTransform(1, 0, 0, 1, 0, 0);
+
+        }
+    }
+
+
+
+    function randomRange(min, max){
+      return Math.floor((Math.random() * (max - min + 1)) + min);
+    }
+
+    //---------------------------------------------------------------------------
+    // javascript for input and event, that isn't managed in the html forms
+    function download() {
+        var dt = canvas.toDataURL('image/jpeg');
+        this.href = dt;
+    };
+    downloadLnk.addEventListener('click', download, false);
+
+
+    function testing(customTxt){
+        // console.log('testing if enter button clicked')
+        // console.log('input text', txt)
+        txt = customTxt;
+        drawText();
+
+    }
+
+    var input = document.getElementById("customText");
+
+    input.addEventListener("keyup", function(event){
+        if(event.keyCode === 13){
+            event.preventDefault();
+            testing(input.value);
+        }
+
+    });
+
+
+    //----------------------------------------------------------------------------
+
+    canvas_2.addEventListener('click', function(event) { 
+        
+        var clickX = event.clientX;
+        var boxWidth = .05 * newWidth*2;
+        var boxIndex = Math.floor(clickX/boxWidth);
+
+        if(boxIndex < clusters.length){
+            clusters.splice(boxIndex,1)
+
+            drawImg();
+            redrawArt();
+            redrawText();
+        }
+    }, false);
+
+</script>
+
+</body>
+</html>
