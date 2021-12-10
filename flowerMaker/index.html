@@ -1,0 +1,102 @@
+<!doctype html>
+<html>
+<meta charset="utf-8">
+<head>
+  <title>Flower Maker, a simple creative tool, by Kristin Henry (ArtAtomic)</title>
+  <style>
+    body { 
+      margin: 0;
+      background-color: #333;
+    }
+     h1 {
+      font-size: 34px;
+      color: #aaa;
+      font-family: 'Inter', sans-serif;
+      text-shadow: 2px 2px 8px #000000;
+      padding-left: 30px;
+    }
+     p {
+      font-size: 14px;
+      color: #ccc;
+      font-family: 'Inter', sans-serif;
+      text-shadow: 2px 2px 8px #000000;
+      padding-left: 30px;
+    }
+
+     a:link {
+    color: #d1d1cd;
+    background-color: transparent;
+    text-decoration: none;
+    font-weight:bold
+  }
+
+  a:visited {
+    color: #d1d1cd;
+    background-color: transparent;
+    text-decoration: none;
+  }
+
+  a:hover {
+    color: white;
+    background-color: transparent;
+    text-decoration: underline;
+  }
+  </style>
+  <script src="https://unpkg.com/css-doodle@0.18.0/css-doodle.min.js"></script>
+</head>
+<body>
+<h1>Welcome to my Flower Maker</h1>
+<p>A simple creative tool, that generates abstract flowers.</p>
+
+<div>
+  <div style= "float:left;">
+  <css-doodle id="flower-big">
+    --n: 20;
+    --colorMin: 190;
+    --colorMax: 280;
+    --color: @rand(colorMin,colorMax);
+    @grid: 20 x 1 / 40em;
+    @place-cell: center;
+    @size: calc(100% / var(--n) * @index);
+    <!-- opacity: calc(1.1 - 1 / var(--n) * @index); -->
+    z-index: calc(var(--n) - @index);
+    background: hsla(@r360, 70%, 70%, @r.9);
+    <!-- background: hsla(var(--color), @r(10%,50%), @r(10%,70%), @r(.1,.9)); -->
+
+    clip-path: @shape(
+        points: 600;
+        r: cos(@pick(2,3,4,6,8,10,12,13,14,15)t)
+        <!-- r: cos(@rand(6)t) -->
+       
+    );
+  </css-doodle>
+  </div>
+  <div style="padding-top: 20%;">
+    <p>Click flower to generate a new pattern.</p>
+    <button id="button-2">Save to PNG</button>
+  </div>
+</div>
+
+<div style="clear:both;">
+  <p>Created by <a href="http://kristinhenry.github.io/">Kristin Henry</a> (<a href="https://artatomic.itch.io/">ArtAtomic</a>). <a href="https://twitter.com/KristinHenry">@KristinHenry</a>.        Built with <a href="https://css-doodle.com">css-doodle</a></p>
+</div>
+
+<script type='text/javascript'>
+
+  const doodle2 = document.querySelector('#flower-big')
+   doodle2.addEventListener('click', () => {
+      doodle2.update();
+      
+    });
+
+   const button2 = document.querySelector('#button-2')
+
+   button2.addEventListener('click', async e => {
+      let result = await doodle2.export({
+        scale: 6,
+        download: true
+      });
+    });
+</script>
+</body>
+</html>
