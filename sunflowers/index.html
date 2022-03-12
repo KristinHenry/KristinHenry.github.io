@@ -1,0 +1,336 @@
+<!doctype html>
+<meta charset="utf-8">
+<head>
+  <title>Sunflowers</title>
+  <style>
+    body { margin: 0; }
+    svg {
+      position: absolute;
+      top: 0;
+      left: 0;
+    }
+    .box:hover {
+      fill: steelblue;
+    }
+  </style>
+  <script src='d3.v4.min.js'></script> 
+ 
+</head>
+<body>
+ <html>
+<div id="chart"></div> 
+
+</html>
+
+
+<script type='text/javascript'>
+
+/*
+This generates random sunflowers on initialization, and redraws when user clicks
+*/
+
+var height = self.frameElement ? 500 : innerHeight,
+      width = self.frameElement ? height: innerWidth;
+
+
+
+var xmin = 0;
+var xmax = width;
+var ymin = 0;
+var ymax = height;
+
+
+
+// add canvas
+var canvas_1 = d3.select('#chart')
+                .append('canvas')
+                .attr('width', width)
+                .attr('height', height)
+                .node().getContext('2d');
+
+
+
+
+// need this for drawing into when saving image from canvas, or redrawing canvas
+var svg = d3.select("#chart")
+              .append("svg")
+              .attr("width", width)
+              .attr("height", height)
+              .on('click', function(){ draw(canvas_1);});
+
+//--------------------------------------------------------------
+
+function randomRange(min, max){ 
+  return Math.floor((Math.random() * (max - min + 1)) + min); 
+}
+
+function getPoint(c,r,len,ang,rot){
+
+  var x = (len+r) * Math.cos(ang-rot)
+  var y = (len+r) * Math.sin(ang-rot)
+
+  return {x:c.x+x, y: c.y+y}
+}
+
+function getMidLength(cx, cy, p1, p2){
+
+  var xMin = Math.min(p1.x, p2.x);
+  var xMax = Math.max(p1.x, p2.x);
+
+  var yMin = Math.min(p1.y, p2.y);
+  var yMax = Math.max(p1.y, p2.y);
+
+  var dx = (xMax-xMin)/2 + xMin;
+
+  var m = (yMax - yMin)/(xMax - xMin)
+
+  var y3 = (m*dx) + cy;
+
+  // return {x: dx, y: y3}
+
+  return dx;
+}
+
+//--------------------------------------------------------------
+
+function drawCircle(canvas, x1, y1, r){
+   // draw circles
+    canvas.beginPath();
+    canvas.arc(x1, y1, r, 0, 2 * Math.PI);
+    canvas.stroke();
+    canvas.fill();
+}
+
+
+function changeColor(color){
+  var canvas = canvas_1;
+
+  if(color == "orange"){
+    // 252, 186, 3
+    canvas.strokeStyle = 'rgba(' + 252 + ', ' + 186 + ', ' +  3 + ', 0.5)';
+    canvas.fillStyle = 'rgba(' + 252 + ', ' + 186 + ', ' + 3 + ', 0.4)';
+  } else if(color == "blue"){
+    canvas.strokeStyle = 'rgba(' + 0 + ', ' + 0 + ', ' + 250 + ', 0.9)';
+    canvas.fillStyle = 'rgba(' + 0 + ', ' + 0 + ', ' + 250 + ', 0.9)';
+  } else if(color == "green"){
+    canvas.strokeStyle = 'rgba(' + 0 + ', ' + 250 + ', ' + 0 + ', 0.9)';
+    canvas.fillStyle = 'rgba(' + 0 + ', ' + 250 + ', ' + 0 + ', 0.9)';
+
+  } else {
+    canvas.strokeStyle = 'rgba(' + 50 + ', ' + 100 + ', ' + 100 + ', 0.5)';
+    canvas.fillStyle = 'rgba(' + 50 + ', ' + 100 + ', ' + 100 + ', 0.4)';
+  }
+}
+
+
+//--------------------------------------------------------------
+
+function drawPetal(canvas, cx, cy, r, angle){
+
+  r += randomRange(0, r/5)
+ 
+  
+  // draw bezier shape of petal
+  var rot = angle*Math.PI/180; // in radians
+  var sAngle = (25)*Math.PI/180; 
+  var eAngle = (-25)*Math.PI/180;
+  var sAngle2 = (randomRange(30,35))*Math.PI/180; 
+  var eAngle2 = (-randomRange(30,35))*Math.PI/180; 
+
+
+
+
+  // get outer point of petal
+  var p0 = getPoint({x:cx, y:cy}, 1.5*r, 2*r, 0, rot);
+  // drawCircle(canvas, p0.x, p0.y, 2)
+
+  // draw middle line for petal
+  canvas.beginPath();
+  canvas.moveTo(cx, cy);
+  canvas.lineTo(p0.x, p0.y);
+  canvas.stroke(); 
+
+  
+
+  // first points after point
+  // want random range of len for petal, to give more organic look, instead of len=10
+  var ep1r = (r*1.9) + 5
+  var ep1 = getPoint({x:cx, y:cy}, ep1r, 0, sAngle, rot);
+  var ep2r = (r*1.6) + randomRange(0, r/3)
+  var ep2 = getPoint({x:cx, y:cy}, ep2r, 0, eAngle, rot);
+  
+  
+
+  // points for base curve of petal
+  var m1r = (-1.2*r) + .5*r;
+  var m1 = getPoint(ep1, m1r, 0, 0.3, rot)
+  m2r = (-1.2*r) + .5*r
+  var m2 = getPoint(ep2, m2r, 0, -0.3, rot)
+  
+
+
+
+  // control points for bezier curves in petal
+  var cp1 = getPoint({x:cx, y:cy}, 4*r, -.9*r, sAngle*.4, rot); // midpoint for curves to tip of petal
+  var cp1b = getPoint({x:cx, y:cy}, 4*r, -.9*r, eAngle*.4, rot ) // midppint for right curve to tip of petal
+  
+  
+  // right/left mid curve control 
+  var cp3r = ep1r - ((ep1r-m1r)/8) 
+  var cp3 = getPoint({x:cx, y:cy}, cp3r, 0, sAngle2, rot);
+  // drawCircle(canvas, cp3.x, cp3.y, 5)
+
+  var cp4r = ep2r - ((ep2r-m2r)/8)
+  var cp4 = getPoint({x:cx, y:cy}, cp4r, 0, eAngle2, rot);
+  // drawCircle(canvas, cp4.x, cp4.y, 2)
+
+  var cp2 = getPoint({x:cx, y:cy}, r, -.5*r, 0, rot); // base of petal control point
+
+
+ 
+  // canvas.beginPath()
+  canvas.lineJoin = 'miter';
+  canvas.moveTo(p0.x, p0.y)
+  
+  
+  // draw a straight line, instead of a curve, in this part of the petal sometimes
+  if(randomRange(0,2) >= 0){
+    canvas.quadraticCurveTo(cp1.x, cp1.y, ep1.x, ep1.y);
+  } else {
+    canvas.lineTo(ep1.x, ep1.y)
+  }
+
+  canvas.stroke()
+  
+  canvas.quadraticCurveTo(cp3.x, cp3.y, m1.x, m1.y);
+  
+  
+  // arc at bottom of petal
+    canvas.quadraticCurveTo(cp2.x, cp2.y, m2.x, m2.y);
+
+
+  canvas.quadraticCurveTo(cp4.x, cp4.y, ep2.x, ep2.y);
+
+  // draw a straight line, instead of a curve, in this part of the petal sometimes
+  if(randomRange(0,2) >= 0){
+    canvas.quadraticCurveTo(cp1b.x, cp1b.y, p0.x, p0.y);
+  } else {
+    canvas.lineTo(p0.x, p0.y)
+  }
+  canvas.stroke()
+  canvas.fill()
+  canvas.closePath();
+
+}
+
+
+function drawFlower(canvas, x, y){
+
+  var r = randomRange(10, 40)
+
+  // center of flower
+  changeColor("")
+  drawCircle(canvas, x, y, r)
+
+  var i = 5; //5;
+  var da = 360/i;
+  var angle = 3;
+
+  // for drawing center of flower
+  var startRadius = 1/r;
+  var newRadius = startRadius;
+  var cAngle = 10/r;
+  var r2 = r/10;
+  //--------------------------------
+
+  changeColor("orange");
+
+  // draw petals
+  while(i>0){
+    angle += da;
+
+    drawPetal(canvas, x, y, r, angle)
+
+    i-=1;
+
+  }
+
+  // draw next round of petals
+  angle = da/3;
+  i = 5
+  while(i>0){
+    angle += da;
+
+    drawPetal(canvas, x, y,  r, angle)
+
+    i-=1;
+
+  }
+
+  // draw next round of petals
+  angle = 2*da/3;
+  i = 5
+  while(i>0){
+    angle += da;
+
+    drawPetal(canvas, x, y,  r, angle)
+
+    i-=1;
+
+  }
+  changeColor("")
+
+
+  i = 2*r
+  while(i>0){
+
+    //draw center of flower
+    cAngle += 1;
+    newRadius += r2*(startRadius/newRadius)*.5 +.5; //1;
+
+    var x1 = x + Math.cos(cAngle)*newRadius;
+    var y1 = y + Math.sin(cAngle)*newRadius;
+    drawCircle(canvas, x1, y1, r/5)
+    i-=1;
+  }
+
+
+  
+
+  
+
+}
+
+
+function draw(canvas) {
+
+    canvas.clearRect(0, 0, width, height);
+
+    canvas.fillStyle = "#34c6eb";
+    canvas.fillRect(0, 0, width, height);
+
+    // set up colors
+    canvas.strokeStyle = 'rgba(' + 50 + ', ' + 100 + ', ' + 100 + ', 0.5)';
+    canvas.fillStyle = 'rgba(' + 50 + ', ' + 100 + ', ' + 100 + ', 0.4)';
+
+
+    
+
+   
+    var i = 20;
+    while(i>0){
+
+       var x = randomRange(0, width)
+       var y = randomRange(0, height);
+
+        drawFlower(canvas, x, y);
+        i-=1;
+    }
+
+}
+
+draw(canvas_1)
+
+
+</script>
+</body>
