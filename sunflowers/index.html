@@ -2,7 +2,7 @@
 <meta charset="utf-8">
 <head>
   <title>Sunflowers</title>
-  <style>
+  <!-- <style>
     body { margin: 0; }
     svg {
       position: absolute;
@@ -12,7 +12,56 @@
     .box:hover {
       fill: steelblue;
     }
+  </style> -->
+  <style>
+    body { margin: 0; }
+    svg {
+      position: absolute;
+      top: 0;
+      left: 0;
+    }
+    rect { fill: transparent; }
+
+    p {
+      font-size: 14px;
+      color: #657c9e;
+      font-family: 'Inter', sans-serif;
+
+    }
+
+    a:link {
+    color: #657c9e;
+    background-color: transparent;
+    text-decoration: none;
+    font-weight:bold
+  }
+
+  a:visited {
+    color: #657c9e;
+    background-color: transparent;
+    text-decoration: none;
+  }
+
+  a:hover {
+    color: white;
+    background-color: transparent;
+    text-decoration: underline;
+  }
+
+    .container {
+            position: relative;
+            background: '#333'
+        }
+     
+        .txtCanvas {
+            position: absolute;
+            left: 0px;
+            top: 0px;
+            /*z-index: 10;*/
+            background:transparent;
+        }
   </style>
+  
   <script src='d3.v4.min.js'></script> 
  
 </head>
@@ -38,6 +87,10 @@ var xmin = 0;
 var xmax = width;
 var ymin = 0;
 var ymax = height;
+
+var flowers = [];
+var fallingPetals = [];
+var seedCenters = [];
 
 
 
@@ -102,13 +155,15 @@ function drawCircle(canvas, x1, y1, r){
 }
 
 
-function changeColor(color){
+function changeColor(color, da){
   var canvas = canvas_1;
 
   if(color == "orange"){
     // 252, 186, 3
-    canvas.strokeStyle = 'rgba(' + 252 + ', ' + 186 + ', ' +  3 + ', 0.5)';
-    canvas.fillStyle = 'rgba(' + 252 + ', ' + 186 + ', ' + 3 + ', 0.4)';
+    var newAlpha = 0.5//+da;
+    // console.log(newAlpha)
+    canvas.strokeStyle = 'rgba(' + 252 + ', ' + 186 + ', ' +  3 + ', ' + newAlpha +')';
+    canvas.fillStyle = 'rgba(' + 252 + ', ' + 186 + ', ' + 3 + ', '+ newAlpha + ')';
   } else if(color == "blue"){
     canvas.strokeStyle = 'rgba(' + 0 + ', ' + 0 + ', ' + 250 + ', 0.9)';
     canvas.fillStyle = 'rgba(' + 0 + ', ' + 0 + ', ' + 250 + ', 0.9)';
@@ -125,10 +180,13 @@ function changeColor(color){
 
 //--------------------------------------------------------------
 
-function drawPetal(canvas, cx, cy, r, angle){
+function makePetal(cx, cy, r, angle){
 
   r += randomRange(0, r/5)
  
+  // we want petals to rotate in downward direction when they fall
+  var rotDir = -1;
+  if(angle > 90 && angle < 270){ rotDir = 1; }
   
   // draw bezier shape of petal
   var rot = angle*Math.PI/180; // in radians
@@ -142,21 +200,12 @@ function drawPetal(canvas, cx, cy, r, angle){
 
   // get outer point of petal
   var p0 = getPoint({x:cx, y:cy}, 1.5*r, 2*r, 0, rot);
-  // drawCircle(canvas, p0.x, p0.y, 2)
-
-  // draw middle line for petal
-  canvas.beginPath();
-  canvas.moveTo(cx, cy);
-  canvas.lineTo(p0.x, p0.y);
-  canvas.stroke(); 
-
-  
 
   // first points after point
   // want random range of len for petal, to give more organic look, instead of len=10
   var ep1r = (r*1.9) + 5
   var ep1 = getPoint({x:cx, y:cy}, ep1r, 0, sAngle, rot);
-  var ep2r = (r*1.6) + randomRange(0, r/3)
+  var ep2r = (r*1.6) + 5;//randomRange(0, r/3)
   var ep2 = getPoint({x:cx, y:cy}, ep2r, 0, eAngle, rot);
   
   
@@ -164,11 +213,8 @@ function drawPetal(canvas, cx, cy, r, angle){
   // points for base curve of petal
   var m1r = (-1.2*r) + .5*r;
   var m1 = getPoint(ep1, m1r, 0, 0.3, rot)
-  m2r = (-1.2*r) + .5*r
+  var m2r = (-1.2*r) + .5*r
   var m2 = getPoint(ep2, m2r, 0, -0.3, rot)
-  
-
-
 
   // control points for bezier curves in petal
   var cp1 = getPoint({x:cx, y:cy}, 4*r, -.9*r, sAngle*.4, rot); // midpoint for curves to tip of petal
@@ -187,36 +233,140 @@ function drawPetal(canvas, cx, cy, r, angle){
   var cp2 = getPoint({x:cx, y:cy}, r, -.5*r, 0, rot); // base of petal control point
 
 
+  
+  return {"p0": p0, "ep1": ep1, "ep2": ep2, "ep2r": ep2r, "m1": m1, "m2": m2, "cp1": cp1, "cp1b": cp1b,
+          "cp3": cp3, "cp4": cp4, "cp2": cp2, "cx": cx, "cy": cy, 
+          "r":r, "sAngle": sAngle, "eAngle":eAngle, "sAngle2": sAngle2, "eAngle2": eAngle2, "angle": angle, 
+          "rotDir": rotDir
+        }
+
+
+}
+
+
+function rotateDroppingPetal(petal){
+
+  petal.angle+= (petal.rotDir * randomRange(1, 2)); //2;
+
+  var r = petal.r  //+= randomRange(0, r/5)
+  var rot = petal.angle*Math.PI/180; // in radians
+
+
+  // var sAngle = (25)*Math.PI/180; 
+  // var eAngle = (-25)*Math.PI/180;
+  
+  // get outer point of petal
+  petal.p0 = getPoint({x:petal.cx, y:petal.cy}, 1.5*r, 2*r, 0, rot);
+
+  // first points after point
+  var ep1r = (r*1.9) + 5;
+  petal.ep1 = getPoint({x:petal.cx, y:petal.cy}, ep1r, 0, petal.sAngle, rot);
+  var ep2r = (r*1.9) + 5;
+  petal.ep2 = getPoint({x:petal.cx, y:petal.cy}, ep2r, 0, petal.eAngle, rot);
+  
+  
+
+  // points for base curve of petal
+  var m1r = (-1.2*r) + .5*r;
+  petal.m1 = getPoint(petal.ep1, m1r, 0, 0.3, rot)
+  var m2r = (-1.2*r) + .5*r
+  petal.m2 = getPoint(petal.ep2, m2r, 0, -0.3, rot)
+
+  // control points for bezier curves in petal
+  petal.cp1 = getPoint({x:petal.cx, y:petal.cy}, 4*r, -.9*r, petal.sAngle*.4, rot); // midpoint for curves to tip of petal
+  petal.cp1b = getPoint({x:petal.cx, y:petal.cy}, 4*r, -.9*r, petal.eAngle*.4, rot); // midppint for right curve to tip of petal
+  
+  
+  // right/left mid curve control 
+  var cp3r = ep1r - ((ep1r-m1r)/8) 
+  petal.cp3 = getPoint({x:petal.cx, y:petal.cy}, cp3r, 0, petal.sAngle2, rot);
+  // drawCircle(canvas, cp3.x, cp3.y, 5)
+
+  var cp4r = ep2r - ((ep2r-m2r)/8)
+  petal.cp4 = getPoint({x:petal.cx, y:petal.cy}, cp4r, 0, petal.eAngle2, rot);
+  // drawCircle(canvas, cp4.x, cp4.y, 2)
+
+  petal.cp2 = getPoint({x:petal.cx, y:petal.cy}, r, -.5*r, 0, rot); // base of petal control point
+  
+}
+
+function growPetal(petal){
+
+  petal.r += 1;
+
+  var r = petal.r  //+= randomRange(0, r/5)
+  var rot = petal.angle*Math.PI/180; // in radians
+
+
+  // var sAngle = (25)*Math.PI/180; 
+  // var eAngle = (-25)*Math.PI/180;
+  
+  // get outer point of petal
+  petal.p0 = getPoint({x:petal.cx, y:petal.cy}, 1.5*r, 2*r, 0, rot);
+
+  // first points after point
+  var ep1r = (r*1.9) + 5;
+  petal.ep1 = getPoint({x:petal.cx, y:petal.cy}, ep1r, 0, petal.sAngle, rot);
+  var ep2r = (r*1.6) + 5;
+  petal.ep2 = getPoint({x:petal.cx, y:petal.cy}, ep2r, 0, petal.eAngle, rot);
+  
+  
+
+  // points for base curve of petal
+  var m1r = (-1.2*r) + .5*r;
+  petal.m1 = getPoint(petal.ep1, m1r, 0, 0.3, rot)
+  var m2r = (-1.2*r) + .5*r
+  petal.m2 = getPoint(petal.ep2, m2r, 0, -0.3, rot)
+
+  // midpoints for curves to top of petal
+  petal.cp1 = getPoint({x:petal.cx, y:petal.cy}, 4*r, -.9*r, petal.sAngle*.4, rot); 
+  petal.cp1b = getPoint({x:petal.cx, y:petal.cy}, 4*r, -.9*r, petal.eAngle*.4, rot); 
+  
+  
+  // right/left mid curve control 
+  var cp3r = ep1r - ((ep1r-m1r)/8) 
+  petal.cp3 = getPoint({x:petal.cx, y:petal.cy}, cp3r, 0, petal.sAngle2, rot);
+  // drawCircle(canvas, cp3.x, cp3.y, 5)
+
+  var cp4r = petal.ep2r - ((petal.ep2r-m2r)/8)
+  petal.cp4 = getPoint({x:petal.cx, y:petal.cy}, cp4r, 0, petal.eAngle2, rot);
+  // drawCircle(canvas_1, petal.cp4.x, petal.cp4.y, 2)
+
+  petal.cp2 = getPoint({x:petal.cx, y:petal.cy}, r, -.5*r, 0, rot); // base of petal control point
+  
+}
+
+
+function drawPetal(canvas, petal){
+
+  // draw middle line for petal
+  canvas.beginPath();
+  canvas.moveTo(petal.cx, petal.cy);
+  canvas.lineTo(petal.p0.x, petal.p0.y);
+  canvas.stroke(); 
+
  
   // canvas.beginPath()
   canvas.lineJoin = 'miter';
-  canvas.moveTo(p0.x, p0.y)
+  canvas.moveTo(petal.p0.x, petal.p0.y)
   
   
-  // draw a straight line, instead of a curve, in this part of the petal sometimes
-  if(randomRange(0,2) >= 0){
-    canvas.quadraticCurveTo(cp1.x, cp1.y, ep1.x, ep1.y);
-  } else {
-    canvas.lineTo(ep1.x, ep1.y)
-  }
+  
+  canvas.quadraticCurveTo(petal.cp1.x, petal.cp1.y, petal.ep1.x, petal.ep1.y);
+  
 
   canvas.stroke()
   
-  canvas.quadraticCurveTo(cp3.x, cp3.y, m1.x, m1.y);
+  canvas.quadraticCurveTo(petal.cp3.x, petal.cp3.y, petal.m1.x, petal.m1.y);
   
   
   // arc at bottom of petal
-    canvas.quadraticCurveTo(cp2.x, cp2.y, m2.x, m2.y);
+  canvas.quadraticCurveTo(petal.cp2.x, petal.cp2.y, petal.m2.x, petal.m2.y);
 
 
-  canvas.quadraticCurveTo(cp4.x, cp4.y, ep2.x, ep2.y);
-
-  // draw a straight line, instead of a curve, in this part of the petal sometimes
-  if(randomRange(0,2) >= 0){
-    canvas.quadraticCurveTo(cp1b.x, cp1b.y, p0.x, p0.y);
-  } else {
-    canvas.lineTo(p0.x, p0.y)
-  }
+  canvas.quadraticCurveTo(petal.cp4.x, petal.cp4.y, petal.ep2.x, petal.ep2.y);
+  canvas.quadraticCurveTo(petal.cp1b.x, petal.cp1b.y, petal.p0.x, petal.p0.y);
+  
   canvas.stroke()
   canvas.fill()
   canvas.closePath();
@@ -224,35 +374,24 @@ function drawPetal(canvas, cx, cy, r, angle){
 }
 
 
-function drawFlower(canvas, x, y){
 
-  var r = randomRange(10, 40)
+function makeFlower(x, y){
 
-  // center of flower
-  changeColor("")
-  drawCircle(canvas, x, y, r)
+  var size = 2
+  var maxSize = randomRange(10, 40)
+  var petals = [];
 
   var i = 5; //5;
   var da = 360/i;
-  var angle = 3;
+  var angle = 0; //randomRange(0,90);
 
-  // for drawing center of flower
-  var startRadius = 1/r;
-  var newRadius = startRadius;
-  var cAngle = 10/r;
-  var r2 = r/10;
-  //--------------------------------
 
-  changeColor("orange");
 
   // draw petals
   while(i>0){
     angle += da;
-
-    drawPetal(canvas, x, y, r, angle)
-
+    petals.push(makePetal(x,y,size,angle));
     i-=1;
-
   }
 
   // draw next round of petals
@@ -260,9 +399,7 @@ function drawFlower(canvas, x, y){
   i = 5
   while(i>0){
     angle += da;
-
-    drawPetal(canvas, x, y,  r, angle)
-
+    petals.push(makePetal(x,y,size,angle));
     i-=1;
 
   }
@@ -272,32 +409,96 @@ function drawFlower(canvas, x, y){
   i = 5
   while(i>0){
     angle += da;
-
-    drawPetal(canvas, x, y,  r, angle)
+    petals.push(makePetal(x,y,size,angle));
 
     i-=1;
 
   }
-  changeColor("")
+  
+  return {'petals': petals, 'cx': x, 'cy': y, 'size': size, 'maxSize': maxSize}
+
+}
 
 
-  i = 2*r
+function drawFlower(canvas, flower){
+
+  // var flower = makeFlower(x,y);
+  var size = flower.size;
+  var x = flower.cx;
+  var y = flower.cy
+
+  // center of flower
+  changeColor("", 0)
+  drawCircle(canvas, x, y, size);
+
+  // for drawing center of flower
+  var startRadius = 1/size;
+  var newRadius = startRadius;
+  var cAngle = 10/size;
+  var r2 = size/10;
+  //--------------------------------
+
+  // if(flower.petals.length > 0){
+    // draw petals of flower
+    changeColor("orange", -0.1);
+    for(var p in flower.petals){
+
+      // console.log(flower.petals[p].rotDir, flower.petals[p].angle)
+
+      drawPetal(canvas, flower.petals[p])
+    }
+  // }
+
+  //draw center of flower
+  changeColor("", 0)
+  i = 2*size
   while(i>0){
 
-    //draw center of flower
     cAngle += 1;
     newRadius += r2*(startRadius/newRadius)*.5 +.5; //1;
 
     var x1 = x + Math.cos(cAngle)*newRadius;
     var y1 = y + Math.sin(cAngle)*newRadius;
-    drawCircle(canvas, x1, y1, r/5)
+    drawCircle(canvas, x1, y1, size/5)
     i-=1;
   }
-
-
   
+}
 
-  
+
+function drawSeedCenter(canvas, flower){
+  // console.log('------------------------------')
+  // console.log('seed center', flower)
+  // console.log('------------------------------')
+
+  // var flower = makeFlower(x,y);
+  var size = flower.size;
+  var x = flower.cx;
+  var y = flower.cy
+
+  // center of flower
+  changeColor("", 0)
+  drawCircle(canvas, x, y, size);
+
+  // for drawing center of flower
+  var startRadius = 1/size;
+  var newRadius = startRadius;
+  var cAngle = 10/size;
+  var r2 = size/10;
+
+  //draw center of flower
+  changeColor("", 0)
+  i = 2*size
+  while(i>0){
+
+    cAngle += 1;
+    newRadius += r2*(startRadius/newRadius)*.5 +.5; //1;
+
+    var x1 = x + Math.cos(cAngle)*newRadius;
+    var y1 = y + Math.sin(cAngle)*newRadius;
+    drawCircle(canvas, x1, y1, size/5)
+    i-=1;
+  }
 
 }
 
@@ -313,23 +514,405 @@ function draw(canvas) {
     canvas.strokeStyle = 'rgba(' + 50 + ', ' + 100 + ', ' + 100 + ', 0.5)';
     canvas.fillStyle = 'rgba(' + 50 + ', ' + 100 + ', ' + 100 + ', 0.4)';
 
+    changeColor("orange", 1) // uncomment this, for falling petals to be orange
+    for(i in fallingPetals){
+      drawPetal(canvas, fallingPetals[i])
+    }
+
+
+    for(var i in flowers){
+      drawFlower(canvas, flowers[i]);
+    }
+
+
+    for(var s in seedCenters){
+      drawSeedCenter(canvas, seedCenters[s])
+    }
 
     
+    
+}
 
-   
-    var i = 20;
-    while(i>0){
 
-       var x = randomRange(0, width)
-       var y = randomRange(0, height);
 
-        drawFlower(canvas, x, y);
-        i-=1;
-    }
+function makeFlowers(num){
+
+  var i = num;
+  while(i>0){
+
+      var x = randomRange(0, width)
+      var y = randomRange(0, height);
+       
+      flowers.push(makeFlower(x,y));
+      i-=1;
+  }
+
 
 }
 
+// makeFlowers(10);
+makeFlowers(2);
 draw(canvas_1)
+
+
+
+function selectPetalToDrop(){
+  // console.log(" select a petal to drop")
+
+  // select random flower
+  // console.log(flowers.length)
+  if(flowers.length > 0){
+
+    var i = randomRange(0, flowers.length-1)
+
+    var flower = flowers[i]
+    // console.log('this flower: ', i, flower)
+
+
+    // select random petal from flower, if there are any left
+    if(flower.petals.length > 0){
+      i = randomRange(0, flower.petals.length-1)
+
+      var petal = flower.petals.splice(i, 1)[0]
+
+      // console.log(petal)
+
+
+      // move petal data to the fallingPetals array
+      fallingPetals.push(petal);
+    
+    }
+  }
+
+
+  
+
+}
+
+function updatePetals(flower, dx, dy){
+
+  //{"p0": p0, "ep1": ep1, "ep2": ep2, "m1": m1, "m2": m2, "cp1": cp1, "cp1b": cp1b,
+  // "cp3": cp3, "cp4": cp4, "cp2": cp2 }
+
+    var petals = flower.petals;
+
+    for(i in petals){
+
+      var p = petals[i];
+
+      p.p0.x += dx;
+      p.p0.y += dy;
+
+      p.ep1.x += dx;
+      p.ep1.y += dy;
+
+      p.ep2.x += dx;
+      p.ep2.y += dy;
+
+      p.m1.x += dx;
+      p.m1.y += dy;
+
+      p.m2.x += dx;
+      p.m2.y += dy;
+
+      p.cp1.x += dx;
+      p.cp1.y += dy;
+
+      p.cp1b.x += dx;
+      p.cp1b.y += dy;
+
+      p.cp3.x += dx;
+      p.cp3.y += dy;
+
+      p.cp4.x += dx;
+      p.cp4.y += dy;
+
+      p.cp2.x += dx;
+      p.cp2.y += dy;     
+        
+  }
+
+}
+
+
+function updateFallingPetals(){
+
+
+  var dx = 0;
+  var dy = randomRange(1,2);
+
+  for(var i=0; i<fallingPetals.length; i++){
+      var p = fallingPetals[i];
+
+      rotateDroppingPetal(p)
+
+      dx = p.rotDir * randomRange(0,1) * -1; // we want petals to drift apart, if from same flower
+
+      p.cx += dx;
+      p.cy += dy
+
+      p.p0.x += dx;
+      p.p0.y += dy;
+
+      p.ep1.x += dx;
+      p.ep1.y += dy;
+
+      p.ep2.x += dx;
+      p.ep2.y += dy;
+
+      p.m1.x += dx;
+      p.m1.y += dy;
+
+      p.m2.x += dx;
+      p.m2.y += dy;
+
+      p.cp1.x += dx;
+      p.cp1.y += dy;
+
+      p.cp1b.x += dx;
+      p.cp1b.y += dy;
+
+      p.cp3.x += dx;
+      p.cp3.y += dy;
+
+      p.cp4.x += dx;
+      p.cp4.y += dy;
+
+      p.cp2.x += dx;
+      p.cp2.y += dy;     
+
+
+
+  }
+
+}
+
+function updateCenters(){
+
+  for(s in seedCenters){
+    if(seedCenters[s].size < 2){ 
+          seedCenters.splice(s,1);
+          // s++;
+    }
+  }
+
+  for(s in seedCenters){
+    seedCenters[s].size-=1;
+  }
+
+}
+
+
+function update(){
+
+  /* Working here!
+
+    Instead of just drifting full flowers, I want to occasionally pick a petal to let drift down
+
+    Thoughts:
+
+      Periodically -- might trigger this in the timer:
+      1. pick a random flower
+      2. pick a random petal on that flower
+      3. remove that petal from the flower's data, and move it to an array of 'falling' petals
+      4. if that flower has no petals remaining, trigger it's 'explosion' of seeds
+
+      Every draw:
+      1. go through array of 'falling petals'
+      2. change position for each so that it is 'falling'
+      3. When petal has fallen offscreen, remove it from array of 'falling petals'
+
+      Would be nice:
+      1. At begining of 'fall'...
+      2. Petal turns a bit, as starting to fall
+      3. and drifts down
+      4. Maybe turning, maybe pointing down...will have to test and see which looks better
+
+  */
+
+  updateFallingPetals();
+
+  /* 
+
+   grow the flower until it reaches it's max size
+
+  */
+
+  for(flower in flowers){
+    var f = flowers[flower]
+
+    if(f.size < f.maxSize){ 
+      f.size+=1; 
+      for(p in f.petals){
+        growPetal(f.petals[p])
+      }
+    }
+
+    
+  }
+
+
+
+  /* 
+
+  now I want to add new flowers, if any flowers have lost all their petals  
+
+  ToDo: Still have to decide what to do with flower seeds/center
+
+  */
+
+
+  if(flowers.length > 0){
+    for(flower in flowers){
+
+      if(flowers[flower].petals.length<1){ 
+         var center = flowers.splice(flower, 1)[0]
+         seedCenters.push(center)
+      }
+    }
+  }
+
+
+  updateCenters();
+
+}
+
+
+//-----------------------------------------------------------
+var button_msg_1 = "<br /><h1>Sunflowers</h1><br />an animated meditation<br />by Kristin Henry<br /><br /> --> Click to continue <-- <br /><br />"
+var button_msg_2 = " || "
+
+makeButton_1();
+
+function makeButton_1(){
+
+    // intro button
+
+        var button_width = 340;
+        var button_height = 190;
+        var left = (width/2) - (button_width/2);
+        var top = (height/2) - (button_height/2);
+
+        var btn = document.createElement("BUTTON");   
+        btn.innerHTML = button_msg_1;                   
+        btn.id = "btn"
+        btn.style="position: absolute; top:"+
+              top+"px; left:"+left+"px; width:"+ 
+              button_width+ "px; height:"+button_height+ "px;" +
+             "font-size: 16px;" +
+              "border-radius:" + 36 +"px;" +
+            "background: #28487a;" + 
+            "opacity: 0.8;" +
+            "color: white;" +
+             "font-family: 'Inter', sans-serif;" +
+             "font-size: 15px;" +
+             "font-weight: 500;" +
+             // "text-transform: uppercase;"+
+              "letter-spacing: 1px;" +
+              "border: none;"+
+               " box-shadow: 0 18px 32px #00000030;"
+        document.body.appendChild(btn);
+
+        document.getElementById('btn').onclick = btnFunction_1;
+
+        make_button = false;
+    }
+
+function makeButton_2(button_msg, btnFunction){
+    // pause/play button
+
+        var button_width = 40;
+        var button_height = 40;
+        var left = (button_width/2);
+        var top = (height) - (button_height*1.5);
+
+        var btn = document.createElement("BUTTON");   
+        btn.innerHTML = button_msg;                   
+        btn.id = "btn"
+        btn.style="position: absolute; top:"+
+              top+"px; left:"+left+"px; width:"+ 
+              button_width+ "px; height:"+button_height+ "px;" +
+             "font-size: 16px;" +
+              "border-radius:" + 36 +"px;" +
+            "background: #646a75;" + 
+            "opacity: 0.5;" +
+            "color: white;" +
+             "font-family: 'Inter', sans-serif;" +
+             "font-size: 15px;" +
+             "font-weight: 500;" +
+             // "text-transform: uppercase;"+
+              "letter-spacing: 1px;" +
+              "border: none;"+
+               " box-shadow: 0 18px 32px #00000030;"
+        document.body.appendChild(btn);
+
+        document.getElementById('btn').onclick = btnFunction;
+
+        make_button = false;
+    }
+
+function btnFunction_1(){
+        
+        var btn = document.getElementById('btn');
+        btn.parentNode.removeChild(btn)
+
+        timer_elapsed = max_time; // make sure timer is done
+
+        max_time = 5000000;
+        timer = setInterval(tickFxn, tick);
+
+        makeButton_2(" || ", btnFunction_2)
+
+
+        var btn2 = document.getElementById('btn2');
+        // if(btn2 == null) makeButton_3(" ? ", btnFunction_3);
+
+}
+
+function btnFunction_2(){
+
+    clearInterval(timer)
+
+    var btn = document.getElementById('btn');
+    btn.parentNode.removeChild(btn);
+
+    makeButton_2(" > ", btnFunction_1)
+    // makeButton_3(" ? ", btnFunction_3)
+}
+
+
+//------------------------------------------------------------
+// This portion controls the timer loop
+var timer_elapsed = 0;
+var max_time = 20; //2000; //50; //500; //1000; //50000;
+
+
+// slowing down tick/timer gives time for calculations, smooth animations
+var tick = 80; //10; //50; //1000;  
+timer = setInterval(tickFxn, tick);
+
+var t = 0;
+function tickFxn(){
+  t+=1;
+
+  // occasionally pick a petal to drop
+  if(randomRange(0,20)<1){
+    selectPetalToDrop();
+  }
+
+  if((randomRange(0,50)<1) && (flowers.length<10) ){
+    makeFlowers(1)
+  }
+  
+  // console.log(t)
+  // testBounds();
+  update();
+
+  draw(canvas_1);
+
+  // comment this out, if we want it to keep running without timing out
+  if(t > max_time) clearInterval(timer)
+}
 
 
 </script>
