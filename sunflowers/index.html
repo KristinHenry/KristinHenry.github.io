@@ -93,6 +93,23 @@ var fallingPetals = [];
 var seedCenters = [];
 
 
+var backgroundColors = [[36, 81, 166],[52, 198, 235], [44, 36, 56],[59, 72, 97], [35, 39, 61]]
+var bgColorIndex = 0;
+var maxColorIndex = 100; //200;//100;
+
+
+// var colorsScale = d3.scaleLinear()
+//     .domain(d3.ticks(0, maxColorIndex, 12))
+//     .range(["#5E4FA2", "#3288BD", "#66C2A5", "#ABDDA4", "#E6F598", 
+//     "#FFFFBF", "#FEE08B", "#FDAE61", "#F46D43", "#D53E4F", "#9E0142","#5E4FA2"]);
+
+
+var colorsScale = d3.scaleLinear()
+    .domain(d3.ticks(0, maxColorIndex, 6))
+    .range(["#5E4FA2", "#3288BD", "#66C2A5", "#66C2A5", "#3288BD", "#5E4FA2", "#5E4FA2"]);
+
+
+
 
 // add canvas
 var canvas_1 = d3.select('#chart')
@@ -196,8 +213,6 @@ function makePetal(cx, cy, r, angle){
   var eAngle2 = (-randomRange(30,35))*Math.PI/180; 
 
 
-
-
   // get outer point of petal
   var p0 = getPoint({x:cx, y:cy}, 1.5*r, 2*r, 0, rot);
 
@@ -207,7 +222,6 @@ function makePetal(cx, cy, r, angle){
   var ep1 = getPoint({x:cx, y:cy}, ep1r, 0, sAngle, rot);
   var ep2r = (r*1.6) + 5;//randomRange(0, r/3)
   var ep2 = getPoint({x:cx, y:cy}, ep2r, 0, eAngle, rot);
-  
   
 
   // points for base curve of petal
@@ -290,6 +304,7 @@ function rotateDroppingPetal(petal){
   
 }
 
+
 function growPetal(petal){
 
   petal.r += 1;
@@ -328,7 +343,7 @@ function growPetal(petal){
   petal.cp3 = getPoint({x:petal.cx, y:petal.cy}, cp3r, 0, petal.sAngle2, rot);
   // drawCircle(canvas, cp3.x, cp3.y, 5)
 
-  var cp4r = petal.ep2r - ((petal.ep2r-m2r)/8)
+  var cp4r = ep2r - ((ep2r-m2r)/8)
   petal.cp4 = getPoint({x:petal.cx, y:petal.cy}, cp4r, 0, petal.eAngle2, rot);
   // drawCircle(canvas_1, petal.cp4.x, petal.cp4.y, 2)
 
@@ -503,12 +518,27 @@ function drawSeedCenter(canvas, flower){
 }
 
 
+
+
+function updateBackgroundColor(){
+    /* Instead of drawing two transparent squares...
+        Getting interpolated colors from D3.scale, it's more performant
+    */
+
+    bgColorIndex+=1;
+    if(bgColorIndex>maxColorIndex){ bgColorIndex = 1; }
+  
+}
+
 function draw(canvas) {
 
     canvas.clearRect(0, 0, width, height);
 
-    canvas.fillStyle = "#34c6eb";
+
+    // use interpolated color scale for background color
+    canvas.fillStyle = colorsScale(bgColorIndex);
     canvas.fillRect(0, 0, width, height);
+
 
     // set up colors
     canvas.strokeStyle = 'rgba(' + 50 + ', ' + 100 + ', ' + 100 + ', 0.5)';
@@ -903,10 +933,15 @@ function tickFxn(){
   if((randomRange(0,50)<1) && (flowers.length<10) ){
     makeFlowers(1)
   }
+
+  if(randomRange(0,10)<1){ 
+    updateBackgroundColor(); 
+  }
   
   // console.log(t)
   // testBounds();
   update();
+  
 
   draw(canvas_1);
 
