@@ -68,7 +68,10 @@
 <body>
  <html>
 <div id="chart"></div> 
-
+<div id="container"><canvas id='txtCanvas' class='txtCanvas'></canvas>
+    <div id="infoDiv" style="position: absolute; bottom: 5px; left: 120px">
+    </div>
+  </div>
 </html>
 
 
@@ -91,6 +94,7 @@ var ymax = height;
 var flowers = [];
 var fallingPetals = [];
 var seedCenters = [];
+var rings = [];
 
 
 var backgroundColors = [[36, 81, 166],[52, 198, 235], [44, 36, 56],[59, 72, 97], [35, 39, 61]]
@@ -181,6 +185,9 @@ function changeColor(color, da){
     // console.log(newAlpha)
     canvas.strokeStyle = 'rgba(' + 252 + ', ' + 186 + ', ' +  3 + ', ' + newAlpha +')';
     canvas.fillStyle = 'rgba(' + 252 + ', ' + 186 + ', ' + 3 + ', '+ newAlpha + ')';
+  } else if(color == "white"){
+    canvas.strokeStyle = 'rgba(' + 255 + ', ' + 255 + ', ' + 255 + ', 0.02)';
+    canvas.fillStyle = 'rgba(' + 0 + ', ' + 0 + ', ' + 250 + ', 0)';
   } else if(color == "blue"){
     canvas.strokeStyle = 'rgba(' + 0 + ', ' + 0 + ', ' + 250 + ', 0.9)';
     canvas.fillStyle = 'rgba(' + 0 + ', ' + 0 + ', ' + 250 + ', 0.9)';
@@ -458,9 +465,8 @@ function drawFlower(canvas, flower){
     changeColor("orange", -0.1);
     for(var p in flower.petals){
 
-      // console.log(flower.petals[p].rotDir, flower.petals[p].angle)
-
       drawPetal(canvas, flower.petals[p])
+
     }
   // }
 
@@ -477,7 +483,19 @@ function drawFlower(canvas, flower){
     drawCircle(canvas, x1, y1, size/5)
     i-=1;
   }
+
   
+  
+}
+
+function drawRing(canvas, x,y, size){
+
+  changeColor("white", 0)
+  // canvas.lineWidth = 80;
+  canvas.fillStyle = 'rgba(' + 255 + ', ' + 255 + ', ' + 255 + ', 0.01)';
+  drawCircle(canvas, x, y, size)
+  // canvas.lineWidth = 1;
+
 }
 
 
@@ -530,6 +548,14 @@ function updateBackgroundColor(){
   
 }
 
+function makeRings(){
+  var n = 100;
+  while(n>0){
+    n-=1;
+    rings.push({'x': randomRange(-100, width+100), 'y':randomRange(0,height), 'size':height/4+randomRange(10,200) })
+  }
+}
+
 function draw(canvas) {
 
     canvas.clearRect(0, 0, width, height);
@@ -539,10 +565,20 @@ function draw(canvas) {
     canvas.fillStyle = colorsScale(bgColorIndex);
     canvas.fillRect(0, 0, width, height);
 
+    
+    
+
 
     // set up colors
     canvas.strokeStyle = 'rgba(' + 50 + ', ' + 100 + ', ' + 100 + ', 0.5)';
     canvas.fillStyle = 'rgba(' + 50 + ', ' + 100 + ', ' + 100 + ', 0.4)';
+
+    // background 'noise'
+    changeColor("white", 0)
+    for(i in rings){
+      drawRing(canvas, rings[i].x, rings[i].y, rings[i].size)
+    }
+    
 
     changeColor("orange", 1) // uncomment this, for falling petals to be orange
     for(i in fallingPetals){
@@ -582,6 +618,7 @@ function makeFlowers(num){
 
 // makeFlowers(10);
 makeFlowers(2);
+makeRings();
 draw(canvas_1)
 
 
@@ -732,6 +769,18 @@ function updateCenters(){
 
 }
 
+function updateRings(){
+  for(i in rings){
+    // console.log(rings[i])
+    var r = rings[i];
+    if(r.x > (width+(r.size/2))){ r.x = 0; }
+
+    dx = randomRange(0,2);
+    dy = 0;
+    r.x += dx;
+  }
+}
+
 
 function update(){
 
@@ -805,6 +854,8 @@ function update(){
 
   updateCenters();
 
+  updateRings();
+
 }
 
 
@@ -848,6 +899,24 @@ function makeButton_1(){
         make_button = false;
     }
 
+function btnFunction_1(){
+        
+        var btn = document.getElementById('btn');
+        btn.parentNode.removeChild(btn)
+
+        timer_elapsed = max_time; // make sure timer is done
+
+        max_time = 5000000;
+        timer = setInterval(tickFxn, tick);
+
+        makeButton_2(" || ", btnFunction_2)
+
+
+        var btn2 = document.getElementById('btn2');
+        if(btn2 == null) makeButton_3(" ? ", btnFunction_3);
+
+}
+
 function makeButton_2(button_msg, btnFunction){
     // pause/play button
 
@@ -881,23 +950,39 @@ function makeButton_2(button_msg, btnFunction){
         make_button = false;
     }
 
-function btnFunction_1(){
-        
-        var btn = document.getElementById('btn');
-        btn.parentNode.removeChild(btn)
+function makeButton_3(button_msg, btnFunction){
+    // info button
 
-        timer_elapsed = max_time; // make sure timer is done
+        var button_width = 40;
+        var button_height = 40;
+        var left = (width - button_width*1.6);
+        var top = (height) - (button_height*1.5);
 
-        max_time = 5000000;
-        timer = setInterval(tickFxn, tick);
+        var btn = document.createElement("BUTTON");   
+        btn.innerHTML = button_msg;                   
+        btn.id = "btn2"
+        btn.style="position: absolute; top:"+
+              top+"px; left:"+left+"px; width:"+ 
+              button_width+ "px; height:"+button_height+ "px;" +
+             "font-size: 16px;" +
+              "border-radius:" + 36 +"px;" +
+            "background: #646a75;" + 
+            "opacity: 0.5;" +
+            "color: white;" +
+             "font-family: 'Inter', sans-serif;" +
+             "font-size: 15px;" +
+             "font-weight: 500;" +
+             // "text-transform: uppercase;"+
+              "letter-spacing: 1px;" +
+              "border: none;"+
+               " box-shadow: 0 18px 32px #00000030;"
+        document.body.appendChild(btn);
 
-        makeButton_2(" || ", btnFunction_2)
+        document.getElementById('btn2').onclick = btnFunction;
+
+    }
 
 
-        var btn2 = document.getElementById('btn2');
-        // if(btn2 == null) makeButton_3(" ? ", btnFunction_3);
-
-}
 
 function btnFunction_2(){
 
@@ -907,7 +992,34 @@ function btnFunction_2(){
     btn.parentNode.removeChild(btn);
 
     makeButton_2(" > ", btnFunction_1)
-    // makeButton_3(" ? ", btnFunction_3)
+    makeButton_3(" ? ", btnFunction_3)
+}
+
+function btnFunction_3(){
+
+  var w = width/2;
+
+  var p = document.getElementById('info')
+  var left = width/2 - ((w/2)*1.5);
+  var top = -140; //(40*1.5);
+
+  if(p == null){ 
+    
+    var info = document.createElement("P"); 
+    info.innerHTML = "I've been creating this animated meditation while working through anxiety and grief. <br/><br/>" +
+     "--<a href='https://twitter.com/KristinHenry' target='_blank'>Kristin Henry</a>"
+    info.id = 'info' 
+    info.style="position: absolute; top:"+top+
+              "px; left:"+left+"px; width:"+ w + "px;"
+
+
+    var targ = document.getElementById('infoDiv')
+    targ.appendChild(info);
+
+  } else {
+    p.parentNode.removeChild(p)
+  }
+
 }
 
 
