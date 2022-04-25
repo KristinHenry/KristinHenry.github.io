@@ -42,7 +42,7 @@
 
 
 
-var datafile = "responses_v2.csv"
+var datafile = "responses_v3.csv"
 var dataset;
 
 var width = window.innerWidth-4, 
@@ -591,40 +591,43 @@ function createFishFromData(d, c){
     }
   }
 
-  f.s_connected = d["Connected to community"]*1;
-  f.s_appreciative = d["Appreciative"]*1;
-  f.s_comfort = d["How comfortable are you with acknowledging your impermanence and talking about death?"]*1;
+  if(d != undefined){
+
+    f.s_connected = d["Connected to community"]*1;
+    f.s_appreciative = d["Appreciative"]*1;
+    f.s_comfort = d["How comfortable are you with acknowledging your impermanence and talking about death?"]*1;
 
 
-  // size fish by survey response 
-  // f.r1 *= (f.s_appreciative);
-  // f.r1 = rscale(f.s_appreciative+f.s_connected)
-  f.r1 = rscale(f.s_appreciative+f.s_connected+f.s_comfort)
-  // f.r1 = rscale(2)
+    // size fish by survey response 
+    // f.r1 *= (f.s_appreciative);
+    // f.r1 = rscale(f.s_appreciative+f.s_connected)
+    f.r1 = rscale(f.s_appreciative+f.s_connected+f.s_comfort)
+    // f.r1 = rscale(2)
 
-  f.s_name = d["What is the name of the person or thing you wish to honor through your attendance at Reimagine."]
-  f.s_relation = d["What is their relation to you?"]
+    f.s_name = d["What is the name of the person or thing you wish to honor through your attendance at Reimagine."]
+    f.s_relation = d["What is their relation to you?"]
 
-  // add 'My' to relation, only if not already in response
-  if(f.s_relation.length > 1 && !f.s_relation.toLowerCase().includes('my')) f.s_relation = "My " + f.s_relation;
+    // add 'My' to relation, only if not already in response
+    if(f.s_relation.length > 1 && !f.s_relation.toLowerCase().includes('my')) f.s_relation = "My " + f.s_relation;
 
 
-  f.bubble.textlength = f.s_name.length + f.s_relation.length;
-  if(f.bubble.textlength < 20) f.bubble.textlength = 20 
+    f.bubble.textlength = f.s_name.length + f.s_relation.length;
+    if(f.bubble.textlength < 20) f.bubble.textlength = 20 
             
-  // create initial text for bubble 
-  f.bubble.txt = ".."
-  var i = f.bubble.textlength+20;
-      while(i--){
-      f.bubble.txt = f.bubble.txt.concat("..")
+    // create initial text for bubble 
+    f.bubble.txt = ".."
+    var i = f.bubble.textlength+20;
+        while(i--){
+        f.bubble.txt = f.bubble.txt.concat("..")
+    }
+
+    // text with data. this will replace inital dots-text
+    f.bubble.txt2 = f.s_name + "......" + f.s_relation;
+
+    dots.push(f)
+
+    id+=1;  // counter for all fish created
   }
-
-  // text with data. this will replace inital dots-text
-  f.bubble.txt2 = f.s_name + "......" + f.s_relation;
-
-  dots.push(f)
-
-  id+=1;  // counter for all fish created
 
 }
 
