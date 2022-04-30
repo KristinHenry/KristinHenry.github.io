@@ -7,14 +7,14 @@ var config = {
     title: 'Stickers And Stamps',
     subtitle: 'A Penpal Data-Art Project',
     byline: '',
-    footer: 'Stickers, Data Collection, and Data Visualization by <a href="http://kristinhenry.github.io/">Kristin Henry</a>, 2020-2021',
+    footer: 'Stickers, Data Collection, and Data Visualization by <a href="http://kristinhenry.github.io/">Kristin Henry</a>, 2020-2022',
     chapters: [
         {
             id: 'intro',
             alignment: 'center',
             // title: '',
-            description: '',
-            location: {
+        description: "When COVID hit, I had all these stickers I'd made for in-person events.<br /><br /> At the same time, our USPS was under attack.  I felt powerless. <br /><br /> So I started offering my stickers to friends. Then it occured to me to keep track of how long it took to arrive.<br /><br /> After making signups public, I've mailed out hundreds of stickers.   <br />Where have I mailed them?",
+            location: { 
                 center: [-2.44486, 27.77139],
                 zoom: 1.2,
                 pitch: 0.00,
@@ -405,6 +405,21 @@ var config = {
             onChapterEnter: [],
             onChapterExit: []
         },
+        // {
+        //     id: 'zips',
+        //     alignment: 'left',
+        //     title: 'Your Zipcode?',
+        //     image: '',
+        //     description: "What's going on in your zip code?",
+        //     location: {
+        //         center: [-110.44486, 34.77139],
+        //         zoom: 2.6,
+        //         pitch: 14.00,
+        //         bearing: 0.00
+        //     },
+        //     onChapterEnter: [],
+        //     onChapterExit: []
+        // },
         {
             id: 'closing',
             alignment: 'center',

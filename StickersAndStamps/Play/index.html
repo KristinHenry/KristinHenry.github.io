@@ -103,10 +103,6 @@
 
 
 
-
-
-
-
         .chart {
             width:20;
         }
@@ -192,13 +188,11 @@ var alignments = {
 }
 
 function getLayerPaintType(layer) {
-  
         var layerType = map.getLayer(layer).type;
 
         if(layerType){
          return layerTypes[layerType];
-        }
-    
+        }  
 }
 
 function setLayerOpacity(layer, opacity) {
@@ -250,6 +244,20 @@ var colorRegion = d3.scaleOrdinal()
             d.travelTime = +d.travelTime;
 
             return d.travelTime;
+}
+
+
+function getZipCounts(data){
+    zips = {};
+
+    for(i in data){
+        if(data[i]["Country"] === "US"){
+            var zip = data[i]["Zipcode "];
+            if(zip in zips){ zips[zip] +=1; } else{ zips[zip] = 1; }
+        }
+    }
+
+    return zips;
 }
 
 
@@ -534,6 +542,8 @@ map.on("load", function() {
 
             drawDensity(data_7, "#intro7")
 
+            drawZipcodes(data, "#zips")
+
         })
 
 
@@ -608,7 +618,7 @@ function drawStory(targ){
         .attr("width", "100")
         .attr("class", "storytext")
         .attr("font-size", "2em")
-        .text("I've mailed stickers all over the place.  Click on the dots.")
+        .text("I've mailed stickers all over the place.  Click on the dots to see the counts.")
         .call(wrap, 200, 0, x_text)
 
 
@@ -837,6 +847,9 @@ function drawDensity(data_raw, targ){
                     .attr("transform", "translate(" + margin.left + "," + margin.top + ")")
 
 
+    
+
+
 
     // Need to get longest delivery time, for number of bins
     // get travelTime for all data (unfiltered)
@@ -1003,6 +1016,39 @@ function drawCurve(linedata, targ, x, y, color){
       .attr("d", line) // 11. Calls the line generator 
       .style('fill', color)
       .style('fill-opacity', .4)
+
+}
+
+
+function drawZipcodes(data_raw, targ){
+
+    //-------------------------------------
+    // experimenting here...will need to move this code later
+
+    // var zips = data_raw.map(function(d){ return d["Zipcode "]; })
+    // console.log('zips: ', zips)
+
+    // var zips2 = d3.nest()
+    //             .key(function(d){ return d["Zipcode "]})
+    //             .rollup(function(leaves){ return leaves.length} )
+    //             .entries(data.raw)
+
+    // var zips2 = data_raw.map(function(d){ return d["Zipcode "]; })
+
+    // console.log('zip2: ', data_raw)
+
+    var zips = getZipCounts(data_raw)
+    console.log('zips: ', zips)
+
+    console.log(zips['94119'])
+    
+    //----------------------------------------
+
+    //  Add the SVG to the page 
+    var svg = d3.select(targ).append("svg")
+        .attr("width", width + margin.left + margin.right)
+        .attr("height", height + margin.top + margin.bottom)
+        .style("background-color", "#333333")
 
 }
 
