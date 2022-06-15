@@ -4,7 +4,7 @@ var config = {
     showMarkers: false,
     testing: true,
     theme: 'dark',
-    title: 'Stickers And Stamps',
+    title: 'TEST Stickers And Stamps',
     subtitle: 'A Penpal Data-Art Project',
     byline: '',
     footer: 'Stickers, Data Collection, and Data Visualization by <a href="http://kristinhenry.github.io/">Kristin Henry</a>, 2020-2022',
@@ -12,8 +12,9 @@ var config = {
         {
             id: 'intro',
             alignment: 'center',
-            // title: '',
-        description: "When COVID hit, I had all these stickers I'd made for in-person events.<br /><br /> At the same time, our USPS was under attack.  I felt powerless. <br /><br /> So I started offering my stickers to friends. Then it occured to me to keep track of how long it took to arrive.<br /><br /> After making signups public, I've mailed out hundreds of stickers.   <br />Where have I mailed them?",
+            title: "TEST When COVID hit, I found myself staring at the pile of art stickers I was going to give away at conferences and shows…all cancelled because Covid.",
+            image: 'lotsOfStickers.jpg',
+        description: "TEST At the same time, our USPS was under attack.  I felt powerless. I needed to do something joyful.<br /><br /> So I started mailing my stickers to friends. I work with data, so, of course, I asked them to tell me how long it took to arrive. I collected a small, but promising date set.<br /><br /> After making signups public, I've mailed out hundreds of stickers.   <br />Where have I mailed them?",
             location: { 
                 center: [-2.44486, 27.77139],
                 zoom: 1.2,
@@ -41,7 +42,40 @@ var config = {
                     opacity: 0
                 }
             ]
-        },        
+        }, 
+        {
+            id: 'intro2',
+            alignment: 'center',
+            // title: '',
+        description: "Some more text here",
+            location: { 
+                center: [-2.44486, 27.77139],
+                zoom: 1.2,
+                pitch: 0.00,
+                bearing: 0.00
+            },
+            onChapterEnter: [
+                {
+                    layer: 'mail-circles',
+                    opacity: 0
+                },
+                {
+                    layer: 'mail-centers',
+                    opacity: 0
+                }
+                ,
+                {
+                    layer: 'mail-center-lines',
+                    opacity: 0
+                }
+            ],
+            onChapterExit: [
+                {
+                    layer: 'mail-circles',
+                    opacity: 0
+                }
+            ]
+        },               
         {
             id: 'intro7',
             alignment: 'center',

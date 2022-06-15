@@ -1,5 +1,19 @@
 # stickersMapDraft
 
+
+## new text --05/20/2022
+
+
+#intro
+
+<h1>Before Covid hit, I made a bunch of stickers to give away at conferences and shows.</h1>
+
+But they all were cancelled...because of Covid. What was I going to do with all these stickers?<br /><br />At the same time, our USPS was under attack. I needed to do something, no matter how small.<br /><br />I started mailing stickers to friends, and asked them to tell me when they arrived.<br /><br />After a few weeks, I had a small, but promising, date set.<br /><br />So I opened up signups to the general public, and started mailing more of my stickers. 
+
+
+
+----------------------------------------------------------
+
 ## old text
 
 I was going to give these away at conferences and shows that were cancelled because of Covid...<br><br>I started mailing them to friends, and tracking how long it took my envelopes to travel from my local Post Office here in San Francisco to their destinations.
