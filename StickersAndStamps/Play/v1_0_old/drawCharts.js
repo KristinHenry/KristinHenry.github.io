@@ -1,8 +1,6 @@
 
 function drawLinks(data, targ, color_by){
 
-  console.log("***********8     draw links")
-
   var containerWidth = +d3.select(targ).style('width').slice(0, -2)
 
   var margin = {top: 50, right: 60, bottom: 40, left: 50},
@@ -15,7 +13,6 @@ function drawLinks(data, targ, color_by){
     var x2 = d3.scaleLinear()
       .range([0, width]);
 
-    console.log(data)
 
     var xAxis1 = d3.axisTop(x1).ticks(5).tickSizeOuter(0);
     var xAxis2 = d3.axisBottom(x2).ticks(5).tickSizeOuter(0);
@@ -28,13 +25,10 @@ function drawLinks(data, targ, color_by){
     .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
 
 
-    // console.log('distance', d.distance)
+    console.log('distance', d.distance)
 
     x1.domain(d3.extent(data, function(d) { return (d.travelTime > 0 ? d.travelTime : 0); })).nice();
     x2.domain(d3.extent(data, function(d) { return (d.travelTime > 0 ? d.distance : 0); })).nice();
-
-
-    console.log('testing')
 
 
     //link generator
@@ -105,8 +99,6 @@ function drawCurve(linedata, targ, x, y, color){
 }
 
 function drawDensity(data_raw, targ){
-
-    console.log('draw density chart')
 
     var color = d3.scaleOrdinal().range(["#c6bad1","#5cbf84", "#e3cd91", "#4287f5", "#9743f7"])
 

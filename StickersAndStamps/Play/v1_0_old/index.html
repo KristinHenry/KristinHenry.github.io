@@ -1,4 +1,4 @@
-0<!DOCTYPE html>
+<!DOCTYPE html>
 <html>
 <head>
     <meta charset='utf-8' />
@@ -188,31 +188,25 @@ var alignments = {
     'full': 'fully'
 }
 
-
 function getLayerPaintType(layer) {
-    if(layer){
         var layerType = map.getLayer(layer).type;
 
         if(layerType){
          return layerTypes[layerType];
         }  
-    }
 }
-
 
 function setLayerOpacity(layer, opacity) {
     var paintProps = getLayerPaintType(layer.layer);
-    if(paintProps){
-        paintProps.forEach(function(prop) {
-            var options = {};
-            if (layer.duration) {
-                var transitionProp = prop + "-transition";
-                options = { "duration": layer.duration };
-                map.setPaintProperty(layer.layer, transitionProp, options);
-            }
-            map.setPaintProperty(layer.layer, prop, layer.opacity, options);
-        });
-    }
+    paintProps.forEach(function(prop) {
+        var options = {};
+        if (layer.duration) {
+            var transitionProp = prop + "-transition";
+            options = { "duration": layer.duration };
+            map.setPaintProperty(layer.layer, transitionProp, options);
+        }
+        map.setPaintProperty(layer.layer, prop, layer.opacity, options);
+    });
 }
 
 
@@ -245,14 +239,12 @@ var colorRegion = d3.scaleOrdinal()
                 // .domain(["US", "Canada", "Europe", "Australia", "EastAsia"])
                 .range(["#c6bad1","#5cbf84", "#e3cd91", "#4287f5", "#9743f7"])
 
-var dateMax_1 = parseTime("2020-12-10 0:0:00")
-            // var dateMax_1 = parseTime("9/1/2021")
-            // var dateMax_1 = parseTime("05/16/2022")
-
 
 
  function getTravelTime(d){
 
+        // d.mailed = parseTime(d["dateMailed"])
+        // d.arrived = parseTime(d["dateArrived"])
 
             d.travelTime = 0;
             if(d.mailed && d.arrived) d.travelTime = d3.timeDay.count(d.mailed,d.arrived);
@@ -270,7 +262,7 @@ function getZipCounts(data){
     for(i in data){
         if(data[i]["country"] === "US"){
             var zip = data[i]["zipcode"];
-            // console.log(zip)
+            console.log(zip)
             if(zip in zips){ zips[zip] +=1; } else{ zips[zip] = 1; }
         }
     }
@@ -393,16 +385,11 @@ map.on("load", function() {
     d3.csv(datafile)
       .then(function(data) {
 
-            var earlyLetters = {"type": "FeatureCollection", "features": []};
-            var laterLetters = {"type": "FeatureCollection", "features": []};
-            var earlySortingCenters = {"type": "FeatureCollection", "features": []}
-            var laterSortingCenters = {"type": "FeatureCollection", "features": []}
+            var myjson = {"type": "FeatureCollection", "features": []}
             var notYetReported = {"type": "FeatureCollection", "features": []}
-            
-            var earlyLines = {"type": "FeatureCollection", "features": []}
-            var laterLines = {"type": "FeatureCollection", "features": []}
+            var sortingCenters = {"type": "FeatureCollection", "features": []}
+            var mylines = {"type": "FeatureCollection", "features": []}
 
-            var lats = [] // for keeping track of sorting centers
 
             data.forEach(function(d,i) {
 
@@ -418,20 +405,19 @@ map.on("load", function() {
                     d.mailed = parseTime(d["dateMailed"])
                     d.arrived = parseTime(d["dateArrived"])
 
-                    // console.log('request', parseTime(d.dateRequested), dateMax_1)
-
 
                     //just for now, change region to US or Canada if that's the country too
                     if(d["country"] == "US" || d["country"] == "Canada" || d["country"] == "Australia") d["region"] = d["country"];
 
                     var travelTime = getTravelTime(d);
 
+                    console.log('****travel time: ', travelTime)
 
                     // I want to show the locations requested, even if not 'arrived'
                     if(travelTime == 0){
 
-                        // console.log('-----------------------')
-                        // console.log(d)
+                        console.log('-----------------------')
+                        console.log(d)
 
                         notYetReported.features.push({
                             "type": "Feature",
@@ -441,113 +427,59 @@ map.on("load", function() {
                                       },
                                       "properties": {
                                         "travelTime": travelTime,
-                                        "color": "white" 
+                                        "color": "grey" 
                                       }
                         })
 
                     }
 
                     // now lets look at requests we have arrival data for 
-                    if(travelTime > 0){
+                    if(travelTime > 0 ){
 
-                        // first set of mail data
-                        if(parseTime(d.dateRequested) <=  dateMax_1){
-                            earlyLetters.features.push({
-                                "type": "Feature",
-                                          "geometry": {
-                                            "type": "Point",
-                                            "coordinates": [d.lon, d.lat]
-                                          },
-                                          "properties": {
-                                            "travelTime": travelTime,
-                                            "color": colorScale(travelTime)
-                                          }
-                            })
+                        console.log(d.lon, d.lat)
 
-                        } else {
+                        myjson.features.push({
+                            "type": "Feature",
+                                      "geometry": {
+                                        "type": "Point",
+                                        "coordinates": [d.lon, d.lat]
+                                      },
+                                      "properties": {
+                                        "travelTime": travelTime,
+                                        "color": colorScale(travelTime)
+                                      }
+                        })
 
-                            // ongoing mail data
-                            laterLetters.features.push({
-                                "type": "Feature",
-                                          "geometry": {
-                                            "type": "Point",
-                                            "coordinates": [d.lon, d.lat]
-                                          },
-                                          "properties": {
-                                            "travelTime": travelTime,
-                                            "color": colorScale(travelTime)
-                                          }
-                            })
-
-                        }
 
                         // these are the open circles for the usps sorting centers 
-                            // doing this until I can figure out simpler way to get sorting centers saved only once.
                         if(d["country"] == "US"){
                                                 
-                            if(parseTime(d.dateRequested) <=  dateMax_1){
 
-                                var i = lats.indexOf(d.uspsCenterLat)
-                                if(i<0){
-                                    lats.push(d.uspsCenterLat)
-                                    earlySortingCenters.features.push({
-                                        "type": "Feature",
-                                                "geometry": {
-                                                    "type": "Point",
-                                                    "coordinates": [d.uspsCenterLon, d.uspsCenterLat]
-                                                },
-                                                "properties": {
-                                                    "travelTime": travelTime,
-                                                    "color": "white"
-                                                }
-                                    })
-                                }
-                            } else {
-                                // deal with later sorting centers here
-                                var i = lats.indexOf(d.uspsCenterLat)
-                                if(i<0){
-                                    lats.push(d.uspsCenterLat)
-                                    laterSortingCenters.features.push({
-                                        "type": "Feature",
-                                                "geometry": {
-                                                    "type": "Point",
-                                                    "coordinates": [d.uspsCenterLon, d.uspsCenterLat]
-                                                },
-                                                "properties": {
-                                                    "travelTime": travelTime,
-                                                    "color": "white"
-                                                }
-                                    })
-                                }
-                            }
+                            sortingCenters.features.push({
+                                "type": "Feature",
+                                        "geometry": {
+                                            "type": "Point",
+                                            "coordinates": [d.uspsCenterLon, d.uspsCenterLat]
+                                        },
+                                        "properties": {
+                                            "travelTime": travelTime,
+                                            "color": "white"//colorScale(travelTime)
+                                        }
 
-                            
-                            if(parseTime(d.dateRequested) <=  dateMax_1){
-                                earlyLines.features.push({
-                                    "type": "Feature",
-                                    "geometry": { 
-                                        "type": "LineString",
-                                        "coordinates": [[d.lon, d.lat], [d.uspsCenterLon, d.uspsCenterLat]]
-                                    },
-                                    "properties":{
-                                        "travelTime": travelTime,
-                                        "color": colorScale(travelTime)
-                                    }
-                                })
-                            } else {
-                                // deal with later lines here
-                                laterLines.features.push({
-                                    "type": "Feature",
-                                    "geometry": { 
-                                        "type": "LineString",
-                                        "coordinates": [[d.lon, d.lat], [d.uspsCenterLon, d.uspsCenterLat]]
-                                    },
-                                    "properties":{
-                                        "travelTime": travelTime,
-                                        "color": colorScale(travelTime)
-                                    }
-                                })
-                            }
+                            })
+
+                      
+                            mylines.features.push({
+                                "type": "Feature",
+                                "geometry": { 
+                                    "type": "LineString",
+                                    "coordinates": [[d.lon, d.lat], [d.uspsCenterLon, d.uspsCenterLat]]
+                                },
+                                "properties":{
+                                    "travelTime": travelTime,
+                                    "color": colorScale(travelTime)
+                                }
+                            })
                         }
                     }
                 }
@@ -556,17 +488,59 @@ map.on("load", function() {
 
 
 
-            // connect my data to layers and add those to the map 
-            map.addSource('earlyLetters', {
+            // connect my data to the map, and name it 'testDot'
+            map.addSource('testDot', {
                     'type': 'geojson',
-                    data: earlyLetters
+                    data: myjson
                 });
 
+            map.addSource('unreported', {'type': 'geojson', data: notYetReported})
+
+            map.addSource('mailCenters', {
+                'type': 'geojson',
+                data: sortingCenters
+
+            });
+
+            map.addSource('mailCenterLines', {
+                'type': 'geojson',
+                data: mylines
+            })
+
+
+
             map.addLayer({
-                    'id': 'early-letter-glow',
+                'id': 'mail-centers',
+                'type': 'circle',
+                'source':'mailCenters',
+                'paint': {
+
+                    'circle-opacity': 0.0,
+                    'circle-color': '#404040',
+                    'circle-stroke-color': ['get', 'color'],
+                    'circle-stroke-width': .5,
+                    'circle-radius': 4
+                }
+            })
+
+
+            map.addLayer({
+                'id': 'mail-center-lines',
+                'type': 'line',
+                'source': 'mailCenterLines',
+                'paint': {
+                    'line-width': 1,
+                    'line-color': ['get', 'color'],
+
+                }
+
+            })
+
+
+            map.addLayer({
+                    'id': 'mail-circles',
                     'type': 'circle',
-                    'source': 'earlyLetters',
-                    'opacity': 0.01,
+                    'source': 'testDot',
                     'paint': {
                         'circle-color': ['get', 'color'],
                         'circle-opacity': 0.1,
@@ -574,141 +548,24 @@ map.on("load", function() {
                     }
                 });
 
+
             map.addLayer({
-                    'id': 'early-letters',
+                    'id': 'mail-dots',
                     'type': 'circle',
-                    'source': 'earlyLetters',
-                    'opacity': 0.6,
-                    // 'layout': {
-                    //     'visibility': 'none'
-                    // },
+                    'source': 'testDot',
                     'paint': {
                         'circle-color': ['get', 'color'],
                         'circle-opacity': 0.6,
                         'circle-radius': 2 //['get', 'travelTime']
                     }
                 });
-
-            // ----------------------------
-            map.addSource('earlyLines', {
-                'type': 'geojson',
-                data: earlyLines
-            })
-
-            map.addLayer({
-                'id': 'early-lines',
-                'type': 'line',
-                'source': 'earlyLines',
-                'opacity': 0,
-                'paint': {
-                    'line-width': 1,
-                    'line-color': ['get', 'color'],
-
-                }
-
-            })
-
-
-            
-
-
-
-            //-------------
-            map.addSource('earlyMailCenters', {
-                'type': 'geojson',
-                data: earlySortingCenters
-
-            });
-
-            map.addLayer({
-                'id': 'early-mail-centers',
-                'type': 'circle',
-                'source':'earlyMailCenters',
-                'opacity': 0.5,
-                'paint': {
-
-                    'circle-opacity': 0.0,
-                    'circle-color': '#404040',
-                    'circle-stroke-color': ['get', 'color'],
-                    'circle-stroke-width': .5,
-                    'circle-radius': 4
-                }
-            })
-
-             map.addSource('laterMailCenters', {
-                'type': 'geojson',
-                data: laterSortingCenters
-
-            });
-
-            map.addLayer({
-                'id': 'later-mail-centers',
-                'type': 'circle',
-                'source':'laterMailCenters',
-                'opacity': 0.5,
-                'paint': {
-
-                    'circle-opacity': 0.0,
-                    'circle-color': '#404040',
-                    'circle-stroke-color': ['get', 'color'],
-                    'circle-stroke-width': .5,
-                    'circle-radius': 4
-                }
-            })
-
-
-
-            //-------------
-            
-
-            map.addSource('laterLetters', {
-                    'type': 'geojson',
-                    data: laterLetters
-                });
-
-            map.addLayer({
-                    'id': 'later-letters',
-                    'type': 'circle',
-                    'source': 'laterLetters',
-                    'opacity': 0,
-                    'paint': {
-                        'circle-color': ['get', 'color'],
-                        'circle-opacity': 0.6,
-                        'circle-radius': 2 //['get', 'travelTime']
-                    }
-                });
-
-            //------------------
-            map.addSource('laterLines', {
-                'type': 'geojson',
-                data: laterLines
-            })
-
-            map.addLayer({
-                'id': 'later-lines',
-                'type': 'line',
-                'source': 'laterLines',
-                'opacity': 0,
-                'paint': {
-                    'line-width': 1,
-                    'line-color': ['get', 'color'],
-
-                }
-
-            })
-
-           // --------------------
-            map.addSource('unreported', {
-                'type': 'geojson', data: notYetReported})
-
-            
 
             map.addLayer({
                     'id': 'mail-unreported',
                     'type': 'circle',
                     'source': 'unreported',
                     'paint': {
-                        'circle-color': 'white',
+                        'circle-color': 'grey',
                         'circle-opacity': 0.4,
                         'circle-radius': 2 //['get', 'travelTime']
                         
@@ -716,39 +573,34 @@ map.on("load", function() {
 
                 });
 
-            
+            // map.addLayer({
+            //         'id': 'mail-unreported-circles',
+            //         'type': 'circle',
+            //         'source': 'unreported',
+            //         'paint': {
+            //             'circle-color': 'grey',
+            //             'circle-opacity': 0.1,
+            //             'circle-radius': 10 //['get', 'travelTime']
+            //         }
+            //     });
 
             
 
 
             //--------------------------------------------
-            
-            
-
-            data = data.filter(function(d){ 
-
-                // console.log('------------------------')
-                // console.log('date max: ', dateMax_1)
-                // console.log('date requested: ', d.dateRequested)
-                
-
-                // let requestDate = parseTime(d.dateRequested)
-                // // console.log('filtering', requestDate ); 
-                // console.log('testing dates request<max?', requestDate <= dateMax_1)
-
-                // parseTime(d.dateRequested) <=  dateMax_1
-
-                return parseTime(d.dateRequested) <=  dateMax_1;})
+            var dateMax_1 = parseTime("9/1/2020")
+            // var dateMax_1 = parseTime("05/16/2022")
+            // var data_2 = data.filter(function(d) { return d.travelTime > 0  && d.arrived < dateMax_1})
 
 
             var data_2 = data.filter(function(d) { return d.travelTime > 0  && d.arrived < dateMax_1})
 
-            var data_6 = data.filter(function(d) { return (d.travelTime > 0 && d.travelTime < 20) && (d["country"] == "US") })
+            var data_6 = data.filter(function(d) { return (d.travelTime > 0 && d.travelTime < 20) && (d["Country"] == "US") })
 
             var data_7 = data.filter(function(d) { return (d.travelTime > 0 && d.travelTime < 31 ) })
 
 
-            // drawStory("#intro")
+            drawStory("#intro")
 
 
             // drawScatter(data_2, "#intro3");
@@ -847,7 +699,7 @@ function drawStory(targ){
 
     // destinations data last updated 05/05/2021
     d3.json("treeStructure2.json").then(function(data) {
-        // console.log(data)
+        console.log(data)
 
 
 
@@ -886,7 +738,7 @@ function drawStory(targ){
         const links = root.links();
         const nodes = root.descendants();
 
-        // console.log(nodes)
+        console.log(nodes)
 
         const simulation = d3.forceSimulation(nodes)
           .force("link", d3.forceLink(links).id(d => d.id).distance(0).strength(1))
