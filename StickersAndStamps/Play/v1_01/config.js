@@ -12,12 +12,12 @@ var config = {
         {
             id: 'intro',
             alignment: 'center',
-            title: "Sitting at my ink-stained desk, I found myself staring at a pile of stickers.",
+            title: "",
             image: 'lotsOfStickers.jpg',
-        description: "",
+        description: "Sitting at my ink-stained desk, I found myself staring at a pile of stickers.",
             location: { 
                 center: [-42.44486, 27.77139],
-                zoom: 4, //1.2,
+                zoom: 5, //1.2,
                 pitch: 0.00,
                 bearing: 0.00
             },
@@ -204,10 +204,6 @@ var config = {
                 bearing: 0.00
             },
             onChapterEnter: [
-                {
-                    // layer: 'early-letter-glow',
-                    // opacity: 0
-                },
                 {
                     layer: 'later-letters',
                     opacity: 0

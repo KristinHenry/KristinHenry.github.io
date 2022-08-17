@@ -12,12 +12,12 @@ var config = {
         {
             id: 'intro',
             alignment: 'center',
-            title: "Sitting at my ink-stained desk, I found myself staring at a pile of stickers.",
+            title: "",
             image: 'lotsOfStickers.jpg',
-        description: "",
+        description: "Sitting at my ink-stained desk, I found myself staring at a pile of stickers.",
             location: { 
                 center: [-42.44486, 27.77139],
-                zoom: 4, //1.2,
+                zoom: 5, //1.2,
                 pitch: 0.00,
                 bearing: 0.00
             },
@@ -62,7 +62,7 @@ var config = {
             id: 'intro1',
             alignment: 'center',
             title: "",
-            description: "<h3>I’d made them to give away at conferences and shows. But everything was canceled...because of Covid. It was early 2020.<br/><br/>What was I going to do with all these stickers?</h3>",
+            description: "I’d made them to give away at conferences and shows. But everything was canceled...because of Covid. It was early 2020.<br/><br/>What was I going to do with all these stickers?",
             location: { 
                 center: [-42.44486, 27.77139],
                 zoom: 4, //1.2,
@@ -112,7 +112,7 @@ var config = {
             id: 'intro2',
             alignment: 'center',
             // title: '',
-        description: "<h3>I started mailing them to artist-friends, and asked them to tell me when they arrived. I was curious to see how long it would take for my letters to get to my friends.<br /><br />Within a few weeks, I had a nice little data set. It surprised me how quickly some letters arrived, and how much longer it took for others.<br /><br />Would more data show more patterns?<br /><br />  I opened up signups and posted the project online. <br /><br />Within a few months, I’d mailed out over 300 handwritten notes and stickers.</h3>",
+        description: "I started mailing them to artist-friends, and asked them to tell me when they arrived. I was curious to see how long it would take for my letters to get to my friends.<br /><br />Within a few weeks, I had a nice little data set. It surprised me how quickly some letters arrived, and how much longer it took for others.<br /><br />Would more data show more patterns?<br /><br />  I opened up signups and posted the project online. <br /><br />Within a few months, I’d mailed out over 300 handwritten notes and stickers.",
             location: { 
                 center: [-42.44486, 27.77139],
                 zoom: 4,//1.2,
@@ -148,7 +148,7 @@ var config = {
             id: 'intro7',
             alignment: 'center',
             title: 'How long did it take for these first letters to reach their destinations?',
-            description: '<h3>Most of my letters were delivered, in the US, within 2–4 days. But many of them took a lot longer.</h3>',
+            description: 'Most of my letters were delivered, in the US, within 2–4 days. But many of them took a lot longer.',
             location: {
                 center: [-42.44486, 27.77139],
                 zoom: 4,
@@ -196,7 +196,7 @@ var config = {
             id: 'intro4',
             alignment: 'center',
             title: '',
-            description: '<h3>The distance an envelope traveled did not correspond with how long it took to be delivered. If it did, the lines in this chart would all be mostly straight up and down.</h3>',
+            description: 'The distance an envelope traveled did not correspond with how long it took to be delivered. If it did, the lines in this chart would all be mostly straight up and down.',
             location: {
                 center: [-42.44486, 27.77139],
                 zoom: 4,
@@ -204,10 +204,6 @@ var config = {
                 bearing: 0.00
             },
             onChapterEnter: [
-                {
-                    // layer: 'early-letter-glow',
-                    // opacity: 0
-                },
                 {
                     layer: 'later-letters',
                     opacity: 0
@@ -236,7 +232,7 @@ var config = {
             id: 'intro8',
             alignment: 'center',
             title: '',
-            description: '<h3>Well, it sure looked like distance alone does not determine how long it will take for a letter to travel from San Francisco to another location in the United States. This is not surprising, given the interference with the USPS recently. <br/><br/>But can we actually see traces of this interference in our project? Can we bring personal experience back into the story? Where did I send my letters? How long did it take to get there? Time to plot some  data on a map… </h3>',
+            description: 'Well, it sure looked like distance alone does not determine how long it will take for a letter to travel from San Francisco to another location in the United States. This is not surprising, given the interference with the USPS recently. <br/><br/>But can we actually see traces of this interference in our project? Can we bring personal experience back into the story? Where did I send my letters? How long did it take to get there? Time to plot some  data on a map… ',
             location: {
                 center: [-42.44486, 27.77139],
                 zoom: 4,
@@ -273,7 +269,7 @@ var config = {
             alignment: 'left',
             title: 'International Mail',
             image: '',
-            description: '<h3>International mail, as expected, takes longer than most domestic mail.<br/><br/>And it takes a very long time for it to get to Australia.</h3>',
+            description: 'International mail, as expected, takes longer than most domestic mail.<br/><br/>And it takes a very long time for it to get to Australia.',
             location: {
                 center: [-2.44486, 27.77139],
                 zoom: 1.2,
@@ -327,7 +323,7 @@ var config = {
             alignment: 'left',
             title: 'Domestic USPS Mail',
             image: '',
-            description: '<h3>Delivery times of domestic mail varies quite a bit.<br/><br/>These dots represent individual letters I have mailed. The color represents the number of days it took to arrive. The more orange, the more days.<br/><br/>See those orange dots, up in Canada? Crossing the border and into the Canadian postal service, can be slow.</h3>',
+            description: 'Delivery times of domestic mail varies quite a bit.<br/><br/>These dots represent individual letters I have mailed. The color represents the number of days it took to arrive. The more orange, the more days.<br/><br/>See those orange dots, up in Canada? Crossing the border and into the Canadian postal service, can be slow.',
             location: {
                 center: [-110.44486, 34.77139],
                 zoom: 2.6,
@@ -380,7 +376,7 @@ var config = {
             alignment: 'left',
             title: 'USPS Sorting Centers',
             image: '',
-            description: '<h3>The US Postal Service utilizes many regional sorting centers. Your mail goes, in and out, through the center that serves your <b>zip code</b>.<br/><br/>Some areas have several sorting centers nearby, and others are served by sorting centers in another state! <br/><br/>Here, the sorting centers my letters have passed through are drawn as open circles. The lines connect the town where the letter was delivered with the regional sorting center that letter passed through.</h3>',
+            description: 'The US Postal Service utilizes many regional sorting centers. Your mail goes, in and out, through the center that serves your <b>zip code</b>.<br/><br/>Some areas have several sorting centers nearby, and others are served by sorting centers in another state! <br/><br/>Here, the sorting centers my letters have passed through are drawn as open circles. The lines connect the town where the letter was delivered with the regional sorting center that letter passed through.',
             location: {
                 center: [-110.44486, 34.77139],
                 zoom: 2.6,
@@ -429,7 +425,7 @@ var config = {
             alignment: 'left',
             title: 'Zooming in',
             image: '',
-            description: '<h3>By the end of 2020, my data set was still small.  But even with 300 letters (data points), we can already see that some sorting centers deliver promptly. Others do not.<br /><br /> If I had more data, I could possibly dismiss some of the slow deliveries from centers that are usually quick. Or maybe it differs by zipcode? I may look at that, if I get more participants.</h3> ',
+            description: 'By the end of 2020, my data set was still small.  But even with 300 letters (data points), we can already see that some sorting centers deliver promptly. Others do not.<br /><br /> If I had more data, I could possibly dismiss some of the slow deliveries from centers that are usually quick. Or maybe it differs by zipcode? I may look at that, if I get more participants.',
             location: {
                 center: [-112.0740, 33.4484],
                 zoom: 4,
@@ -503,7 +499,7 @@ var config = {
             alignment: 'left',
             title: 'Western States',
             image: '',
-            description: '<h3>Being less densely populated, the western states have fewer sorting centers than Eastern states.<br/><br/>Note that not all sorting centers are shown on this map. Only the sorting centers that my letters have passed through are shown.</h3>',
+            description: 'Being less densely populated, the western states have fewer sorting centers than Eastern states.<br/><br/>Note that not all sorting centers are shown on this map. Only the sorting centers that my letters have passed through are shown.',
             location: {
                 center: [-104.9903, 39.7392],
                 zoom: 4,
@@ -544,7 +540,7 @@ var config = {
             alignment: 'left',
             title: 'Denver, CO',
             image: '',
-            description: '<h3>Denver has some prompt deliveries and some slow ones, and these are all passing through the same sorting center.</h3>',
+            description: 'Denver has some prompt deliveries and some slow ones, and these are all passing through the same sorting center.',
             location: {
                 center: [-104.9903, 39.7392],
                 zoom: 5.92,
@@ -581,7 +577,7 @@ var config = {
             alignment: 'left',
             title: 'East Coast',
             image: '',
-            description: '<h3>So many sorting centers...slow and fast deliveries coming out of some of the same centers.</h3>',
+            description: 'So many sorting centers...slow and fast deliveries coming out of some of the same centers.',
             location: {
                 center: [-77.0369, 38.9072],
                 zoom: 5.92,
@@ -652,7 +648,7 @@ var config = {
             alignment: 'center',
             title: "Fast forward...to 2022   ",
             image: '',
-            description: "<h3>As of July 2022, I've mailed out over <b>3,000</b> envelopes. <br /><br />That's a lot of dots on our map!</h3>",
+            description: "As of July 2022, I've mailed out over <b>3,000</b> envelopes. <br /><br />That's a lot of dots on our map!",
             location: {
                 center: [-82.44486, 37.77139],
                 zoom: 3,
@@ -693,7 +689,7 @@ var config = {
             alignment: 'center',
             title: "While I've sent out over 3,000 envelopes since July 2022, not everyone told me when their's arrived.",
             image: 'chart_051622.png',
-            description: '<h3>A surge in sugnups, in mid-2021 left me exhausted and burnt-out. I was looking forward to growing my little data set, but most of the folks who signed up just ingnored my request to report arrival time.<br /><br />But in later surge events, folks were a lot better about helping me with the <b>data</b> part of the project.<br /><br />The locations I have mailed letters to, but do not have arrival times for, are marked as white dots on this map.</h3>',
+            description: 'A surge in sugnups, in mid-2021 left me exhausted and burnt-out. I was looking forward to growing my little data set, but most of the folks who signed up just ingnored my request to report arrival time.<br /><br />But in later surge events, folks were a lot better about helping me with the <b>data</b> part of the project.<br /><br />The locations I have mailed letters to, but do not have arrival times for, are marked as white dots on this map.',
             location: {
                 center: [-82.44486, 37.77139],
                 zoom: 3,
