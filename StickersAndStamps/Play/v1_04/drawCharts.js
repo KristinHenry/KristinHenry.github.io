@@ -1,5 +1,5 @@
 
-function drawLinks(data, targ, color_by){
+function drawLinks(data, targ, color_by, chartID){
 
   console.log("***********8     draw links")
 
@@ -20,7 +20,10 @@ function drawLinks(data, targ, color_by){
     var xAxis1 = d3.axisTop(x1).ticks(5).tickSizeOuter(0);
     var xAxis2 = d3.axisBottom(x2).ticks(5).tickSizeOuter(0);
 
-    var svg = d3.select(targ).append("svg")
+    var svg = d3.select(targ).append("svg").attr("id", chartID)
+
+
+    // .attr("id", chartID)
     .attr("width", width + margin.left + margin.right)
     .attr("height", height + margin.top + margin.bottom)
     .style("background-color", "#333333")
@@ -76,6 +79,8 @@ function drawLinks(data, targ, color_by){
       .style('fill', '#ccc')
       .text("Distance Travelled (miles)");
 
+
+
 }
 
 //---------------------------------------------------------
@@ -87,6 +92,8 @@ function drawLinks(data, targ, color_by){
 
 //  for drawing slope chart of how long data takes to arrive
 function drawCurve(linedata, targ, x, y, color){
+
+
 
   // line generator
   var line = d3.line()
@@ -104,13 +111,15 @@ function drawCurve(linedata, targ, x, y, color){
 
 }
 
-function drawDensity(data_raw, targ){
+function drawDensity(data_raw, targ, chartID){
 
-    console.log('draw density chart')
+    console.log('draw density chart targ: ', targ)
 
     var color = d3.scaleOrdinal().range(["#c6bad1","#5cbf84", "#e3cd91", "#4287f5", "#9743f7"])
 
     var containerWidth = +d3.select(targ).style('width').slice(0, -2)
+
+    // console.log('containerWidth', containerWidth)
 
     margin = ({top:20, right: 30, bottom: 30, left: 60}),
     width = containerWidth - margin.left - margin.right,
@@ -122,9 +131,13 @@ function drawDensity(data_raw, targ){
 
     //  Add the SVG to the page 
     var svg = d3.select(targ).append("svg")
+
+    svg.attr("id", chartID)
         .attr("width", width + margin.left + margin.right)
         .attr("height", height + margin.top + margin.bottom)
         .style("background-color", "#333333")
+
+   
 
 
     var subchart = svg.append("g")

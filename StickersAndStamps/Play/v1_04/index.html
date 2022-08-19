@@ -229,6 +229,12 @@ function setLayerOpacity(layer, opacity) {
 // var datafile = "stickersData052622.csv"
 var datafile = "stickerData061422.csv"
 
+var data_2;
+var data_6;
+var data_7;
+
+
+
 // 2020-09-23 00:00:00
 var parseTime = d3.timeParse("%Y-%m-%d %H:%M:%S")
 
@@ -749,11 +755,11 @@ map.on("load", function() {
                 return parseTime(d.dateRequested) <=  dateMax_1;})
 
 
-            var data_2 = data.filter(function(d) { return d.travelTime > 0  && d.arrived < dateMax_1})
+            data_2 = data.filter(function(d) { return d.travelTime > 0  && d.arrived < dateMax_1})
 
-            var data_6 = data.filter(function(d) { return (d.travelTime > 0 && d.travelTime < 20) && (d["country"] == "US") })
+            data_6 = data.filter(function(d) { return (d.travelTime > 0 && d.travelTime < 20) && (d["country"] == "US") })
 
-            var data_7 = data.filter(function(d) { return (d.travelTime > 0 && d.travelTime < 31 ) })
+            data_7 = data.filter(function(d) { return (d.travelTime > 0 && d.travelTime < 31 ) })
 
 
             // drawStory("#intro")
@@ -761,13 +767,13 @@ map.on("load", function() {
 
             // drawScatter(data_2, "#intro3");
 
-            drawLinks(data_6, "#intro4", "Country")
+            drawLinks(data_6, "#intro4", "Country","curvesChart")
 
             // drawScatter2(data_7, "#intro5", "GlobalRegion",20, 80);
 
 
 
-            drawDensity(data_7, "#intro7")
+            drawDensity(data_7, "#intro7", "densityChart")
 
             drawZipcodes(data, "#zips")
 
@@ -803,10 +809,42 @@ map.on("load", function() {
     });
 });
 
-// setup resize event
-window.addEventListener('resize', scroller.resize);
-    //ToDo: put resize of chart divs in there too!
 
+
+//----------------------------------------------
+function resizeAll(){
+    scroller.resize();
+
+    document.getElementById("densityChart").remove();
+    drawDensity(data_7, "#intro7", "densityChart")
+
+    document.getElementById("curvesChart").remove();
+    drawLinks(data_6, "#intro4", "Country", "curvesChart")
+
+    // drawZipcodes(data, "#zips")
+}
+
+
+
+
+// modified from https://stackoverflow.com/questions/45905160/javascript-on-window-resize-end
+function debounce(func, time){
+    var time = time || 100; // 100 by default if no param
+    var timer;
+    return function(event){
+        if(timer) clearTimeout(timer);
+        timer = setTimeout(func, time, event);
+    };
+}
+
+// Function with stuff to execute
+function resizeContent() {
+    console.log('resized');
+    resizeAll();
+}
+
+// Eventlistener
+window.addEventListener("resize", debounce( resizeContent, 150 ));
 
 
 
