@@ -62,7 +62,7 @@ var config = {
             id: 'intro1',
             alignment: 'center',
             title: "",
-            description: "I’d made them to give away at conferences and shows. But everything was canceled...because of Covid. It was early 2020.<br/><br/>What was I going to do with all these stickers?",
+            description: "I was going to give them away at conferences and shows.<br/><br/>But everything was canceled...because of Covid. This was early 2020.<br/><br/>What was I going to do with all these stickers?",
             location: { 
                 center: [-42.44486, 27.77139],
                 zoom: 4, //1.2,
@@ -232,7 +232,7 @@ var config = {
             id: 'intro8',
             alignment: 'center',
             title: '',
-            description: 'Well, it sure looked like distance alone does not determine how long it will take for a letter to travel from San Francisco to another location in the United States. This is not surprising, given the interference with the USPS recently. <br/><br/>But can we actually see traces of this interference in our project? Can we bring personal experience back into the story? Where did I send my letters? How long did it take to get there? Time to plot some  data on a map… ',
+            description: 'So, where did my letters take a long time to arrive? A short time? Time to plot some  data on a map… ',
             location: {
                 center: [-42.44486, 27.77139],
                 zoom: 4,
