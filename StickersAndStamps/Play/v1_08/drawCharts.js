@@ -1,4 +1,85 @@
 
+
+
+function drawZipSearch(targ){
+  console.log("draw ZipSearch");
+
+  var containerWidth = +d3.select(targ).style('width').slice(0, -2)
+
+  var margin = {top: 50, right: 60, bottom: 40, left: 50},
+    width = containerWidth - margin.left - margin.right,
+    height = 320 - margin.top - margin.bottom;
+
+
+
+  var form = d3.select(targ).append("div")
+
+  .attr("width", width + margin.left + margin.right)
+    .attr("height", height + margin.top + margin.bottom)
+    .style("background-color", "#333333")
+    .append("g")
+    // .append("form")
+    .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
+
+
+  form.id = "testing";
+
+  form.append("input")
+      .attr('id', 'zipInput')
+      
+  
+
+
+  form.append("button")
+      .attr('id', 'zipBtn')
+      .text('Search')
+      .on('click', function(){ 
+        console.log('clicked button', );
+        var val = document.getElementById('zipInput').value
+        console.log(val)
+      })
+
+
+  
+
+
+  // var btn = document.createElement("button"); 
+  // form.append(btn)
+
+  
+
+  // btn.style.width = "200px"
+
+  // btn.innerHTML = "Make A Fish";
+  // btn.style="position: absolute; top:"+
+  //             top+"px; left:"+left+"px; width:"+ 
+  //             button_width+ "px; height:"+button_height+ "px;" +
+  //             "font-size: 16px;" +
+  //             "border-radius:" + 36 +"px;" +
+  //             " z-index: 10;" +
+  //             "color: white;" +
+  //           "background: #6757FF;" +
+  //            "font-family: 'Inter', sans-serif;" +
+  //            "font-size: 15px;" +
+  //            "font-weight: 500;" +
+  //            "text-transform: uppercase;"+
+  //             "letter-spacing: 1px;" +
+  //             "border: none;"+
+  //              " box-shadow: 0 18px 32px #00000030;"
+  
+  // form.append(btn)
+          // .on('click', function(){ console.log('clicked button');})
+
+
+
+}
+
+
+
+
+
+
+
 function drawLinks(data, targ, color_by, chartID){
 
   // console.log("***********8     draw links")

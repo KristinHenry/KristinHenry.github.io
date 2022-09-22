@@ -446,6 +446,11 @@ console.log('lookup 102 in TREE', zipsTree[1][2][0])
 // console.log('lookup 090 in Tree', zipsTree[0][9][0]) // gives error 'no [0][9] found'
 
 
+function searchMyZip(){
+	console.log("clicked button for zip")
+}
+
+
 function getZipData(zip){
 
 	console.log("---------------------")

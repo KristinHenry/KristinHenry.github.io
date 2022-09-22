@@ -264,6 +264,8 @@ var dateMax_1 = parseTime("2020-12-10 0:0:00")
 
 
 
+
+
  function getTravelTime(d){
 
 
@@ -776,8 +778,10 @@ map.on("load", function() {
 
             drawDensity(data_7, "#intro7", "densityChart")
 
-            drawZipcodes(data, "#zips")
+            // drawZipcodes(data, "#zips")
 
+            // drawZipSearch('#zip-search', 'zipChart')
+            drawZipSearch('#zip-search');
         })
 
 
@@ -821,6 +825,9 @@ function resizeAll(){
 
     document.getElementById("curvesChart").remove();
     drawLinks(data_6, "#intro4", "Country", "curvesChart")
+
+
+    // drawZipSearch('#zip-search', 'zipChart')
 
     // drawZipcodes(data, "#zips")
 }
