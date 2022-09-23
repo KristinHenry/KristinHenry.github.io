@@ -26,7 +26,7 @@ function drawZipSearch(targ){
 
   form.append("input")
       .attr('id', 'zipInput')
-      
+
   
 
 
@@ -37,6 +37,8 @@ function drawZipSearch(targ){
         console.log('clicked button', );
         var val = document.getElementById('zipInput').value
         console.log(val)
+        console.log("--------------------")
+        getZipData(val)
       })
 
 

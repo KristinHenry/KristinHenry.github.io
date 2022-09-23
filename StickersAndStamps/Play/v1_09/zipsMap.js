@@ -467,6 +467,14 @@ function getZipData(zip){
 	branch_1 = branch_0[zip_1]
 
 
+	var mapInfo = {
+                center: [-104.9903, 39.7392],
+                zoom: 7,
+                pitch: 39.50,
+                bearing: 36.00
+            }
+
+
 	// we have to check if the first three nums of zipcode are valid (have a sorting center)
 	if(branch_1){
 			var branch_2 = branch_1[zip_2]
@@ -474,6 +482,17 @@ function getZipData(zip){
 			if(branch_2){
 				// Success! We can now have the key for this center's data
 				console.log('!! sorting center for zip ', zip, ' is ', branch_2);
+
+
+				console.log(postalCentersMap[branch_2]);
+
+				var p = postalCentersMap[branch_2];
+
+				mapInfo.center = [p[3], p[2]];
+
+
+				map.flyTo(mapInfo)
+
 			} else {
 				console.log(zip, " is not available for data")
 			}
