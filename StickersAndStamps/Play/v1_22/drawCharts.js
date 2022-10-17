@@ -4,6 +4,67 @@
 function drawZipSearch(targ){
   console.log("draw ZipSearch");
 
+  // console.log("height: ", d3.select(targ).style('height'))
+
+  // getting dimensions of div we'll be drawing into...slice gets rid of "px"
+  var containerWidth = +d3.select(targ).style('width').slice(0, -2)
+  var containerHeight = +d3.select(targ).style('height').slice(0, -2)
+  var margin = {top: 50, right: 60, bottom: 40, left: 50},
+    width = containerWidth - margin.left - margin.right,
+    height = 600;//(containerHeight*3) - margin.top - margin.bottom;
+
+
+  // creating the div the form data will be drawn into
+  var mydiv = d3.select(targ).append("div")
+            .attr("id", "zipDiv")
+            .attr("width", width + margin.left + margin.right)
+            // .attr("height", height + margin.top + margin.bottom)
+            .attr("height", height+"px")
+            .style("background-color", "#333333")
+            .append("g")
+            .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
+
+  // setting up the input box and buttons
+  mydiv.append("input")
+      .attr('id', 'zipInput')
+
+  mydiv.append("button")
+      .attr('id', 'zipBtn')
+      .text('Get Info')
+      .on('click', function(){ 
+        var val = document.getElementById('zipInput').value
+        console.log(val)
+        var zipdata = getZipData(val, targ)
+
+        console.log('zipdata: ', zipdata)
+
+        if(zipdata){
+          //drawZipSearchData(zip, p, targ, mapInfo, map)
+          drawZipSearchData(zipdata[0], zipdata[1], zipdata[2], zipdata[3], zipdata[4])
+        } else {
+          drawZipErrorMessage(val, targ)
+        }
+
+
+
+      })
+
+
+}
+
+
+function zoomToZipCode(mapInfo, map){
+  // console.log('val to zoom to', mapInfo)
+  map.flyTo(mapInfo)
+}
+
+
+
+function drawZipSearchData(zip, data, targ, mapInfo, map){
+
+  console.log('draw zip search data')
+
+
   var containerWidth = +d3.select(targ).style('width').slice(0, -2)
 
   var margin = {top: 50, right: 60, bottom: 40, left: 50},
@@ -11,68 +72,79 @@ function drawZipSearch(targ){
     height = 320 - margin.top - margin.bottom;
 
 
+  zipSearchData = data;
+ 
+  // first check if info element exists, and remove it
+  var x = document.getElementById('zipInfo')
+  if(x){ 
+    x.parentNode.removeChild(x)
+  }
 
-  var form = d3.select(targ).append("div")
+  // now, creat a new element  as container for info data 
+  var info = document.createElement("g")
+  info.id = "zipInfo";
 
-  .attr("width", width + margin.left + margin.right)
-    .attr("height", height + margin.top + margin.bottom)
-    .style("background-color", "#333333")
-    .append("g")
-    // .append("form")
-    .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
+  // create display of data and append to info container
+  var p = document.createElement("p");
+  p.innerHTML = "Passes through: <b>" + zipSearchData[0] + ", " + zipSearchData[1] + "</b>"
+  info.append(p);
 
-
-  form.id = "testing";
-
-  form.append("input")
-      .attr('id', 'zipInput')
-
-  
-
-
-  form.append("button")
-      .attr('id', 'zipBtn')
-      .text('Search')
-      .on('click', function(){ 
-        console.log('clicked button', );
+  // create button for zooming to the zipcode on the map
+  var b = document.createElement("button")
+  b.innerHTML = 'Zoom Map to ' + zip
+  b.addEventListener('click', function() {
         var val = document.getElementById('zipInput').value
-        console.log(val)
-        console.log("--------------------")
-        getZipData(val)
+        console.log('val from zoom:', val)
+
+        var zipdata  = getZipData(val, targ)
+        var mapInfo = zipdata[3]
+        var map = zipdata[4]
+
+        console.log("mapinfo: ", zipdata[3])
+
+        zoomToZipCode(mapInfo, map);
+        
       })
+  info.append(b)
+
+   
+  // now, append the element and it's data display to the div for this "chapter" 
+  var targ = document.getElementById('zipDiv')
+  targ.appendChild(info); 
 
 
+    
   
+}
 
 
-  // var btn = document.createElement("button"); 
-  // form.append(btn)
-
-  
-
-  // btn.style.width = "200px"
-
-  // btn.innerHTML = "Make A Fish";
-  // btn.style="position: absolute; top:"+
-  //             top+"px; left:"+left+"px; width:"+ 
-  //             button_width+ "px; height:"+button_height+ "px;" +
-  //             "font-size: 16px;" +
-  //             "border-radius:" + 36 +"px;" +
-  //             " z-index: 10;" +
-  //             "color: white;" +
-  //           "background: #6757FF;" +
-  //            "font-family: 'Inter', sans-serif;" +
-  //            "font-size: 15px;" +
-  //            "font-weight: 500;" +
-  //            "text-transform: uppercase;"+
-  //             "letter-spacing: 1px;" +
-  //             "border: none;"+
-  //              " box-shadow: 0 18px 32px #00000030;"
-  
-  // form.append(btn)
-          // .on('click', function(){ console.log('clicked button');})
+function drawZipErrorMessage(zip, targ){
 
 
+  var containerWidth = +d3.select(targ).style('width').slice(0, -2)
+
+  var margin = {top: 50, right: 60, bottom: 40, left: 50},
+    width = containerWidth - margin.left - margin.right,
+    height = 320 - margin.top - margin.bottom;
+ 
+  // first check if info element exists, and remove it
+  var x = document.getElementById('zipInfo')
+  if(x){ 
+    x.parentNode.removeChild(x)
+  }
+
+  // now, creat a new element  as container for info data 
+  var info = document.createElement("g")
+  info.id = "zipInfo";
+
+  // create display of data and append to info container
+  var p = document.createElement("p");
+  p.innerHTML = zip + " is not a valid US zipcode." 
+  info.append(p);
+
+  // now, append the element and it's data display to the div for this "chapter" 
+  var targ = document.getElementById('zipDiv')
+  targ.appendChild(info); 
 
 }
 
@@ -80,6 +152,7 @@ function drawZipSearch(targ){
 
 
 
+//=================================================================
 
 
 function drawLinks(data, targ, color_by, chartID){

@@ -484,14 +484,17 @@ function getZipData(zip){
 				console.log('!! sorting center for zip ', zip, ' is ', branch_2);
 
 
-				console.log(postalCentersMap[branch_2]);
+				
 
 				var p = postalCentersMap[branch_2];
+
+				console.log(p);
 
 				mapInfo.center = [p[3], p[2]];
 
 
 				map.flyTo(mapInfo)
+				drawZipData(zip, p)
 
 			} else {
 				console.log(zip, " is not available for data")
@@ -500,6 +503,14 @@ function getZipData(zip){
 	} else {
 		console.log(zip, " is not available for data")
 	}
+
+}
+
+
+function drawZipData(zip, data){
+
+	console.log(zip, data)
+
 
 }
 

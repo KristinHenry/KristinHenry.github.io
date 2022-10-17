@@ -7,7 +7,7 @@ var config = {
     title: 'Stickers And Stamps',
     subtitle: 'A Penpal Data-Art Project by Kristin Henry (ArtAtomic)',
     // byline: 'by Kristin Henry (ArtAtomic)',
-    footer: 'Stickers, Data Collection, and Data Visualization by <a href="http://kristinhenry.github.io/">Kristin Henry</a>, 2020-2022',
+    footer: '<h2>The project continues, as I keep mailing out letters and adding new data and charts.</h2><h2>Want to help out?</h2><ul><li><a href="https://forms.gle/5KpX1yWLr5TnKorK9">Sign up</a> to get a sticker and help fill in more of this map</li><li><a href="https://kristinhenry.medium.com/data-practice-for-stickers-and-stamps-project-3b68c1eb8e3f">Read about the Data Practice</a> for this project.</li><li>Updates and Work-in-progress <a href="https://www.patreon.com/KristinHenry/posts?filters%5Btag%5D=Stickers%20%26%20Stamps">posts</a></li><li><a href="https://kristinhenry.medium.com/stickers-and-stamps-project-faq-505f7d85e79d">Frequently Asked Questions</a></li><li>Static version of this <a href="https://kristinhenry.medium.com/stickers-and-stamps-a-bright-spot-in-2020-d3011afefa09">story, on Medium</a>.</li><li><a href="https://ko-fi.com/artatomic">Chip in a little and support</a> the expenses of this project.</li><p>Project Ideation, Art, Data Collection, and Data Visualization by <a href="http://kristinhenry.github.io/">Kristin Henry</a>, 2020-2022</p></ul>',
     chapters: [
         {
             id: 'intro',
@@ -761,7 +761,7 @@ var config = {
             alignment: 'left',
             title: "Find your zipcode",
             image: '',
-            description: 'need to add text field and button here',
+            // description: 'need to add text field and button here',
             location: {
                 center: [-82.44486, 37.77139],
                 zoom: 3,
@@ -788,44 +788,44 @@ var config = {
                     // opacity: 0
                 }
             ]
-         },
+         }//,
 
-        {
-            id: 'closing',
-            alignment: 'center',
-            title: '',
-            image: '',
-            description: '<h2>The project continues, as I keep mailing out letters and adding new data and charts.</h2><h2>Want to help out? You can</h2><ul><li><a href="https://forms.gle/5KpX1yWLr5TnKorK9">Sign up</a> to get a sticker and help fill in more of this map</li><li><a href="https://kristinhenry.medium.com/data-practice-for-stickers-and-stamps-project-3b68c1eb8e3f">Read about the Data Practice</a> for this project.</li><li>Updates and Work-in-progress <a href="https://www.patreon.com/KristinHenry/posts?filters%5Btag%5D=Stickers%20%26%20Stamps">posts</a></li><li><a href="https://kristinhenry.medium.com/stickers-and-stamps-project-faq-505f7d85e79d">Frequently Asked Questions</a></li><li>Static version of this <a href="https://kristinhenry.medium.com/stickers-and-stamps-a-bright-spot-in-2020-d3011afefa09">story, on Medium</a>.</li><li><a href="https://ko-fi.com/artatomic">Chip in a little and support</a> the expenses of this project.</li></ul>',
-            location: {
-                center: [-82.44486, 37.77139],
-                zoom: 3,
-                pitch: 0.00,
-                bearing: 0.00
-            },
-            onChapterEnter: [
-                {
-                    layer: 'early-letter-glow',
-                    opacity: 0
-                },
-                {
-                    // layer: 'early-lines',
-                    // opacity: 0
-                },
-                {
-                    // layer: 'mail-centers',
-                    // opacity: 0
-                },
-                {
-                    // layer: 'mail-unreported',
-                    // opacity: 0
-                }
-            ],
-            onChapterExit: [
-                {
-                    // layer: 'gnpglaciers-2015',
-                    // opacity: 0
-                }
-            ]
-         }
+        // {
+        //     id: 'closing',
+        //     alignment: 'center',
+        //     title: '',
+        //     image: '',
+        //     description: '<h2>The project continues, as I keep mailing out letters and adding new data and charts.</h2><h2>Want to help out? You can</h2><ul><li><a href="https://forms.gle/5KpX1yWLr5TnKorK9">Sign up</a> to get a sticker and help fill in more of this map</li><li><a href="https://kristinhenry.medium.com/data-practice-for-stickers-and-stamps-project-3b68c1eb8e3f">Read about the Data Practice</a> for this project.</li><li>Updates and Work-in-progress <a href="https://www.patreon.com/KristinHenry/posts?filters%5Btag%5D=Stickers%20%26%20Stamps">posts</a></li><li><a href="https://kristinhenry.medium.com/stickers-and-stamps-project-faq-505f7d85e79d">Frequently Asked Questions</a></li><li>Static version of this <a href="https://kristinhenry.medium.com/stickers-and-stamps-a-bright-spot-in-2020-d3011afefa09">story, on Medium</a>.</li><li><a href="https://ko-fi.com/artatomic">Chip in a little and support</a> the expenses of this project.</li></ul>',
+        //     location: {
+        //         center: [-82.44486, 37.77139],
+        //         zoom: 3,
+        //         pitch: 0.00,
+        //         bearing: 0.00
+        //     },
+        //     onChapterEnter: [
+        //         {
+        //             layer: 'early-letter-glow',
+        //             opacity: 0
+        //         },
+        //         {
+        //             // layer: 'early-lines',
+        //             // opacity: 0
+        //         },
+        //         {
+        //             // layer: 'mail-centers',
+        //             // opacity: 0
+        //         },
+        //         {
+        //             // layer: 'mail-unreported',
+        //             // opacity: 0
+        //         }
+        //     ],
+        //     onChapterExit: [
+        //         {
+        //             // layer: 'gnpglaciers-2015',
+        //             // opacity: 0
+        //         }
+        //     ]
+        //  }
     ]
 };
