@@ -1,7 +1,7 @@
 
 
 
-function drawZipSearch(targ){
+function drawZipSearch(targ, zipCounts){
   console.log("draw ZipSearch");
 
   // console.log("height: ", d3.select(targ).style('height'))
@@ -24,8 +24,13 @@ function drawZipSearch(targ){
             .append("g")
             .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
 
+  // explain what this is
+  mydiv.append("p")
+        .text("Have I mailed any letters to your zip code?")
+
   // setting up the input box and buttons
   mydiv.append("input")
+      .attr('placeholder', 'enter 5-digit zipcode')
       .attr('id', 'zipInput')
 
   mydiv.append("button")
@@ -40,7 +45,7 @@ function drawZipSearch(targ){
 
         if(zipdata){
           //drawZipSearchData(zip, p, targ, mapInfo, map)
-          drawZipSearchData(zipdata[0], zipdata[1], zipdata[2], zipdata[3], zipdata[4])
+          drawZipSearchData(zipdata[0], zipdata[1], zipdata[2], zipdata[3], zipdata[4], zipCounts)
         } else {
           drawZipErrorMessage(val, targ)
         }
@@ -60,9 +65,12 @@ function zoomToZipCode(mapInfo, map){
 
 
 
-function drawZipSearchData(zip, data, targ, mapInfo, map){
+function drawZipSearchData(zip, data, targ, mapInfo, map, zipCounts){
 
-  console.log('draw zip search data')
+  // console.log('draw zip search data')
+  // console.log("now")
+  // console.log('zipCounts to Draw: ')
+  // console.log('from draw zip search', zip, zipCounts[zip])
 
 
   var containerWidth = +d3.select(targ).style('width').slice(0, -2)
@@ -85,9 +93,34 @@ function drawZipSearchData(zip, data, targ, mapInfo, map){
   info.id = "zipInfo";
 
   // create display of data and append to info container
+  var p0 = document.createElement("h3");
+  p0.innerHTML = "For the <i><b>" + zip + "</b></i> zipcode:"  
+  info.append(p0);
+
+  // create display of data and append to info container
   var p = document.createElement("p");
-  p.innerHTML = "Passes through: <b>" + zipSearchData[0] + ", " + zipSearchData[1] + "</b>"
+  p.innerHTML = "USPS sorting center: <i><b>" + zipSearchData[0] + ", " + zipSearchData[1] + "</b></i> " 
   info.append(p);
+
+
+  // test if we have data for this zipcode, and post it if it exists
+  var p2 = document.createElement("p");
+  console.log('zipcounts: ', zipCounts[zip])
+  // console.log('travel times: ', zipCounts[zip]['travelTimes'])
+  // console.log('avg travel times: ', d3.mean(zipCounts[zip]['travelTimes']))
+  if(zipCounts[zip]){
+
+    var avgTravelTime = d3.mean(zipCounts[zip]['travelTimes']);
+
+    if(zipCounts[zip] == 1){
+      p2.innerHTML = "Letters sent: " + zipCounts[zip]['mailed'] + " <br /> Travel time: " + avgTravelTime + " days."
+    } else{
+      p2.innerHTML = "Letters sent: " + zipCounts[zip]['mailed'] + "<br /> Avg travel time: " + avgTravelTime + " days."
+    }
+  } else {
+      p2.innerHTML = "Oops! I haven't mailed any there yet. <br /> Would you like me to <a target='_blank' rel='noopener noreferrer' href='https://forms.gle/D3n4wggNNXJQSE7E8'>mail one to you</a>?"
+  }
+  info.append(p2)
 
   // create button for zooming to the zipcode on the map
   var b = document.createElement("button")

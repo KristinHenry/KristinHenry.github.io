@@ -290,9 +290,27 @@ function getZipCounts(data){
 
     for(i in data){
         if(data[i]["country"] === "US"){
+            // console.log('travel time: ', data[i]["travelTime"])
             var zip = data[i]["zipcode"];
-            // console.log(zip)
-            if(zip in zips){ zips[zip] +=1; } else{ zips[zip] = 1; }
+            var travel = data[i]["travelTime"]
+
+            // first, instantiate the data for this zip in our structure
+            if(!(zip in zips)){ 
+                // console.log(zip, " -->not in zips yet")
+                zips[zip] = {'mailed': 0, 'arrived': 0, 'travelTimes': []}
+            }
+            
+            // then, increment if mailed or arrived
+            zips[zip]['mailed'] +=1;
+
+            if(travel > 0){ 
+                zips[zip]['arrived'] += 1;
+                zips[zip]['travelTimes'].push(travel)
+            }
+
+
+            // console.log('updated: ', zips[zip])
+            
         }
     }
 
@@ -463,6 +481,7 @@ map.on("load", function() {
                                         "coordinates": [d.lon, d.lat]
                                       },
                                       "properties": {
+                                        "description": "testing description for tooltip",
                                         "travelTime": travelTime,
                                         "color": "white" 
                                       }
@@ -740,11 +759,7 @@ map.on("load", function() {
                 });
 
             
-
-            
-
-
-            //--------------------------------------------
+            //-------------------------------------------------
             
             
 
@@ -771,6 +786,9 @@ map.on("load", function() {
             data_7 = data.filter(function(d) { return (d.travelTime > 0 && d.travelTime < 31 ) })
 
 
+
+
+
             // drawStory("#intro")
 
 
@@ -787,7 +805,9 @@ map.on("load", function() {
             // drawZipcodes(data, "#zips")
 
             // drawZipSearch('#zip-search', 'zipChart')
-            drawZipSearch('#zip-search');
+            var zipCounts = getZipCounts(data)
+            // console.log('zipcounts: ', zipCounts)
+            drawZipSearch('#zip-search', zipCounts);
         })
 
 

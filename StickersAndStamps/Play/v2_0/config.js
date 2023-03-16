@@ -4,17 +4,17 @@ var config = {
     showMarkers: false,
     testing: true,
     theme: 'dark',
-    title: 'Stickers And Stamps',
+    title: 'StickersAndStamps',
     subtitle: 'A Penpal Data-Art Project by Kristin Henry (ArtAtomic)',
     // byline: 'by Kristin Henry (ArtAtomic)',
-    footer: '<h2>The project continues, as I keep mailing out letters and adding new data and charts.</h2><h2>Want to help out?</h2><ul><li><a href="https://forms.gle/5KpX1yWLr5TnKorK9">Sign up</a> to get a sticker and help fill in more of this map</li><li><a href="https://kristinhenry.medium.com/data-practice-for-stickers-and-stamps-project-3b68c1eb8e3f">Read about the Data Practice</a> for this project.</li><li>Updates and Work-in-progress <a href="https://www.patreon.com/KristinHenry/posts?filters%5Btag%5D=Stickers%20%26%20Stamps">posts</a></li><li><a href="https://kristinhenry.medium.com/stickers-and-stamps-project-faq-505f7d85e79d">Frequently Asked Questions</a></li><li>Static version of this <a href="https://kristinhenry.medium.com/stickers-and-stamps-a-bright-spot-in-2020-d3011afefa09">story, on Medium</a>.</li><li><a href="https://ko-fi.com/artatomic">Chip in a little and support</a> the expenses of this project.</li><p>Project Ideation, Art, Data Collection, and Data Visualization by <a href="http://kristinhenry.github.io/">Kristin Henry</a>, 2020-2022</p></ul>',
+    footer: '<h2>The project continues, as I keep mailing out letters and adding new data and charts.</h2><h2>Want to help out?</h2><ul><li><a href="https://forms.gle/5KpX1yWLr5TnKorK9">Sign up</a> to get a sticker and help fill in more of this map</li><li><a href="https://kristinhenry.medium.com/data-practice-for-stickers-and-stamps-project-3b68c1eb8e3f">Read about the Data Practice</a> for this project.</li><li>Updates and Work-in-progress <a href="https://www.patreon.com/KristinHenry/posts?filters%5Btag%5D=Stickers%20%26%20Stamps">posts</a></li><li><a href="https://kristinhenry.medium.com/stickers-and-stamps-project-faq-505f7d85e79d">Frequently Asked Questions</a></li><li>Static version of this <a href="https://kristinhenry.medium.com/stickers-and-stamps-a-bright-spot-in-2020-d3011afefa09">story, on Medium</a>.</li><li><a href="https://ko-fi.com/artatomic">Chip in a little and support</a> the expenses of this project.</li><p>Project Ideation, Art, Data Collection, and Data Visualization by <a href="http://kristinhenry.github.io/">Kristin Henry</a>, 2020-2023</p></ul>',
     chapters: [
         {
             id: 'intro',
             alignment: 'center',
             title: "",
             image: 'lotsOfStickers.jpg',
-        description: "Sitting at my ink-stained desk, I found myself staring at a pile of stickers.",
+        description: "Sitting at my desk, I found myself staring at a pile of stickers. I was going to give them away at events.<br/><br/>But everything was canceled...because of Covid. This was early 2020.<br/><br/>What was I going to do with all these stickers?",
             location: { 
                 center: [-42.44486, 27.77139],
                 zoom: 5, //1.2,
@@ -59,60 +59,10 @@ var config = {
             ]
         }, 
         {
-            id: 'intro1',
-            alignment: 'center',
-            title: "",
-            description: "I was going to give them away at conferences and shows.<br/><br/>But everything was canceled...because of Covid. This was early 2020.<br/><br/>What was I going to do with all these stickers?",
-            location: { 
-                center: [-42.44486, 27.77139],
-                zoom: 4, //1.2,
-                pitch: 0.00,
-                bearing: 0.00
-            },
-            onChapterEnter: [
-                {
-                    layer: 'early-letter-glow',
-                    opacity: 0,
-                    layout: { visibility: 'visible'}
-                    
-                },
-                {
-                    layer: 'early-letters',
-                    opacity: 0
-                },
-                {
-                    layer: 'early-mail-centers',
-                    opacity: 0
-                },
-                {
-                    layer: 'later-letters',
-                    opacity: 0
-                },
-                {
-                    layer: 'later-lines',
-                    opacity: 0
-                },
-                {
-                    layer: 'later-mail-centers',
-                    opacity: 0
-                },
-                {
-                    layer: 'mail-unreported',
-                    opacity: 0
-                }
-            ],
-            onChapterExit: [
-                {
-                    // layer: 'mail-circles',
-                    // opacity: 0
-                }
-            ]
-        }, 
-        {
             id: 'intro2',
             alignment: 'center',
             // title: '',
-        description: "I started mailing them to artist-friends, and asked them to tell me when they arrived. I was curious to see how long it would take for my letters to get to my friends.<br /><br />Within a few weeks, I had a nice little data set. It surprised me how quickly some letters arrived, and how much longer it took for others.<br /><br />Would more data show more patterns?<br /><br />  I opened up signups and posted the project online. <br /><br />Within a few months, I’d mailed out over 300 handwritten notes and stickers.",
+        description: "I started mailing them to friends, and asked them to tell me when they arrived. I was curious to see how long it would take for my letters to get to my friends.<br /><br />Within a few weeks, I had a nice little data set. It surprised me how quickly some letters arrived, and how much longer it took for others.  Would more data show more patterns?<br /><br />  I posted the project online, and within a few months, I’d mailed out over 300 handwritten notes and stickers.",
             location: { 
                 center: [-42.44486, 27.77139],
                 zoom: 4,//1.2,
@@ -757,11 +707,11 @@ var config = {
          // },
 
          {
-            id: 'zip-search',
-            alignment: 'left',
-            title: "Find your zipcode",
+            id: 'zip-search-link',
+            alignment: 'center',
+            title: "Explore the Interactive Map",
             image: '',
-            // description: 'need to add text field and button here',
+            description: 'Find data for your zipcode and explore the data with the <a href="index2.html">interactive map</a>',
             location: {
                 center: [-82.44486, 37.77139],
                 zoom: 3,
@@ -790,42 +740,5 @@ var config = {
             ]
          }//,
 
-        // {
-        //     id: 'closing',
-        //     alignment: 'center',
-        //     title: '',
-        //     image: '',
-        //     description: '<h2>The project continues, as I keep mailing out letters and adding new data and charts.</h2><h2>Want to help out? You can</h2><ul><li><a href="https://forms.gle/5KpX1yWLr5TnKorK9">Sign up</a> to get a sticker and help fill in more of this map</li><li><a href="https://kristinhenry.medium.com/data-practice-for-stickers-and-stamps-project-3b68c1eb8e3f">Read about the Data Practice</a> for this project.</li><li>Updates and Work-in-progress <a href="https://www.patreon.com/KristinHenry/posts?filters%5Btag%5D=Stickers%20%26%20Stamps">posts</a></li><li><a href="https://kristinhenry.medium.com/stickers-and-stamps-project-faq-505f7d85e79d">Frequently Asked Questions</a></li><li>Static version of this <a href="https://kristinhenry.medium.com/stickers-and-stamps-a-bright-spot-in-2020-d3011afefa09">story, on Medium</a>.</li><li><a href="https://ko-fi.com/artatomic">Chip in a little and support</a> the expenses of this project.</li></ul>',
-        //     location: {
-        //         center: [-82.44486, 37.77139],
-        //         zoom: 3,
-        //         pitch: 0.00,
-        //         bearing: 0.00
-        //     },
-        //     onChapterEnter: [
-        //         {
-        //             layer: 'early-letter-glow',
-        //             opacity: 0
-        //         },
-        //         {
-        //             // layer: 'early-lines',
-        //             // opacity: 0
-        //         },
-        //         {
-        //             // layer: 'mail-centers',
-        //             // opacity: 0
-        //         },
-        //         {
-        //             // layer: 'mail-unreported',
-        //             // opacity: 0
-        //         }
-        //     ],
-        //     onChapterExit: [
-        //         {
-        //             // layer: 'gnpglaciers-2015',
-        //             // opacity: 0
-        //         }
-        //     ]
-        //  }
     ]
 };

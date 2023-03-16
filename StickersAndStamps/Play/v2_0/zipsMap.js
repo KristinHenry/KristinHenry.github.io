@@ -389,11 +389,6 @@ function getZipData(zip, targ){
 				// drawZipSearchData(zip, p, targ, mapInfo, map)  // in drawCharts.js
 				
 				return [zip, p, targ, mapInfo, map];
-				
-
-
-
-				
 
 			} else {
 				console.log(zip, " is not available for data")
