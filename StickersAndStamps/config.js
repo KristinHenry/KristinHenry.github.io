@@ -4,243 +4,105 @@ var config = {
     showMarkers: false,
     testing: true,
     theme: 'dark',
-    title: 'Stickers And Stamps',
-    subtitle: 'A Bright Spot in 2020',
-    byline: '',
-    footer: 'Stickers, Data Collection, and Data Visualization by <a href="http://kristinhenry.github.io/">Kristin Henry</a>, 2020',
+    title: 'StickersAndStamps',
+    subtitle: 'A Penpal Data-Art Project by Kristin Henry (ArtAtomic)',
+    // byline: 'by Kristin Henry (ArtAtomic)',
+    footer: '<h2>The project continues, as I keep mailing out letters and adding new data and charts.</h2><h2>Want to help out?</h2><p><a href="https://forms.gle/5KpX1yWLr5TnKorK9">Sign up</a> to get a sticker and help fill in more of this map</p><p><a href="https://kristinhenry.medium.com/data-practice-for-stickers-and-stamps-project-3b68c1eb8e3f">Read about the Data Practice</a> for this project.</p><p>Updates and Work-in-progress <a href="https://www.patreon.com/KristinHenry/posts?filters%5Btag%5D=Stickers%20%26%20Stamps">posts</a></p><p><a href="https://kristinhenry.medium.com/stickers-and-stamps-project-faq-505f7d85e79d">Frequently Asked Questions</a></p><p>Static version of this <a href="https://kristinhenry.medium.com/stickers-and-stamps-a-bright-spot-in-2020-d3011afefa09">story, on Medium</a>.</p><p><a href="https://ko-fi.com/artatomic">Chip in a little and support</a> the expenses of this project.</p><p>Project Ideation, Art, Data Collection, and Data Visualization by <a href="http://kristinhenry.github.io/">Kristin Henry</a>, 2020-2023</p></ul>',
     chapters: [
         {
             id: 'intro',
             alignment: 'center',
-            title: '',
+            title: "Back in early 2020, Covid changed all of my plans.",
             // image: 'lotsOfStickers.jpg',
-            description: '2020 has been a rough year in so many ways. The relentless news cycle, ubiquitous uncertainty,  social isolation, existential dread, and so much more. All amplified by social media.<br /><br />The attack on the US Postal Service hit me harder than I expected it to. I felt driven to buy as many stamps as I could, to support the USPS.',
+        description: "I wasn't sure what to do. I had all these art stickers. I was planning to give them away at conferences. But everything was cancelled.<br/><br/> I started mailing them to friends. Then to folks who signed up from across the country and around the world.<br/><br/> I work with data, so I asked them to tell me when the envelopes arrived. <br/><br/>In the past few years, I've continued to mail my stickers, collect data on how long they take to arrive, and explore different ways to visualize that data and tell this story.",
             location: {
-                center: [-2.44486, 27.77139],
-                zoom: 1.2,
+                center: [-42.44486, 27.77139],
+                zoom: 4,
                 pitch: 0.00,
                 bearing: 0.00
             },
             onChapterEnter: [
                 {
-                    layer: 'mail-circles',
-                    opacity: .025
+                    layer: 'early-letter-glow',
+                    opacity: 0
                 },
                 {
-                    layer: 'mail-centers',
+                    layer: 'early-letters',
                     opacity: 0
-                }
-                ,
+                },
                 {
-                    layer: 'mail-center-lines',
+                    layer: 'early-mail-centers',
+                    opacity: 0
+                },
+                {
+                    layer: 'later-letters',
+                    opacity: 0
+                },
+                {
+                    layer: 'later-lines',
+                    opacity: 0
+                },
+                {
+                    layer: 'later-mail-centers',
+                    opacity: 0
+                },
+                {
+                    layer: 'mail-unreported',
                     opacity: 0
                 }
             ],
             onChapterExit: [
                 {
-                    layer: 'mail-circles',
-                    opacity: .01
+                    // layer: 'early-letter-glow',
+                    // opacity: 1
                 }
             ]
-        },
-        {
-            id: 'intro1',
-            alignment: 'center',
-            title: '',
-            image: 'lotsOfStickers.jpg',
-            description: 'At some point, I found myself staring at the pile of art stickers I was going to give away at conferences and shows…all cancelled because Covid.<br/><br/>What was I going to do with them? Could I mail them to people? <br/><br/>I started with a little group of artist-friends and set up an online signup form, so they could send me their mailing addresses privately.',
-            location: {
-                center: [-2.44486, 27.77139],
-                zoom: 1.2,
-                pitch: 0.00,
-                bearing: 0.00
-            },
-            onChapterEnter: [
-                {
-                    layer: 'mail-circles',
-                    opacity: .025
-                },
-                {
-                    layer: 'mail-centers',
-                    opacity: 0
-                }
-                ,
-                {
-                    layer: 'mail-center-lines',
-                    opacity: 0
-                }
-            ],
-            onChapterExit: [
-                {
-                    layer: 'mail-circles',
-                    opacity: .01
-                }
-            ]
-        },
-        {
-            id: 'intro2',
-            alignment: 'center',
-            title: '',
-            image: 'ruthAsawaStamps.jpg',
-            description: 'With perfect timing, the USPS was about to release new stamps honoring local artist Ruth Asawa, just as I was launching an art+data project from right in her neighborhood.<br><br>',
-            location: {
-                center: [-2.44486, 27.77139],
-                zoom: 1.2,
-                pitch: 0.00,
-                bearing: 0.00
-            },
-            onChapterEnter: [
-                {
-                    layer: 'mail-circles',
-                    opacity: .025
-                },
-                {
-                    layer: 'mail-centers',
-                    opacity: 0
-                }
-                ,
-                {
-                    layer: 'mail-center-lines',
-                    opacity: 0
-                }
-            ],
-            onChapterExit: [
-                {
-                    layer: 'mail-circles',
-                    opacity: .01
-                }
-            ]
-        },
-        
-        {
-            id: 'intro3',
-            alignment: 'center',
-            title: '',
-            description: 'The process of writing little notes and addressing the envelopes by hand was surprisingly soothing. I started inviting more people to signup, and asked them to tell me when their sticker arrived. Before I knew it, I had a tiny data set of delivery times for US mail. By profession, I develop data visualizations. So, of course I started charting the data. <br /><br />Patterns started emerging very early: <ul><li>Distance from San Francisco did not seem to indicate delivery time.</li><li>Most US mail arrived in 2-4 days</li><li>But slow mail in the US, was very slow.</li><li> Letters to Canada were slower to arrive than most US letters.</li></ul>',
-            location: {
-                center: [-2.44486, 27.77139],
-                zoom: 1.2,
-                pitch: 0.00,
-                bearing: 0.00
-            },
-            onChapterEnter: [
-                {
-                    layer: 'mail-circles',
-                    opacity: .025
-                },
-                {
-                    layer: 'mail-centers',
-                    opacity: 0
-                }
-                ,
-                {
-                    layer: 'mail-center-lines',
-                    opacity: 0
-                }
-            ],
-            onChapterExit: [
-                {
-                    layer: 'mail-circles',
-                    opacity: .01
-                }
-            ]
-        },
-        {
-            id: 'intro5',
-            alignment: 'center',
-            title: '',
-            description: 'Over the months, more and more folks signed up from across the US and around the world',
-            location: {
-                center: [-2.44486, 27.77139],
-                zoom: 1.2,
-                pitch: 0.00,
-                bearing: 0.00
-            },
-            onChapterEnter: [
-                {
-                    layer: 'mail-circles',
-                    opacity: .025
-                },
-                {
-                    layer: 'mail-centers',
-                    opacity: 0
-                }
-                ,
-                {
-                    layer: 'mail-center-lines',
-                    opacity: 0
-                }
-            ],
-            onChapterExit: [
-                {
-                    layer: 'mail-circles',
-                    opacity: .01
-                }
-            ]
-        },
-        {
-            id: 'intro6',
-            alignment: 'center',
-            title: '',
-            description: 'These charts may not be pretty, but they speak volumes to me. Yes, I love scatter plots! Especially when I start digging into data.<br/><br/>These show me that the distance an envelope travels through the US does not predict when it will arrive. Most arrive in 2–4 days, but some take a lot longer. The international destinations add interesting context. For one of my US recipients, it looks like it took longer than the journey of another envelope of mine to reach Australia.',
-            location: {
-                center: [-2.44486, 27.77139],
-                zoom: 1.2,
-                pitch: 0.00,
-                bearing: 0.00
-            },
-            onChapterEnter: [
-                {
-                    layer: 'mail-circles',
-                    opacity: .025
-                },
-                {
-                    layer: 'mail-centers',
-                    opacity: 0
-                }
-                ,
-                {
-                    layer: 'mail-center-lines',
-                    opacity: 0
-                }
-            ],
-            onChapterExit: [
-                {
-                    layer: 'mail-circles',
-                    opacity: .01
-                }
-            ]
-        },
+        },              
         {
             id: 'intro7',
             alignment: 'center',
-            title: '',
-            description: 'In the scatter plot, above, a lot of points are right on top of each other, making it tricky to see how many there were. A histogram can help with that, this one shows how many envelopes arrived in each time bracket. Most of my letters were delivered in the US in 2–4 days, with most arriving in three days.',
+            title: 'How long did it take for the first letters to reach their destinations?',
+            description: 'Most of my letters were delivered, in the US, within 2–4 days. But many of them took a lot longer.',
             location: {
-                center: [-2.44486, 27.77139],
-                zoom: 1.2,
+                center: [-42.44486, 27.77139],
+                zoom: 4,
                 pitch: 0.00,
                 bearing: 0.00
             },
             onChapterEnter: [
                 {
-                    layer: 'mail-circles',
-                    opacity: .025
+                    layer: 'later-letters',
+                    opacity: 0
                 },
                 {
-                    layer: 'mail-centers',
+                    layer: 'later-lines',
                     opacity: 0
-                }
-                ,
+                },
                 {
-                    layer: 'mail-center-lines',
+                    layer: 'later-mail-centers',
+                    opacity: 0
+                },
+                {
+                    layer: 'mail-unreported',
                     opacity: 0
                 }
             ],
             onChapterExit: [
                 {
-                    layer: 'mail-circles',
-                    opacity: .01
+                    layer: 'later-letters',
+                    opacity: 0
+                },
+                {
+                    layer: 'later-lines',
+                    opacity: 0
+                },
+                {
+                    layer: 'later-mail-centers',
+                    opacity: 0
+                },
+                {
+                    layer: 'mail-unreported',
+                    opacity: 0
                 }
             ]
         },
@@ -248,65 +110,71 @@ var config = {
             id: 'intro4',
             alignment: 'center',
             title: '',
-            description: 'While the histogram is interesting, the most common delivery time dominates the chart. It does not reveal as much about our outliers…the envelopes that arrived later than the expected time of 2–4 days. To me, these are more visible in a less conventional dual axis chart with curved links.<br/><br/>In this chart, each line represents an envelope I mailed from San Francisco to another address in the US. The more orange the line, the longer it took that envelope to arrive.',
+            description: 'The distance an envelope traveled did not correspond with how long it took to be delivered. If it did, the lines in this chart would all be mostly straight up and down.',
             location: {
-                center: [-2.44486, 27.77139],
-                zoom: 1.2,
+                center: [-42.44486, 27.77139],
+                zoom: 4,
                 pitch: 0.00,
                 bearing: 0.00
             },
             onChapterEnter: [
                 {
-                    layer: 'mail-circles',
-                    opacity: .025
+                    layer: 'later-letters',
+                    opacity: 0
                 },
                 {
-                    layer: 'mail-centers',
+                    layer: 'later-lines',
                     opacity: 0
-                }
-                ,
+                },
                 {
-                    layer: 'mail-center-lines',
+                    layer: 'later-mail-centers',
+                    opacity: 0
+                },
+                {
+                    layer: 'mail-unreported',
                     opacity: 0
                 }
             ],
             onChapterExit: [
                 {
-                    layer: 'mail-circles',
-                    opacity: .01
+                    // layer: 'early-letter-glow',
+                    // opacity: .01
                 }
             ]
         },
         {
             id: 'intro8',
             alignment: 'center',
-            title: '',
-            description: 'Well, it sure does look like distance alone does not determine how long it will take for a letter to travel from San Francisco to another location in the United States. This is not surprising, given the interference with the USPS this year. <br/><br/>But can we see traces of this interference in our project? Can we bring personal experience back into the story? Where did I send my letters? How long did it take to get there? Time to plot some  data on a map… ',
+            title: 'So, where did my letters go?',
+            description: "And how long did they take to arrive? Let's look at a map... ",
             location: {
-                center: [-2.44486, 27.77139],
-                zoom: 1.2,
+                center: [-42.44486, 27.77139],
+                zoom: 4,
                 pitch: 0.00,
                 bearing: 0.00
             },
             onChapterEnter: [
                 {
-                    layer: 'mail-circles',
-                    opacity: .025
+                    layer: 'later-letters',
+                    opacity: 0
                 },
                 {
-                    layer: 'mail-centers',
+                    layer: 'later-lines',
                     opacity: 0
-                }
-                ,
+                },
                 {
-                    layer: 'mail-center-lines',
+                    layer: 'later-mail-centers',
+                    opacity: 0
+                },
+                {
+                    layer: 'mail-unreported',
                     opacity: 0
                 }
             ],
             onChapterExit: [
                 {
-                    layer: 'mail-circles',
-                    opacity: .01
+                    // layer: 'early-letter-glow',
+                    // opacity: 0
                 }
             ]
         },
@@ -315,7 +183,7 @@ var config = {
             alignment: 'left',
             title: 'International Mail',
             image: '',
-            description: 'International mail, as expected, takes longer than most domestic mail.<br/><br/>And it takes a very long time for it to get to Australia.',
+            description: 'As expected, international mail takes longer than most domestic mail.<br/><br/>And it takes a very long time for it to get to Australia.',
             location: {
                 center: [-2.44486, 27.77139],
                 zoom: 1.2,
@@ -324,17 +192,37 @@ var config = {
             },
             onChapterEnter: [
                 {
-                    layer: 'mail-centers',
-                    opacity: 0
+                    layer: 'early-letter-glow',
+                    opacity: .1
                 }
                 ,
                 {
-                    layer: 'mail-center-lines',
+                    layer: 'early-letters',
                     opacity: 0
                 },
                 {
-                    layer: 'mail-circles',
-                    opacity: .05
+                    layer: 'early-lines',
+                    opacity: 0
+                },
+                {
+                    layer: 'early-mail-centers',
+                    opacity: 0
+                },
+                {
+                    layer: 'later-letters',
+                    opacity: 0
+                },
+                {
+                    layer: 'later-lines',
+                    opacity: 0
+                },
+                {
+                    layer: 'later-mail-centers',
+                    opacity: 0
+                },
+                {
+                    layer: 'mail-unreported',
+                    opacity: 0
                 }
             ],
             onChapterExit: [
@@ -349,7 +237,7 @@ var config = {
             alignment: 'left',
             title: 'Domestic USPS Mail',
             image: '',
-            description: 'Delivery times of domestic mail varies quite a bit.<br/><br/>These dots represent individual letters I have mailed. The color represents the number of days it took to arrive. The more orange, the more days.',
+            description: 'Delivery times of domestic mail varies quite a bit.<br/><br/>These dots represent individual letters I have mailed. The color represents the number of days it took to arrive. The more orange, the more days.<br/><br/>See those orange dots, up in Canada? Crossing the border, and into the Canadian postal service, can be slow.',
             location: {
                 center: [-110.44486, 34.77139],
                 zoom: 2.6,
@@ -358,15 +246,35 @@ var config = {
             },
             onChapterEnter: [
                 {
-                    layer: 'mail-center-lines',
+                    layer: 'early-letter-glow',
+                    opacity: 0.03
+                },
+                {
+                    layer: 'early-letters',
+                    opacity: 0.6
+                },
+                {
+                    layer: 'early-lines',
                     opacity: 0
                 },
                 {
-                    layer: 'mail-centers',
+                    layer: 'early-mail-centers',
                     opacity: 0
                 },
                 {
-                    layer: 'mail-circles',
+                    layer: 'later-letters',
+                    opacity: 0
+                },
+                {
+                    layer: 'later-lines',
+                    opacity: 0
+                },
+                {
+                    layer: 'later-mail-centers',
+                    opacity: 0
+                },
+                {
+                    layer: 'mail-unreported',
                     opacity: 0
                 }
             ],
@@ -382,7 +290,7 @@ var config = {
             alignment: 'left',
             title: 'USPS Sorting Centers',
             image: '',
-            description: 'The US Postal Service contains many regional sorting centers. Your mail going in and out through the center that serves your zip code.<br/><br/>Some areas have several sorting centers nearby, and others are served by sorting centers in another state! <br/><br/>Here, the sorting centers my letters have passed through are drawn as open circles. The lines connect the town where the letter was delivered to the regional sorting center.',
+            description: 'The US Postal Service utilizes many regional sorting centers. Your mail goes, in and out, through the center that serves your <b>zip code</b>.<br/><br/>Some areas have several sorting centers nearby, and others are served by sorting centers in another state! <br/><br/>Here, the sorting centers my letters have passed through are drawn as open circles. The lines connect the town where the letter was delivered with the regional sorting center that letter passed through.',
             location: {
                 center: [-110.44486, 34.77139],
                 zoom: 2.6,
@@ -391,15 +299,31 @@ var config = {
             },
             onChapterEnter: [
                 {
-                    layer: 'mail-center-lines',
-                    opacity: 1
+                    layer: 'early-letter-glow',
+                    opacity: 0
                 },
                 {
-                    layer: 'mail-centers',
-                    opacity: 1
+                    layer: 'early-mail-centers',
+                    opacity: .5
                 },
                 {
-                    layer: 'mail-circles',
+                    layer: 'early-lines',
+                    opacity: .6
+                },
+                {
+                    layer: 'later-letters',
+                    opacity: 0
+                },
+                {
+                    layer: 'later-lines',
+                    opacity: 0
+                },
+                {
+                    layer: 'later-mail-centers',
+                    opacity: 0
+                },             
+                {
+                    layer: 'mail-unreported',
                     opacity: 0
                 }
             ],
@@ -415,7 +339,7 @@ var config = {
             alignment: 'left',
             title: 'Zooming in',
             image: '',
-            description: 'My data set is small, but even with approximately 300 letters (data points), we can already see that some sorting centers deliver promptly. Others do not. If I had more data, I could possibly dismiss some of the slow deliveries from centers that are usually quick. Or maybe it differs by zipcode? I may look at that, if I get more participants. ',
+            description: 'By the end of 2020, my data set was still small.  But even with 300 letters (data points), we can already see that some sorting centers deliver promptly. Others do not.<br /><br /> If I had more data, I could possibly dismiss some of the slow deliveries from centers that are usually quick. Or maybe it differs by zipcode? I may look at that, if I get more participants.',
             location: {
                 center: [-112.0740, 33.4484],
                 zoom: 4,
@@ -424,12 +348,24 @@ var config = {
             },
             onChapterEnter: [
                 {
-                    layer: 'mail-center-lines',
-                    opacity: 1
+                    layer: 'early-letter-glow',
+                    opacity: 0
                 },
                 {
-                    layer: 'mail-centers',
-                    opacity: 1
+                    layer: 'later-letters',
+                    opacity: 0
+                },
+                {
+                    layer: 'later-lines',
+                    opacity: 0
+                },
+                {
+                    layer: 'later-mail-centers',
+                    opacity: 0
+                },
+                {
+                    layer: 'mail-unreported',
+                    opacity: 0
                 }
             ],
             onChapterExit: [
@@ -439,40 +375,45 @@ var config = {
                 // }
             ]
         },
-        {
-            id: 'phoenix2',
-            alignment: 'left',
-            title: 'Phoenix',
-            image: '',
-            description: 'All but one letter I sent to Arizona arrived on the late side.',
-            location: {
-                center: [-112.0740, 33.4484],
-                zoom: 5.92,
-                pitch: 51.50,
-                bearing: -26.40
-            },
-            onChapterEnter: [
-             {
-                    layer: 'mail-circles',
-                    opacity: 0
-                },
-                {
-                    layer: 'mail-center-lines',
-                    opacity: 1
-                },
-                {
-                    layer: 'mail-centers',
-                    opacity: 1
-                }
-            ],
-            onChapterExit: []
-        },
+        // {
+        //     id: 'phoenix2',
+        //     alignment: 'left',
+        //     title: 'Phoenix',
+        //     image: '',
+        //     description: 'All but one letter I sent to Arizona arrived on the late side.',
+        //     location: {
+        //         center: [-112.0740, 33.4484],
+        //         zoom: 5.92,
+        //         pitch: 51.50,
+        //         bearing: -26.40
+        //     },
+        //     onChapterEnter: [
+        //      {
+        //             layer: 'mail-circles',
+        //             opacity: 0
+        //         },
+        //         {
+        //             layer: 'mail-center-lines',
+        //             opacity: 1
+        //         },
+        //         {
+        //             layer: 'mail-centers',
+        //             opacity: 1
+        //         }
+        //         ,
+                // {
+                //     layer: 'mail-unreported',
+                //     opacity: 0
+                // }
+        //     ],
+        //     onChapterExit: []
+        // },
         {
             id: 'denver1',
             alignment: 'left',
             title: 'Western States',
             image: '',
-            description: 'Being less densely populated, the western states have fewer sorting centers than Eastern states.<br/><br/>Note that not all sorting centers are shown on this map. Only the sorting centers that my letters passed through are shown.',
+            description: 'Being less densely populated, the western states have fewer sorting centers than Eastern states.<br/><br/>Note that not all sorting centers are shown on this map. Only the sorting centers that my letters have passed through are shown.',
             location: {
                 center: [-104.9903, 39.7392],
                 zoom: 4,
@@ -481,12 +422,24 @@ var config = {
             },
             onChapterEnter: [
                 {
-                    layer: 'mail-center-lines',
-                    opacity: 1
+                    layer: 'early-letter-glow',
+                    opacity: 0
                 },
                 {
-                    layer: 'mail-centers',
-                    opacity: 1
+                    layer: 'later-letters',
+                    opacity: 0
+                },
+                {
+                    layer: 'later-lines',
+                    opacity: 0
+                },
+                {
+                    layer: 'later-mail-centers',
+                    opacity: 0
+                },
+                {
+                    layer: 'mail-unreported',
+                    opacity: 0
                 }
             ],
             onChapterExit: [
@@ -510,12 +463,24 @@ var config = {
             },
             onChapterEnter: [
                 {
-                    layer: 'mail-center-lines',
-                    opacity: 1
+                    layer: 'early-letter-glow',
+                    opacity: 0
                 },
                 {
-                    layer: 'mail-centers',
-                    opacity: 1
+                    layer: 'later-letters',
+                    opacity: 0
+                },
+                {
+                    layer: 'later-lines',
+                    opacity: 0
+                },
+                {
+                    layer: 'later-mail-centers',
+                    opacity: 0
+                },
+                {
+                    layer: 'mail-unreported',
+                    opacity: 0
                 }
 
             ],
@@ -526,7 +491,7 @@ var config = {
             alignment: 'left',
             title: 'East Coast',
             image: '',
-            description: 'So many sorting centers, and slow sorting centers right next to prompt centers.',
+            description: 'So many sorting centers...slow and fast deliveries coming out of some of the same centers.',
             location: {
                 center: [-77.0369, 38.9072],
                 zoom: 5.92,
@@ -534,13 +499,25 @@ var config = {
                 bearing: -26.40
             },
             onChapterEnter: [
-               {
-                    layer: 'mail-center-lines',
-                    opacity: 1
+                {
+                    layer: 'early-letter-glow',
+                    opacity: 0
                 },
                 {
-                    layer: 'mail-centers',
-                    opacity: 1
+                    layer: 'later-letters',
+                    opacity: 0
+                },
+                {
+                    layer: 'later-lines',
+                    opacity: 0
+                },
+                {
+                    layer: 'later-mail-centers',
+                    opacity: 0
+                },
+                {
+                    layer: 'mail-unreported',
+                    opacity: 0
                 }
             ],
             onChapterExit: [
@@ -551,58 +528,11 @@ var config = {
             ]
         },
         {
-            id: 'dc2',
-            alignment: 'left',
-            title: 'DC Area',
-            image: '',
-            description: 'This view has a lot going on. On my ToDo list: get more relevant data on this area.<br/><br/>USPS sorting centers are assigned by zip code, so there should be a lot of relevant data to work with.',
-            location: {
-                center: [-77.0369, 38.9072],
-                zoom: 6.51,
-                pitch: 41.00,
-                bearing: 78.33
-            },
-            onChapterEnter: [],
-            onChapterExit: []
-        },
-        {
-            id: 'intro6',
+            id: 'timing-0',
             alignment: 'center',
-            title: '',
-            description: 'From the beginning, this project has been a combination of modern technology and personal tangible hand-written notes in hand-addressed envelopes and modern technology. Participants sign up with a google-form, which I can then move to a spreadsheet for tracking when mail is sent and recieved (communicated by email).<br><br>But, for me, the greatest treasures of this project have been the little gifts and drawings that people send back to me. Especially drawings from children!',
-            location: {
-                center: [-2.44486, 27.77139],
-                zoom: 1.2,
-                pitch: 0.00,
-                bearing: 0.00
-            },
-            onChapterEnter: [
-                {
-                    layer: 'mail-circles',
-                    opacity: .025
-                },
-                {
-                    layer: 'mail-center-lines',
-                    opacity: 1
-                },
-                {
-                    layer: 'mail-centers',
-                    opacity: 1
-                }
-            ],
-            onChapterExit: [
-                {
-                    layer: 'mail-circles',
-                    opacity: .01
-                }
-            ]
-        },
-        {
-            id: 'closing',
-            alignment: 'center',
-            title: 'The project continues:',
+            title: "Fast forward...to 2022   ",
             image: '',
-            description: '<ul><li><a href="https://forms.gle/5KpX1yWLr5TnKorK9">Sign up</a> to get a sticker and help fill in more of this map</li><li>Updates and Work-in-progress <a href="https://www.patreon.com/KristinHenry/posts?filters%5Btag%5D=Stickers%20%26%20Stamps">posts</a></li><li><a href="https://kristinhenry.medium.com/stickers-and-stamps-project-faq-505f7d85e79d">Frequently Asked Questions</a></li><li>Static version of this <a href="https://kristinhenry.medium.com/stickers-and-stamps-a-bright-spot-in-2020-d3011afefa09">story, on Medium</a>.</li></ul>',
+            description: "As of July 2022, I've mailed out over <b>3,000</b> envelopes. <br /><br />That's a lot of dots on our map!",
             location: {
                 center: [-82.44486, 37.77139],
                 zoom: 3,
@@ -611,11 +541,23 @@ var config = {
             },
             onChapterEnter: [
                 {
-                    layer: 'mail-center-lines',
+                    layer: 'early-letter-glow',
                     opacity: 0
                 },
                 {
-                    layer: 'mail-centers',
+                    layer: 'later-letters',
+                    opacity: .6
+                },
+                {
+                    layer: 'later-lines',
+                    opacity: .6
+                },
+                {
+                    layer: 'later-mail-centers',
+                    opacity: .5
+                },
+                {
+                    layer: 'mail-unreported',
                     opacity: 0
                 }
             ],
@@ -625,6 +567,74 @@ var config = {
                     // opacity: 0
                 }
             ]
-         }
+         },
+        {
+            id: 'timing-1',
+            alignment: 'center',
+            title: "While I'd sent out over 3,000 envelopes by July 2022, not everyone told me when their's arrived.",
+            image: 'chart_051622.png',
+            description: 'A surge in sugnups, in mid-2021 left me exhausted and burnt-out. I was looking forward to growing my little data set, but most of the folks who signed up just ingnored my request to report arrival time.<br /><br />But in later surge events, folks were a lot better about helping me with the <b>data</b> part of the project.<br /><br />The locations I have mailed letters to, but do not have arrival times for, are marked as white dots on this map.',
+            location: {
+                center: [-82.44486, 37.77139],
+                zoom: 3,
+                pitch: 0.00,
+                bearing: 0.00
+            },
+            onChapterEnter: [
+                {
+                    layer: 'early-letter-glow',
+                    opacity: 0
+                },
+                {
+                    layer: 'later-mail-centers',
+                    opacity: .4
+                },
+                {
+                    layer: 'mail-unreported',
+                    opacity: .6
+                }
+            ],
+            onChapterExit: [
+                {
+                    // layer: 'mail-unreported',
+                    // opacity: 0
+                }
+            ]
+         },
+
+         {
+            id: 'zip-search-link',
+            alignment: 'center',
+            title: 'Explore the Interactive Map and see all current data (2020-2023)',
+            image: '',
+            description: 'Find data for your zipcode and explore the data with the <a href="index2.html">interactive map</a>',
+            location: {
+                center: [-82.44486, 37.77139],
+                zoom: 3,
+                pitch: 0.00,
+                bearing: 0.00
+            },
+            onChapterEnter: [
+                {
+                    layer: 'early-letter-glow',
+                    opacity: 0
+                },
+                {
+                    layer: 'later-mail-centers',
+                    opacity: .4
+                },
+                {
+                    layer: 'mail-unreported',
+                    opacity: .6
+                }
+            ],
+            onChapterExit: [
+                {
+                    // layer: 'mail-unreported',
+                    // opacity: 0
+                }
+            ]
+         }//,
+
     ]
 };

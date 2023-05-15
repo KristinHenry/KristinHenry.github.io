@@ -1,3 +1,4 @@
+
 <!DOCTYPE html>
 <html>
 <head>
@@ -10,10 +11,14 @@
     <script src="https://unpkg.com/intersection-observer@0.5.1/intersection-observer.js"></script>
     <script src="https://unpkg.com/scrollama"></script>
 
-    <script src="http://d3js.org/d3.v6.min.js"></script>
+    <script src="https://d3js.org/d3.v6.min.js"></script>
     <script src="https://d3js.org/d3-color.v2.min.js"></script>
     <script src="https://d3js.org/d3-interpolate.v2.min.js"></script>
     <script src="https://rawgit.com/susielu/d3-annotation/master/d3-annotation.min.js"></script>
+    <!-- <script src="storyGraph.js"></script> -->
+    <script src="zipsMap.js"></script>
+    <script src="drawCharts.js"></script>
+   
 
    <!--  <script src="Semicircle.js"></script> -->
 
@@ -25,6 +30,11 @@
             /*color: #ff0000;*/
             /*color: #afb8ba;*/
         }
+
+        html {
+          font-size: 100%;
+        }
+
         a:link {
     color: #657c9e;
     background-color: transparent;
@@ -98,10 +108,8 @@
 
         #features h3, #features p {
             color: #afb8ba;
+            font-size: 1rem;
         }
-
-
-
 
 
 
@@ -136,7 +144,8 @@
         .step {
             padding-bottom: 50vh;
             /* margin-bottom: 10vh; */
-            opacity: 0.25;
+           /* opacity: 0.25;*/
+           opacity: 0.8;
         }
         .step.active {
             opacity: 0.9;
@@ -178,8 +187,7 @@ var layerTypes = {
     'line': ['line-opacity'],
     'circle': ['circle-opacity', 'circle-stroke-opacity'],
     'symbol': ['icon-opacity', 'text-opacity'],
-    'raster': ['raster-opacity'],
-    'fill-extrusion': ['fill-extrusion-opacity']
+    'raster': ['raster-opacity']
 }
 
 var alignments = {
@@ -189,29 +197,62 @@ var alignments = {
     'full': 'fully'
 }
 
+
 function getLayerPaintType(layer) {
-    var layerType = map.getLayer(layer).type;
-    return layerTypes[layerType];
+    if(layer){
+        var layerType = map.getLayer(layer).type;
+
+        if(layerType){
+         return layerTypes[layerType];
+        }  
+    }
 }
 
-function setLayerOpacity(layer) {
+
+function setLayerOpacity(layer, opacity) {
     var paintProps = getLayerPaintType(layer.layer);
-    paintProps.forEach(function(prop) {
-        var options = {};
-        if (layer.duration) {
-            var transitionProp = prop + "-transition";
-            options = { "duration": layer.duration };
-            map.setPaintProperty(layer.layer, transitionProp, options);
-        }
-        map.setPaintProperty(layer.layer, prop, layer.opacity, options);
-    });
+    if(paintProps){
+        paintProps.forEach(function(prop) {
+            var options = {};
+            if (layer.duration) {
+                var transitionProp = prop + "-transition";
+                options = { "duration": layer.duration };
+                map.setPaintProperty(layer.layer, transitionProp, options);
+            }
+            map.setPaintProperty(layer.layer, prop, layer.opacity, options);
+        });
+    }
 }
 
 
+
+//-------------------------------------------------------
+
+var zipSearchData;  // used to globally store current zip code search result
 
 //--------------------------------------------------------
-var datafile = "StickerData122920.csv"
-var parseTime = d3.timeParse("%m/%d/%Y");
+// var datafile = "StickerData122920.csv"
+// var datafile = "StickerData051622.csv"
+// var datafile = "stickersData052622.csv"
+var datafile = "stickerData061422.csv"
+
+var data_2;
+var data_6;
+var data_7;
+
+
+
+// 2020-09-23 00:00:00
+var parseTime = d3.timeParse("%Y-%m-%d %H:%M:%S")
+
+var bubbleScale = d3.scaleLinear()
+                .domain([0,80])  // these are max counts for letters sent to a place
+                .range([2,30]);
+
+var storyColors = d3.scaleLinear()
+                .domain([1, 20, 50, 90]) // these are based on counts
+                .range(["White", "CornflowerBlue", "#4e6da6", "#324569"])
+                .interpolate(d3.interpolateHcl)
 
 var colorScale = d3.scaleLinear()
                 .domain([1, 5, 6, 30])
@@ -223,17 +264,57 @@ var colorRegion = d3.scaleOrdinal()
                 // .domain(["US", "Canada", "Europe", "Australia", "EastAsia"])
                 .range(["#c6bad1","#5cbf84", "#e3cd91", "#4287f5", "#9743f7"])
 
+var dateMax_1 = parseTime("2020-12-10 0:0:00")
+            // var dateMax_1 = parseTime("9/1/2021")
+            // var dateMax_1 = parseTime("05/16/2022")
+
+
+
 
 
  function getTravelTime(d){
-        d.mailed = parseTime(d["Date Mailed"])
-            d.arrived = parseTime(d["Date reported recieved"])
+
 
             d.travelTime = 0;
             if(d.mailed && d.arrived) d.travelTime = d3.timeDay.count(d.mailed,d.arrived);
             d.travelTime = +d.travelTime;
 
+            
+
             return d.travelTime;
+}
+
+
+function getZipCounts(data){
+    zips = {};
+
+    for(i in data){
+        if(data[i]["country"] === "US"){
+            // console.log('travel time: ', data[i]["travelTime"])
+            var zip = data[i]["zipcode"];
+            var travel = data[i]["travelTime"]
+
+            // first, instantiate the data for this zip in our structure
+            if(!(zip in zips)){ 
+                // console.log(zip, " -->not in zips yet")
+                zips[zip] = {'mailed': 0, 'arrived': 0, 'travelTimes': []}
+            }
+            
+            // then, increment if mailed or arrived
+            zips[zip]['mailed'] +=1;
+
+            if(travel > 0){ 
+                zips[zip]['arrived'] += 1;
+                zips[zip]['travelTimes'].push(travel)
+            }
+
+
+            // console.log('updated: ', zips[zip])
+            
+        }
+    }
+
+    return zips;
 }
 
 
@@ -275,8 +356,10 @@ config.chapters.forEach((record, idx) => {
     var container = document.createElement('div');
     var chapter = document.createElement('div');
 
+    // ToDo: use this to correctly set tag types in chapter text
+
     if (record.title) {
-        var title = document.createElement('h3');
+        var title = document.createElement('h2');
         title.innerText = record.title;
         chapter.appendChild(title);
     }
@@ -351,67 +434,163 @@ map.on("load", function() {
     d3.csv(datafile)
       .then(function(data) {
 
-            var myjson = {"type": "FeatureCollection", "features": []}
-            var sortingCenters = {"type": "FeatureCollection", "features": []}
-            var mylines = {"type": "FeatureCollection", "features": []}
+            var earlyLetters = {"type": "FeatureCollection", "features": []};
+            var laterLetters = {"type": "FeatureCollection", "features": []};
+            var earlySortingCenters = {"type": "FeatureCollection", "features": []}
+            var laterSortingCenters = {"type": "FeatureCollection", "features": []}
+            var notYetReported = {"type": "FeatureCollection", "features": []}
+            
+            var earlyLines = {"type": "FeatureCollection", "features": []}
+            var laterLines = {"type": "FeatureCollection", "features": []}
 
+            var lats = [] // for keeping track of sorting centers
 
             data.forEach(function(d,i) {
 
+                
+                //  using this limiting of samples to debug problems in the data set
+                var midpoint = 2610;
+                // if(i> midpoint & i < midpoint+10 ){
+                if(i > 0){
+                    // console.log('data: ', i, d)
 
-                d.distance = +d["Distance From SF"];
+                    d.distance = +d["distanceFromSF"];
 
-                d.mailed = parseTime(d["Date Mailed"])
-                d.arrived = parseTime(d["Date reported recieved"])
+                    d.mailed = parseTime(d["dateMailed"])
+                    d.arrived = parseTime(d["dateArrived"])
 
-                //just for now, change region to US or Canada if that's the country too
-                if(d["Country"] == "US" || d["Country"] == "Canada" || d["Country"] == "Australia") d["GlobalRegion"] = d["Country"];
-
-                var travelTime = getTravelTime(d);
-
-                if(travelTime > 0 ){
-
-                    myjson.features.push({
-                        "type": "Feature",
-                                  "geometry": {
-                                    "type": "Point",
-                                    "coordinates": [d.lon, d.lat]
-                                  },
-                                  "properties": {
-                                    "travelTime": travelTime,
-                                    "color": colorScale(travelTime)
-                                  }
-                    })
+                    // console.log('request', parseTime(d.dateRequested), dateMax_1)
 
 
-                    if(d["Country"] == "US"){
-                                            
+                    //just for now, change region to US or Canada if that's the country too
+                    if(d["country"] == "US" || d["country"] == "Canada" || d["country"] == "Australia") d["region"] = d["country"];
 
-                        sortingCenters.features.push({
+                    var travelTime = getTravelTime(d);
+
+
+                    // I want to show the locations requested, even if not 'arrived'
+                    if(travelTime == 0){
+
+                        // console.log('-----------------------')
+                        // console.log(d)
+
+                        notYetReported.features.push({
                             "type": "Feature",
-                                    "geometry": {
+                                      "geometry": {
                                         "type": "Point",
-                                        "coordinates": [d.SC_lon, d.SC_lat]
+                                        "coordinates": [d.lon, d.lat]
+                                      },
+                                      "properties": {
+                                        "description": "testing description for tooltip",
+                                        "travelTime": travelTime,
+                                        "color": "white" 
+                                      }
+                        })
+
+                    }
+
+                    // now lets look at requests we have arrival data for 
+                    if(travelTime > 0){
+
+                        // first set of mail data
+                        if(parseTime(d.dateRequested) <=  dateMax_1){
+                            earlyLetters.features.push({
+                                "type": "Feature",
+                                          "geometry": {
+                                            "type": "Point",
+                                            "coordinates": [d.lon, d.lat]
+                                          },
+                                          "properties": {
+                                            "travelTime": travelTime,
+                                            "color": colorScale(travelTime)
+                                          }
+                            })
+
+                        } else {
+
+                            // ongoing mail data
+                            laterLetters.features.push({
+                                "type": "Feature",
+                                          "geometry": {
+                                            "type": "Point",
+                                            "coordinates": [d.lon, d.lat]
+                                          },
+                                          "properties": {
+                                            "travelTime": travelTime,
+                                            "color": colorScale(travelTime)
+                                          }
+                            })
+
+                        }
+
+                        // these are the open circles for the usps sorting centers 
+                            // doing this until I can figure out simpler way to get sorting centers saved only once.
+                        if(d["country"] == "US"){
+                                                
+                            if(parseTime(d.dateRequested) <=  dateMax_1){
+
+                                var i = lats.indexOf(d.uspsCenterLat)
+                                if(i<0){
+                                    lats.push(d.uspsCenterLat)
+                                    earlySortingCenters.features.push({
+                                        "type": "Feature",
+                                                "geometry": {
+                                                    "type": "Point",
+                                                    "coordinates": [d.uspsCenterLon, d.uspsCenterLat]
+                                                },
+                                                "properties": {
+                                                    "travelTime": travelTime,
+                                                    "color": "white"
+                                                }
+                                    })
+                                }
+                            } else {
+                                // deal with later sorting centers here
+                                var i = lats.indexOf(d.uspsCenterLat)
+                                if(i<0){
+                                    lats.push(d.uspsCenterLat)
+                                    laterSortingCenters.features.push({
+                                        "type": "Feature",
+                                                "geometry": {
+                                                    "type": "Point",
+                                                    "coordinates": [d.uspsCenterLon, d.uspsCenterLat]
+                                                },
+                                                "properties": {
+                                                    "travelTime": travelTime,
+                                                    "color": "white"
+                                                }
+                                    })
+                                }
+                            }
+
+                            
+                            if(parseTime(d.dateRequested) <=  dateMax_1){
+                                earlyLines.features.push({
+                                    "type": "Feature",
+                                    "geometry": { 
+                                        "type": "LineString",
+                                        "coordinates": [[d.lon, d.lat], [d.uspsCenterLon, d.uspsCenterLat]]
                                     },
-                                    "properties": {
+                                    "properties":{
                                         "travelTime": travelTime,
                                         "color": colorScale(travelTime)
                                     }
-
-                        })
-
-                      
-                        mylines.features.push({
-                            "type": "Feature",
-                            "geometry": { 
-                                "type": "LineString",
-                                "coordinates": [[d.lon, d.lat], [d.SC_lon, d.SC_lat]]
-                            },
-                            "properties":{
-                                "travelTime": travelTime,
-                                "color": colorScale(travelTime)
+                                })
+                            } else {
+                                // deal with later lines here
+                                laterLines.features.push({
+                                    "type": "Feature",
+                                    "geometry": { 
+                                        "type": "LineString",
+                                        "coordinates": [[d.lon, d.lat], [d.uspsCenterLon, d.uspsCenterLat]]
+                                    },
+                                    "properties":{
+                                        "travelTime": travelTime,
+                                        "color": colorScale(travelTime)
+                                    }
+                                })
                             }
-                        })
+                        }
                     }
                 }
 
@@ -419,30 +598,98 @@ map.on("load", function() {
 
 
 
-            // connect my data to the map, and name it 'testDot'
-            map.addSource('testDot', {
+            // connect my data to layers and add those to the map 
+            map.addSource('earlyLetters', {
                     'type': 'geojson',
-                    data: myjson
+                    data: earlyLetters
                 });
 
-            map.addSource('mailCenters', {
-                'type': 'geojson',
-                data: sortingCenters
+            map.addLayer({
+                    'id': 'early-letter-glow',
+                    'type': 'circle',
+                    'source': 'earlyLetters',
+                    'opacity': 0.01,
+                    'paint': {
+                        'circle-color': ['get', 'color'],
+                        'circle-opacity': 0.1,
+                        'circle-radius': 10 //['get', 'travelTime']
+                    }
+                });
 
-            });
+            map.addLayer({
+                    'id': 'early-letters',
+                    'type': 'circle',
+                    'source': 'earlyLetters',
+                    'opacity': 0.6,
+                    // 'layout': {
+                    //     'visibility': 'none'
+                    // },
+                    'paint': {
+                        'circle-color': ['get', 'color'],
+                        'circle-opacity': 0.6,
+                        'circle-radius': 2 //['get', 'travelTime']
+                    }
+                });
 
-            map.addSource('mailCenterLines', {
+            // ----------------------------
+            map.addSource('earlyLines', {
                 'type': 'geojson',
-                data: mylines
+                data: earlyLines
+            })
+
+            map.addLayer({
+                'id': 'early-lines',
+                'type': 'line',
+                'source': 'earlyLines',
+                'opacity': 0,
+                'paint': {
+                    'line-width': 1,
+                    'line-color': ['get', 'color'],
+
+                }
+
             })
 
 
+            
+
+
+
+            //-------------
+            map.addSource('earlyMailCenters', {
+                'type': 'geojson',
+                data: earlySortingCenters
+
+            });
 
             map.addLayer({
-                'id': 'mail-centers',
+                'id': 'early-mail-centers',
                 'type': 'circle',
-                'source':'mailCenters',
+                'source':'earlyMailCenters',
+                'opacity': 0.5,
                 'paint': {
+
+                    'circle-opacity': 0.0,
+                    'circle-color': '#404040',
+                    'circle-stroke-color': ['get', 'color'],
+                    'circle-stroke-width': .5,
+                    'circle-radius': 4
+                }
+            })
+
+             map.addSource('laterMailCenters', {
+                'type': 'geojson',
+                data: laterSortingCenters
+
+            });
+
+            map.addLayer({
+                'id': 'later-mail-centers',
+                'type': 'circle',
+                'source':'laterMailCenters',
+                'opacity': 0.5,
+                'paint': {
+
                     'circle-opacity': 0.0,
                     'circle-color': '#404040',
                     'circle-stroke-color': ['get', 'color'],
@@ -452,36 +699,20 @@ map.on("load", function() {
             })
 
 
-            map.addLayer({
-                'id': 'mail-center-lines',
-                'type': 'line',
-                'source': 'mailCenterLines',
-                'paint': {
-                    'line-width': 1,
-                    'line-color': ['get', 'color'],
-                    
 
-                }
+            //-------------
+            
 
-            })
-
-
-            map.addLayer({
-                    'id': 'mail-circles',
-                    'type': 'circle',
-                    'source': 'testDot',
-                    'paint': {
-                        'circle-color': ['get', 'color'],
-                        'circle-opacity': 0.1,
-                        'circle-radius': 10 //['get', 'travelTime']
-                    }
+            map.addSource('laterLetters', {
+                    'type': 'geojson',
+                    data: laterLetters
                 });
 
-
             map.addLayer({
-                    'id': 'mail-dots',
+                    'id': 'later-letters',
                     'type': 'circle',
-                    'source': 'testDot',
+                    'source': 'laterLetters',
+                    'opacity': 0,
                     'paint': {
                         'circle-color': ['get', 'color'],
                         'circle-opacity': 0.6,
@@ -489,31 +720,94 @@ map.on("load", function() {
                     }
                 });
 
+            //------------------
+            map.addSource('laterLines', {
+                'type': 'geojson',
+                data: laterLines
+            })
+
+            map.addLayer({
+                'id': 'later-lines',
+                'type': 'line',
+                'source': 'laterLines',
+                'opacity': 0,
+                'paint': {
+                    'line-width': 1,
+                    'line-color': ['get', 'color'],
+
+                }
+
+            })
+
+           // --------------------
+            map.addSource('unreported', {
+                'type': 'geojson', data: notYetReported})
+
             
 
+            map.addLayer({
+                    'id': 'mail-unreported',
+                    'type': 'circle',
+                    'source': 'unreported',
+                    'paint': {
+                        'circle-color': 'white',
+                        'circle-opacity': 0.4,
+                        'circle-radius': 2 //['get', 'travelTime']
+                        
+                    }
 
-            //--------------------------------------------
-            var dateMax_1 = parseTime("9/1/2020")
-            // var data_2 = data.filter(function(d) { return d.travelTime > 0  && d.arrived < dateMax_1})
+                });
+
+            
+            //-------------------------------------------------
+            
+            
+
+            data = data.filter(function(d){ 
+
+                // console.log('------------------------')
+                // console.log('date max: ', dateMax_1)
+                // console.log('date requested: ', d.dateRequested)
+                
+
+                // let requestDate = parseTime(d.dateRequested)
+                // // console.log('filtering', requestDate ); 
+                // console.log('testing dates request<max?', requestDate <= dateMax_1)
+
+                // parseTime(d.dateRequested) <=  dateMax_1
+
+                return parseTime(d.dateRequested) <=  dateMax_1;})
 
 
-            var data_2 = data.filter(function(d) { return d.travelTime > 0  && d.arrived < dateMax_1})
+            data_2 = data.filter(function(d) { return d.travelTime > 0  && d.arrived < dateMax_1})
 
-            var data_6 = data.filter(function(d) { return (d.travelTime > 0 && d.travelTime < 20) && (d["Country"] == "US") })
+            data_6 = data.filter(function(d) { return (d.travelTime > 0 && d.travelTime < 20) && (d["country"] == "US") })
 
-            var data_7 = data.filter(function(d) { return (d.travelTime > 0 && d.travelTime < 31 ) })
-
-
-            drawScatter(data_2, "#intro3");
-
-            drawLinks(data_6, "#intro4", "Country")
-
-            drawScatter2(data_7, "#intro5", "GlobalRegion",20, 80);
+            data_7 = data.filter(function(d) { return (d.travelTime > 0 && d.travelTime < 31 ) })
 
 
 
-            drawDensity(data_7, "#intro7")
 
+
+            // drawStory("#intro")
+
+
+            // drawScatter(data_2, "#intro3");
+
+            drawLinks(data_6, "#intro4", "Country","curvesChart")
+
+            // drawScatter2(data_7, "#intro5", "GlobalRegion",20, 80);
+
+
+
+            drawDensity(data_7, "#intro7", "densityChart")
+
+            // drawZipcodes(data, "#zips")
+
+            // drawZipSearch('#zip-search', 'zipChart')
+            var zipCounts = getZipCounts(data)
+            // console.log('zipcounts: ', zipCounts)
+            drawZipSearch('#zip-search', zipCounts);
         })
 
 
@@ -546,491 +840,65 @@ map.on("load", function() {
     });
 });
 
-// setup resize event
-window.addEventListener('resize', scroller.resize);
 
 
+//----------------------------------------------
+function resizeAll(){
+    scroller.resize();
+
+    document.getElementById("densityChart").remove();
+    drawDensity(data_7, "#intro7", "densityChart")
+
+    document.getElementById("curvesChart").remove();
+    drawLinks(data_6, "#intro4", "Country", "curvesChart")
+
+
+    // drawZipSearch('#zip-search', 'zipChart')
+
+    // drawZipcodes(data, "#zips")
+}
+
+
+
+
+// modified from https://stackoverflow.com/questions/45905160/javascript-on-window-resize-end
+function debounce(func, time){
+    var time = time || 100; // 100 by default if no param
+    var timer;
+    return function(event){
+        if(timer) clearTimeout(timer);
+        timer = setTimeout(func, time, event);
+    };
+}
+
+// Function with stuff to execute
+function resizeContent() {
+    console.log('resized');
+    resizeAll();
+}
+
+// Eventlistener
+window.addEventListener("resize", debounce( resizeContent, 150 ));
 
 
 
 
 //-----------------------------------------------------------------
-function drawDensity(data_raw, targ){
 
-    var color = d3.scaleOrdinal().range(["#c6bad1","#5cbf84", "#e3cd91", "#4287f5", "#9743f7"])
 
-    var containerWidth = +d3.select(targ).style('width').slice(0, -2)
 
-    margin = ({top:20, right: 30, bottom: 30, left: 60}),
-    width = containerWidth - margin.left - margin.right,
-    height = 300
 
 
-  legend_x=20, 
-  legend_y=50;
 
-    //  Add the SVG to the page 
-    var svg = d3.select(targ).append("svg")
-        .attr("width", width + margin.left + margin.right)
-        .attr("height", height + margin.top + margin.bottom)
-        .style("background-color", "#333333")
 
-
-    var subchart = svg.append("g")
-                    .attr("transform", "translate(" + margin.left + "," + margin.top + ")")
-
-
-
-    // Need to get longest delivery time, for number of bins
-    // get travelTime for all data (unfiltered)
-    // numBins will be max value in that array. We'll use this in histGenerator
-    var numBins = d3.max(data_raw.map(function(d){ return d.travelTime; }))
-    var buff = 2;
-
-    // get count of each instance of a day-value
-    // we're getting bins for all the data here, and we'll plug region data into it later
-    var histGenerator = d3.histogram()
-    .domain([0, numBins +buff])    // Set the domain to cover the entire intervall [0;]
-    .thresholds(numBins+buff);  // number of thresholds; this will create n+1 bins
-
-
-  var x = d3.scaleLinear()
-        .domain([0, numBins]) // input
-        .range([0, width-margin.right]); // output
-
-    var y = d3.scaleLinear()
-        .domain([0, 90]) // input 
-        .range([height-margin.bottom, margin.top]); // output 
-
-
-
-  var xAxis = d3.axisBottom(x);
-  var yAxis = d3.axisLeft(y).ticks(5).tickSizeOuter(0);
-
-
-  // now filter, and prepare data for line/area chart and draw the curves
-  var groups = ["US", "Canada", "Australia", "Europe", "EastAsia"]
-
-  for(var i=0; i<groups.length; i++){
-
-        group = groups[i]
-
-        var mydata = data_raw.filter(function(d){ return d["GlobalRegion"] === group})
-        var mytimes = mydata.map(function(d){ return d.travelTime; })
-
-        var bins = histGenerator(mytimes);
-
-        // convert array of day-values into [day, count] pairs
-        var dataset = [];
-        for(var j=0; j<bins.length; j++){
-            dataset[j] = {"y": bins[j].length}
-        }
-
-          drawCurve(dataset, subchart, x, y, color(group));
-
-    }
-
-
-
-
-  // Add the Axes
-  svg.append("g")
-      .attr("transform", "translate("+ margin.left + "," + (height-10) + ")")
-      .attr("stroke-opacity", .4)
-      .attr('class','axis')
-      .call(xAxis)
-
-  svg.append("text")             
-      .attr("transform", "translate("+(width/2)+","+(height+margin.top+10)+")")
-      .style("text-anchor", "middle")
-      .style('fill', '#ccc')
-      .text("Days to reach destination");
-
-  svg.append("g")
-      .attr("transform", "translate("+ (margin.left) + "," + margin.top + ")")
-      .attr("stroke-opacity", .4)
-      .attr("class", "axis")
-      .call(yAxis)
-
-  // text label for the y axis
-  svg.append("text")
-      .attr("x", margin.left/2)
-      .attr("y", margin.top)
-      .attr("dy", "1em")
-      .style("text-anchor", "Right")
-      .style('fill', '#ccc')
-      .text("Envelopes");
-
-
-  var legend = svg.selectAll(".legend")
-      .data(color.domain())
-    .enter().append("g")
-      .attr("class", "legend")
-      .attr("transform", function(d, i) { return "translate(40," + (legend_y+(i * legend_x )) + ")"; });
-
-  legend.append("rect")
-      .attr("x", width - 18)
-      .attr("width", 18)
-      .attr("height", 18)
-      .attr("fill-opacity", .8)
-      .style("fill", color);
-
-  legend.append("text")
-      .attr("x", width - 24)
-      .attr("y", 9)
-      .attr("dy", ".35em")
-      .style("text-anchor", "end")
-      .style("fill", "#ccc")
-      .text(function(d) { return d; });
-
-
-
-    // Features of the annotation
-    var an_x = x(3)+margin.left
-    const annotations = [
-      {
-        note: {
-          label: "Most letters were delivered in the US within 2-4 days, with most arriving in 3 days.",
-          title: "Delivery Times in US"
-        },
-        x: x(3)+margin.left,
-        y: 100,
-        dy: -20,
-        dx: 50
-      },
-      {
-        note: {
-          label: "Many letters were delivered in 6-7 days.",
-          title: "Delivery Times in Europe"
-        },
-        x: x(6)+margin.left,
-        y: 265,
-        dy: -80,
-        dx: 40
-      }
-      ,
-      {
-        note: {
-          label: "A lot of slow mail took a week or more to arrive.",
-          title: "Late Deliveries in US"
-        },
-        x: x(7)+margin.left,
-        y: 265,
-        dy: -25,
-        dx: 140
-      }
-    ]
-
-    // Add annotation to the chart
-    const makeAnnotations = d3.annotation().annotations(annotations);
-    // d3.select(targ)
-      svg.append("g")
-      .call(makeAnnotations)
-
-    
-}
-
-
-function drawCurve(linedata, targ, x, y, color){
-
-  // line generator
-  var line = d3.line()
-      .x(function(d, i) { return x(i); }) // set the x values for the line generator
-      .y(function(d) { return y(d.y); }) // set the y values for the line generator 
-      .curve(d3.curveMonotoneX) // apply smoothing to the line
-
-  // Append the path, bind the data, and call the line generator 
-  targ.append("path")
-      .datum(linedata) 
-      .attr("class", "line") // Assign a class for styling 
-      .attr("d", line) // 11. Calls the line generator 
-      .style('fill', color)
-      .style('fill-opacity', .4)
-
-}
-
-
-
-
-//-------------------------------------------------------------------
-
-function drawLinks(data, targ, color_by){
-
-  var containerWidth = +d3.select(targ).style('width').slice(0, -2)
-
-  var margin = {top: 50, right: 60, bottom: 40, left: 50},
-    width = containerWidth - margin.left - margin.right,
-    height = 320 - margin.top - margin.bottom;
-
-    var x1 = d3.scaleLinear()
-      .range([0, width]);
-
-    var x2 = d3.scaleLinear()
-      .range([0, width]);
-
-
-    var xAxis1 = d3.axisTop(x1).ticks(5).tickSizeOuter(0);
-    var xAxis2 = d3.axisBottom(x2).ticks(5).tickSizeOuter(0);
-
-    var svg = d3.select(targ).append("svg")
-    .attr("width", width + margin.left + margin.right)
-    .attr("height", height + margin.top + margin.bottom)
-    .style("background-color", "#333333")
-    .append("g")
-    .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
-
-    x1.domain(d3.extent(data, function(d) { return (d.travelTime > 0 ? d.travelTime : 0); })).nice();
-    x2.domain(d3.extent(data, function(d) { return (d.travelTime > 0 ? d.distance : 0); })).nice();
-
-
-    //link generator
-    var link = d3.linkVertical()
-                .source(function(d) { return [x1(d.travelTime), 10];})
-                .target(function(d) { return [x2(d.distance), 200];});
-       
-    // //Adding the link paths
-    // d3.select(svg) 
-    svg.selectAll("path")
-        .data(data)
-        .join("path")
-        .attr("d", link)
-        .attr('stroke', function(d) { return colorScale(d.travelTime); })
-        .attr('stroke-opacity', .4)
-        .attr("fill", 'none')
-        .classed("link", true); 
-
-
-     svg.append("g")
-      .attr("class", "axis")
-      .call(xAxis1)
-
-    svg.append("g")
-      .attr("class", "axis")
-      .attr("transform", "translate( 0, " + (height-20) + " )")
-      .call(xAxis2)
-
-
-     svg.append("text")             
-      .attr("transform", "translate("+(width/2)+","+(-24)+")")
-      .style("text-anchor", "middle")
-      .style('fill', '#ccc')
-      .text("Days to reach destination");
-
-    svg.append("text")             
-      .attr("transform", "translate("+(width/2)+","+(height+14)+")")
-      .style("text-anchor", "middle")
-      .style('fill', '#ccc')
-      .text("Distance Travelled (miles)");
-
-}
-
-function drawScatter(data, targ){
-
-  var containerWidth = +d3.select(targ).style('width').slice(0, -2)
-
-  var margin = {top: 20, right: 20, bottom: 40, left: 70},
-    width = containerWidth - margin.left - margin.right,
-    height = 200 - margin.top - margin.bottom;
-
-  var x = d3.scaleLinear()
-      .range([0, width]);
-
-  var y = d3.scaleLinear()
-      .range([height, 0]);
-
-  var color = d3.scaleOrdinal().range(["#c6bad1","#5cbf84", "#e3cd91", "#4287f5", "#9743f7"])
-
-  var xAxis = d3.axisBottom(x);
-
-  var yAxis = d3.axisLeft(y).ticks(5).tickSizeOuter(0);
-
-  var svg = d3.select(targ).append("svg")
-    .attr("width", width + margin.left + margin.right)
-    .attr("height", height + margin.top + margin.bottom)
-    .style("background-color", "#333333")
-    .append("g")
-    .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
-
-
-  x.domain(d3.extent(data, function(d) { return (d.travelTime > 0 ? d.travelTime : 0); })).nice();
-  y.domain(d3.extent(data, function(d) { return (d.travelTime > 0 ? d.distance : 0); })).nice();
-
-  svg.append("g")
-      .attr("transform", "translate(0," + height + ")")
-      .attr('class','axis')
-      .attr("stroke-opacity", .4)
-      .call(xAxis)
-
-
-  svg.append("text")             
-      .attr("transform", "translate("+(width/2)+","+(height+margin.top+10)+")")
-      .style("text-anchor", "middle")
-      .style('fill', '#ccc')
-      .text("Days to reach destination");
-
-
-
-  svg.append("g")
-      .attr("class", "axis")
-      .attr("stroke-opacity", .4)
-      .call(yAxis)
-
-  // text label for the y axis
-  svg.append("text")
-      .attr("transform", "rotate(-90)")
-      // .attr("x",0 - (height / 2) +100)
-      // .attr("y", 0 - margin.left)
-      .attr("x", -80)
-      .attr("y", -60)
-      .attr("dy", "1em")
-      .style("text-anchor", "middle")
-      .style('fill', '#ccc')
-      .text("Distance Travelled (miles)");
-
-
-  svg.selectAll(".dot")
-      .data(data)
-    .enter().append("circle")
-      .attr("class", "dot")
-      .attr("r", 4.5)
-      .attr("cx", function(d) { return x(d.travelTime); })
-      .attr("cy", function(d) { return y(d.distance); })
-      .attr("fill-opacity","0.4")
-      .style("fill", function(d) { return color(d.Country); })
-      .style("stroke", function(d) { return color(d.Country); });
-
-
-  var legend = svg.selectAll(".legend")
-      .data(color.domain())
-    .enter().append("g")
-      .attr("class", "legend")
-      .attr("transform", function(d, i) { return "translate(0," + (50+(i * 20 )) + ")"; });
-
-  legend.append("rect")
-      .attr("x", width - 18)
-      .attr("width", 18)
-      .attr("height", 18)
-      .style("fill", color);
-
-  legend.append("text")
-      .attr("x", width - 24)
-      .attr("y", 9)
-      .attr("dy", ".35em")
-      .style("text-anchor", "end")
-      .style("fill", "#ccc")
-      .text(function(d) { return d; });
-
-}
 
 //-----------------------------------------------------------------------------------
 
-function drawScatter2(data, targ, color_by, legend_x, legend_y){
-
-    var containerWidth = +d3.select(targ).style('width').slice(0, -2)
-
-
-  var margin = {top: 20, right: 60, bottom: 40, left: 60},
-    width = containerWidth - margin.left - margin.right,
-    height = 300 - margin.top - margin.bottom;
-
-  var x = d3.scaleLinear()
-      .range([0, width]);
-
-  var y = d3.scaleLinear()
-      .range([height, 0]);
-
-  
-
-  var xAxis = d3.axisBottom(x);
-
-  var yAxis = d3.axisLeft(y).ticks(5).tickSizeOuter(0);
-
-  var svg = d3.select(targ).append("svg")
-    .attr("width", width + margin.left + margin.right)
-    .attr("height", height + margin.top + margin.bottom)
-    .style("background-color", "#333333")
-    .append("g")
-    .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
-
-
-  x.domain(d3.extent(data, function(d) { return (d.travelTime > 0 ? d.travelTime : 0); })).nice();
-  y.domain(d3.extent(data, function(d) { return (d.travelTime > 0 ? d.distance : 0); })).nice();
-
-  svg.append("g")
-      .attr("transform", "translate(0," + height + ")")
-      .attr("stroke-opacity", .4)
-      .attr('class','axis')
-      .call(xAxis)
-
-
-  svg.append("text")             
-      .attr("transform", "translate("+(width/2)+","+(height+margin.top+10)+")")
-      .style("text-anchor", "middle")
-      .style('fill', '#ccc')
-      .text("Days to reach destination");
 
 
 
-  svg.append("g")
-      .attr("stroke-opacity", .4)
-      .attr("class", "axis")
-      .call(yAxis)
-
-
-// // text label for the y axis
-//   svg.append("text")
-//       .attr("x", 0)
-//       .attr("y", margin.top)
-//       .attr("dy", "1em")
-//       .style("text-anchor", "Right")
-//       .style('fill', '#ccc')
-//       .text("Envelopes");
-
-  // text label for the y axis
-  svg.append("text")
-      .attr("transform", "rotate(-90)")
-      .attr("x", -120)
-      .attr("y", -60)
-      .attr("dy", "1em")
-      .style("text-anchor", "middle")
-      .style('fill', '#ccc')
-      .text("Distance Travelled (miles)");
-
-
-  svg.selectAll(".dot")
-      .data(data)
-    .enter().append("circle")
-      .attr("class", "dot")
-      .attr("r", 2)
-      .attr("cx", function(d) { return x(d.travelTime); })
-      .attr("cy", function(d) { return y(d.distance); })
-      .style("fill", function(d) { return colorRegion(d[color_by]); })
-      .attr("fill-opacity","0.2")
-      .style("stroke", function(d) { return colorRegion(d[color_by]); })
-      .style("stroke-opacity", "0.9");
-
-
-  var legend = svg.selectAll(".legend")
-      .data(colorRegion.domain())
-    .enter().append("g")
-      .attr("class", "legend")
-      .attr("transform", function(d, i) { return "translate(40," + (legend_y+(i * legend_x )) + ")"; });
-
-  legend.append("rect")
-      .attr("x", width - 18)
-      .attr("width", 18)
-      .attr("height", 18)
-      .attr("fill-opacity", .8)
-      .style("fill", colorRegion);
-
-  legend.append("text")
-      .attr("x", width - 24)
-      .attr("y", 9)
-      .attr("dy", ".35em")
-      .style("text-anchor", "end")
-      .style("fill", "#ccc")
-      .text(function(d) { return d; });
-
+function randomRange(min, max){ 
+    return Math.floor((Math.random() * (max - min + 1)) + min); 
 }
 
 
