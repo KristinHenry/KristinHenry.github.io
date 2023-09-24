@@ -31,12 +31,12 @@
         <div class="collapse navbar-collapse" id="navbarResponsive">
           <ul class="navbar-nav ml-auto">
             <li class="nav-item active">
-              <a class="nav-link" href="index.html">Home
-                <span class="sr-only">(current)</span>
-              </a>
+              <a class="nav-link" href="index.html">Home</a>
             </li>
             <li class="nav-item active">
-              <a class="nav-link" href="art.html">Art</a>
+              <a class="nav-link" href="art.html">Art
+                <span class="sr-only">(current)</span>
+              </a>
             </li>
             <li class="nav-item">
               <a class="nav-link" href="about.html">About</a>
@@ -110,7 +110,7 @@
       
 
 
-  var datafile = "portfolioProjects.csv";
+  var datafile = "portfolioArt.csv";
   d3.csv(datafile, function(error, data) {
   if (error) throw error;
       
