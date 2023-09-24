@@ -66,14 +66,13 @@ function appendCard(targ, card_data){
 		'<h4 class="card-title">' +
             '<a href="'+ card_data.title_link +'">'+ card_data.title +'</a>' +
         '</h4>' +
-        '<p class="card-text">' + card_data.text  +'</p>' +
+        '<p class="card-text">' + card_data.text  +'</p>'
 		+ '</div>'
 		+ '</div>'
-	 	+ '</div>';
+	 	+ '</div>' ;
 	
-	// console.log("class ", t)
 
-	targ.appendChild(t)
+	targ.appendChild(t);
 
 }
 
