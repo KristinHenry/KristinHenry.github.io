@@ -41,10 +41,11 @@ body {
     <li>Save your watermarked image.</li>
 </ol>
 <form action='#' onsubmit="return false;">
-    <input type='file' id='imgfile'  onChange='loadImage();'/>
+    
     <!-- <input type='button' id='btnLoad' value='Load Image' onclick='loadImage();' /> -->
     <input type='button' id='drawBox' class="button" value='Get SciArt Prompt' onclick="drawSassyText()" />
-    <a id="downloadLnk" class="button" download="SassyWatermark.jpg">Save Prompt Image</a>
+    <a id="downloadLnk" class="button" download="SciArtPrompt.jpg">Save Prompt Image</a>
+    <input type='file' id='imgfile'  onChange='loadImage();'/>
 
 </form>
 <form action='#' onsubmit="return false;">
@@ -177,6 +178,9 @@ body {
 
         function imageLoaded(){
             drawImg();
+
+            if(txt !== undefined){ drawText(); }
+            
         }
 
         function write(msg) {
