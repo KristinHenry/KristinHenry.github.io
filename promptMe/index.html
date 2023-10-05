@@ -1,0 +1,366 @@
+<html>
+<head>
+<meta http-equiv="Content-type" content="text/html;charset=UTF-8">
+<title>SciArt Prompt Generator</title>
+<style type='text/css'>
+body {
+    /*font-family: sans-serif;*/
+    font-family: Courier, sans-serif;
+    background: #919ffa; /*#cad9de;*/
+}
+
+.button {
+  font-family: 'Inter', sans-serif;
+  font-size: 15px;
+  font-weight: 500;
+  text-decoration: none;
+  color: white;
+  background: #a1aabf;
+  padding: 2px 6px 2px 6px;
+  border-radius: 36px;
+  border: none;
+  /*border-top: 1px solid #CCCCCC;
+  border-right: 1px solid #333333;
+  border-bottom: 1px solid #333333;
+  border-left: 1px solid #CCCCCC;*/
+  box-shadow: 0 18px 32px #00000030;
+}
+
+#customText {
+    visibility: hidden;
+}
+</style>
+
+</head>
+<body>
+<h1>SciArt Prompt Generator</h1>
+<p>Get a random SciArt prompt</p>
+<ol>
+    <li>Choose an image to watermark,</li>
+    <li>Add Sassy Watermark,</li>
+    <li>Save your watermarked image.</li>
+</ol>
+<form action='#' onsubmit="return false;">
+    <input type='file' id='imgfile'  onChange='loadImage();'/>
+    <!-- <input type='button' id='btnLoad' value='Load Image' onclick='loadImage();' /> -->
+    <input type='button' id='drawBox' class="button" value='Get SciArt Prompt' onclick="drawSassyText()" />
+    <a id="downloadLnk" class="button" download="SassyWatermark.jpg">Save Prompt Image</a>
+
+</form>
+<form action='#' onsubmit="return false;">
+    <input type='button' id='showTextField' class='button' value='+' onclick="showHideTextField()" />
+    <input type='text' id='customText' size='80' maxlength='80' value='Write your own Sassy text. Click Enter, to add to watermark' visibility='hidden' onclick="drawCustomText()"/>
+</form>
+<canvas id="canvas"></canvas>
+
+<script type='text/javascript'>
+
+    var img;
+
+    var txt;
+
+    var maxWidth = 600;
+    var maxHeight = 500;
+
+    var newWidth = maxWidth;
+    var newHeight = maxHeight;
+
+    var maxTextWidth = 200;
+
+    var txtWidth = maxWidth/2;
+    var txtHeight = maxHeight/4;
+
+    var x1 = 0-newWidth/2; //(maxWidth-txtWidth)/2;
+    var y1 = (newHeight-txtHeight)/2;
+    // var x2 = maxWidth*2; //x1/2 + txtWidth;
+    // var y2 = y1-10;
+
+
+
+
+    var canvas = document.getElementById("canvas")
+            canvas.width = maxWidth;
+            canvas.height = maxHeight;
+    var ctx = canvas.getContext("2d");
+
+    var sassyText = [
+        "Helloooo? Are you there World?",
+        "Lipid",
+        "Flagellum",
+        "Radiolaria",
+        "Diffraction",
+        "Cells",
+        "Fractal",
+        "Size",
+        "Influenza Virus",
+        "Random Walk",
+        "Lichen",
+        "Innoculum",
+        "Ultraviolet",
+        "Mycelium",
+        "Mutation",
+        "Hexagon",
+        "Recursion",
+        "Element",
+        "Golgi Body",
+        "Phototaxis",
+        "Half-life",
+        "Synapse",
+        "Vector",
+        "Eosin",
+        "Codon",
+        "Ectopic",
+        "Intron",
+        "Osmisis",
+        "Transcription",
+        "Vesicle",
+        "Organelle",
+        "Persistence"
+    ]
+
+    var currentIndex = Math.floor(Math.random() * sassyText.length);
+
+    function getNewIndex(){
+        var i = Math.floor(Math.random() * sassyText.length);
+        if (i != currentIndex){
+            // console.log(currentIndex, i)
+            currentIndex = i;
+        } else {
+            // console.log('try again')
+            getNewIndex();
+        }
+    }
+
+
+    var loadDefaultImage = function (url) {
+        img = new Image();
+        img.src = url
+
+        img.onload = function () { 
+            ctx.drawImage(img, 0, 0);
+        }
+    }
+    loadDefaultImage("blank.jpg")
+
+    // modified from https://stackoverflow.com/questions/13938686/can-i-load-a-local-file-into-an-html-canvas-element?rq=1   
+
+    function loadImage() {
+        var input, file, fr;
+
+        if (typeof window.FileReader !== 'function') {
+            write("The file API isn't supported on this browser yet.");
+            return;
+        }
+
+        input = document.getElementById('imgfile');
+        if (!input) {
+            write("Um, couldn't find the imgfile element.");
+        }
+        else if (!input.files) {
+            write("This browser doesn't seem to support the `files` property of file inputs.");
+        }
+        else if (!input.files[0]) {
+            write("Please select a file before clicking 'Load'");
+        }
+        else {
+            file = input.files[0];
+            fr = new FileReader();
+            fr.onload = createImage;
+            fr.readAsDataURL(file);
+        }
+
+        function createImage() {
+            img = new Image();
+            img.onload = imageLoaded;
+            img.src = fr.result;
+        }
+
+        function imageLoaded(){
+            drawImg();
+        }
+
+        function write(msg) {
+            var p = document.createElement('p');
+            p.innerHTML = msg;
+            document.body.appendChild(p);
+        }
+    }
+
+
+    function drawImg(){
+
+        ctx.clearRect(0, 0, canvas.width, canvas.height)
+
+
+
+        newWidth = maxWidth;
+        newHeight = maxHeight;
+
+        if(img.width < img.height){
+            newWidth = maxWidth * (img.width/img.height);
+        }
+
+        if(img.width >= img.height){
+            newHeight = maxHeight * (img.height/img.width)
+        }
+
+        canvas.width = newWidth;
+        canvas.height = newHeight;
+
+        ctx.drawImage(img,0,0, img.width, img.height, 0, 0, newWidth, newHeight);
+
+    }
+
+    function rotateWatermark(ctx){
+        ctx.translate(txtWidth, txtHeight);
+        ctx.rotate(45 * Math.PI / 180);
+        ctx.translate(-txtWidth, -txtHeight);
+
+    }
+
+    function drawRect(){
+
+        x1 = 0-newWidth/2; //(maxWidth-txtWidth)/2;
+        y1 = (newHeight-txtHeight)/2;
+        
+        // rotateWatermark(ctx)
+
+        ctx.beginPath();  //keeping this, just in case 
+        ctx.fillStyle = 'rgba(255,255,255,0.6)';
+        // ctx.rect(x1,y1, maxWidth+250+txt.length, txtHeight);
+        ctx.rect(x1,y1, newWidth*2, txtHeight);
+        ctx.fill();
+
+        // undo global rotate by resetting transformation matrix to the identity matrix
+        ctx.setTransform(1, 0, 0, 1, 0, 0);
+    }
+
+
+    function getFontSizeToFit(txt, font, width, ctx){
+       ctx.font =  'italic 22px ' + font;
+       var size = (width/ctx.measureText(txt).width)*18;
+
+       // we want to make sure that short words don't have huge font size
+       if(size > 80){ size = 80 };
+       return size
+    }
+
+
+
+    function drawCustomText(){
+        console.log('testing')
+    }
+
+    function drawSassyText(){
+
+        getNewIndex();
+
+        txt = sassyText[currentIndex];
+
+        drawText();
+    }
+
+
+    function drawText(){
+
+        // var canvas = document.getElementById("canvas")
+        // var ctx = canvas.getContext("2d");
+
+        var btn = document.getElementById('drawBox');
+        btn.value = "Try Another SciArt Prompt";
+
+       
+
+        drawImg();
+        drawRect();
+
+        var canvas = document.getElementById('canvas');
+        var ctx = canvas.getContext('2d');
+
+        var fontSize = getFontSizeToFit(txt, 'Arial', 500-30, ctx);
+        console.log('font size: ', fontSize)
+
+        // rotateWatermark(ctx)
+
+        // ctx.font = 'italic ' + fontSize + 'px Arial';
+        ctx.font = fontSize + 'px Courier';
+        ctx.textAlign = 'center';
+        ctx. textBaseline = 'middle';
+        ctx.fillStyle = 'black';  // a color name or by using rgb/rgba/hex values
+
+        // fillText(text, x, y [, maxWidth]);
+
+        ctx.fillText(txt, newWidth-newWidth/2, newHeight/2, newWidth); // text and position
+
+
+        drawWatermark(ctx);
+
+        // undo global rotate by resetting transformation matrix to the identity matrix
+        ctx.setTransform(1, 0, 0, 1, 0, 0);
+
+    }
+
+
+    function drawWatermark(ctx){
+
+        var watermark = 'SciArt Prompts'
+        ctx.font = 'italic 12px Courier'
+        ctx.textAlign = 'middle';
+        ctx. textBaseline = 'bottom';
+        ctx.fillStyle = 'white';  // a color name or by using rgb/rgba/hex values
+
+
+        ctx.fillText(watermark, newWidth-newWidth/2, newHeight-newHeight/2+txtHeight/2-txtHeight/8, newWidth); // text and position
+    }
+
+
+    function showHideTextField(){
+        console.log('show or hide')
+        var btn = document.getElementById('showTextField')
+        var fld = document.getElementById('customText')
+        console.log(btn.value)
+
+        if(btn.value == "+"){
+            fld.style.visibility= "visible";
+            btn.value = "<"
+        } else {
+            
+            fld.style.visibility= "hidden";
+            btn.value = "+";
+        }
+    }
+
+    //---------------------------------------------------------------------------
+    // javascript for input and event, that isn't managed in the html forms
+    function download() {
+        var dt = canvas.toDataURL('image/jpeg');
+        this.href = dt;
+
+    };
+    downloadLnk.addEventListener('click', download, false);
+
+
+    function testing(customTxt){
+        console.log('testing if enter button clicked')
+        console.log('input text', txt)
+        txt = customTxt;
+        drawText();
+
+    }
+
+    console.log("testing testing")
+
+    var input = document.getElementById("customText");
+
+    input.addEventListener("keyup", function(event){
+        if(event.keyCode === 13){
+            event.preventDefault();
+            testing(input.value);
+        }
+
+    });
+
+</script>
+
+</body>
+</html>
