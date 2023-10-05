@@ -26,6 +26,17 @@ body {
   box-shadow: 0 18px 32px #00000030;
 }
 
+.container {
+    /*height: 200px;*/
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+/*.item {
+    width: 10em;
+}*/
+
 #customText {
     visibility: hidden;
 }
@@ -33,12 +44,18 @@ body {
 
 </head>
 <body>
+<div class="container">
+<div class="item">
 <h1>SciArt Prompt Generator</h1>
 <p>Get a random SciArt prompt</p>
 <ol>
-    <li>Choose an image to watermark,</li>
-    <li>Add Sassy Watermark,</li>
-    <li>Save your watermarked image.</li>
+    <li>Get a SciArt Prompt,</li>
+    <li>Save image of this prompt.</li>
+</ol>
+<p>Watermark your finished drawing with the prompt.</p>
+<ol>
+    <li>Upload your drawing,</li>
+    <li>Download your drawing, with prompt as a watermark.</li>
 </ol>
 <form action='#' onsubmit="return false;">
     
@@ -53,6 +70,8 @@ body {
     <input type='text' id='customText' size='80' maxlength='80' value='Write your own Sassy text. Click Enter, to add to watermark' visibility='hidden' onclick="drawCustomText()"/>
 </form>
 <canvas id="canvas"></canvas>
+</div>
+</div>
 
 <script type='text/javascript'>
 
