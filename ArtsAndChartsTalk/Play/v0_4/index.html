@@ -1,0 +1,1348 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset='utf-8' />
+    <title>Stickers And Stamps Project</title>
+    <meta name='viewport' content='initial-scale=1,maximum-scale=1,user-scalable=no' />
+    <script src='https://api.tiles.mapbox.com/mapbox-gl-js/v1.5.0/mapbox-gl.js'></script>
+    <link href='https://api.tiles.mapbox.com/mapbox-gl-js/v1.5.0/mapbox-gl.css' rel='stylesheet' />
+
+    <script src="https://unpkg.com/intersection-observer@0.5.1/intersection-observer.js"></script>
+    <script src="https://unpkg.com/scrollama"></script>
+
+    <script src="https://d3js.org/d3.v6.min.js"></script>
+    <script src="https://d3js.org/d3-color.v2.min.js"></script>
+    <script src="https://d3js.org/d3-interpolate.v2.min.js"></script>
+    <script src="https://rawgit.com/susielu/d3-annotation/master/d3-annotation.min.js"></script>
+    <script src="storyGraph.js"></script>
+
+   <!--  <script src="Semicircle.js"></script> -->
+
+    <style>
+        body {
+            margin:0;
+            padding:0;
+            font-family: sans-serif;
+            /*color: #ff0000;*/
+            /*color: #afb8ba;*/
+        }
+        a:link {
+    color: #657c9e;
+    background-color: transparent;
+    text-decoration: none;
+    font-weight:bold
+  }
+
+  a:visited {
+    color: #657c9e;
+    background-color: transparent;
+    text-decoration: none;
+  }
+
+  a:hover {
+    color: white;
+    background-color: transparent;
+    text-decoration: underline;
+  }
+
+        .axis path,
+        .axis line {
+          fill: none;
+          stroke: #ccc;
+          shape-rendering: crispEdges;
+        }
+        .axis text{
+          fill: #ccc;
+          /*font: 10px sans-serif;*/
+        } 
+
+
+
+.annotation text{
+    /*fill: #f00;*/
+    font-size: 10px;
+}
+
+
+
+        #map {
+            top:0;
+            height: 100vh;
+            width:100vw;
+            position: fixed;
+            z-index: -5;
+        }
+        #header {
+            margin: auto;
+            width: 50vw;
+        }
+        #header h1, #header h2, #header h3, #header p {
+            margin: 0;
+            padding: 2vh 2vw;
+            text-align: center;
+            color: #afb8ba;
+        }
+        #footer {
+            width: 100%;
+            min-height: 5vh;
+            padding-top: 2vh;
+            padding-bottom: 2vh;
+            text-align: center;
+            line-height: 25px;
+            font-size: 13px;
+        }
+        #features {
+            padding-top: 10vh;
+            padding-bottom: 10vh;
+            z-index: 100;
+        }
+
+        #features h3, #features p {
+            color: #afb8ba;
+        }
+
+
+
+        .chart {
+            width:20;
+        }
+
+        .centered {
+            width: 50vw;
+            margin: 0 auto;
+        }
+        .lefty {
+            width: 33vw;
+            margin-left: 5vw;
+        }
+        .righty {
+            width: 33vw;
+            margin-left: 62vw;
+        }
+        .fully {
+            width: 100%;
+            margin: auto;
+        }
+        .light {
+            color: #444;
+            background-color: #fafafa;
+        }
+        .dark {
+            color: #fafafa;
+            background-color: #444;
+        }
+        .step {
+            padding-bottom: 50vh;
+            /* margin-bottom: 10vh; */
+           /* opacity: 0.25;*/
+           opacity: 0.8;
+        }
+        .step.active {
+            opacity: 0.9;
+        }
+
+        .step div {
+            padding:  25px 50px;
+            line-height: 25px;
+            font-size: 13px;
+        }
+
+        .step img {
+            width: 100%;
+        }
+
+        @media (max-width: 750px) {
+            .centered, .lefty, .righty, .fully {
+                width: 90vw;
+                margin: 0 auto;
+            }
+        }
+
+        /* Fix issue on mobile browser where scroll breaks  */
+        .mapboxgl-canvas-container.mapboxgl-touch-zoom-rotate.mapboxgl-touch-drag-pan, 
+        .mapboxgl-canvas-container.mapboxgl-touch-zoom-rotate.mapboxgl-touch-drag-pan .mapboxgl-canvas {
+            touch-action: unset;
+        }
+
+        </style>
+</head>
+<body>
+
+<div id="map"></div>
+<div id="story"></div>
+<script src="./config.js"></script>
+<script>
+var layerTypes = {
+    'fill': ['fill-opacity'],
+    'line': ['line-opacity'],
+    'circle': ['circle-opacity', 'circle-stroke-opacity'],
+    'symbol': ['icon-opacity', 'text-opacity'],
+    'raster': ['raster-opacity']
+}
+
+var alignments = {
+    'left': 'lefty',
+    'center': 'centered',
+    'right': 'righty',
+    'full': 'fully'
+}
+
+function getLayerPaintType(layer) {
+        var layerType = map.getLayer(layer).type;
+
+        if(layerType){
+         return layerTypes[layerType];
+        }  
+}
+
+function setLayerOpacity(layer, opacity) {
+    var paintProps = getLayerPaintType(layer.layer);
+    paintProps.forEach(function(prop) {
+        var options = {};
+        if (layer.duration) {
+            var transitionProp = prop + "-transition";
+            options = { "duration": layer.duration };
+            map.setPaintProperty(layer.layer, transitionProp, options);
+        }
+        map.setPaintProperty(layer.layer, prop, layer.opacity, options);
+    });
+}
+
+
+
+//--------------------------------------------------------
+var datafile = "StickerData122920.csv"
+var parseTime = d3.timeParse("%m/%d/%Y");
+
+var bubbleScale = d3.scaleLinear()
+                .domain([0,80])  // these are max counts for letters sent to a place
+                .range([2,30]);
+
+var storyColors = d3.scaleLinear()
+                .domain([1, 20, 50, 90]) // these are based on counts
+                .range(["White", "CornflowerBlue", "#4e6da6", "#324569"])
+                .interpolate(d3.interpolateHcl)
+
+var colorScale = d3.scaleLinear()
+                .domain([1, 5, 6, 30])
+                .range(['teal', 'white', 'orange', 'red'])
+                .interpolate(d3.interpolateHcl);
+
+
+var colorRegion = d3.scaleOrdinal()
+                // .domain(["US", "Canada", "Europe", "Australia", "EastAsia"])
+                .range(["#c6bad1","#5cbf84", "#e3cd91", "#4287f5", "#9743f7"])
+
+
+
+ function getTravelTime(d){
+        d.mailed = parseTime(d["Date Mailed"])
+            d.arrived = parseTime(d["Date reported recieved"])
+
+            d.travelTime = 0;
+            if(d.mailed && d.arrived) d.travelTime = d3.timeDay.count(d.mailed,d.arrived);
+            d.travelTime = +d.travelTime;
+
+            return d.travelTime;
+}
+
+
+function getZipCounts(data){
+    zips = {};
+
+    for(i in data){
+        if(data[i]["Country"] === "US"){
+            var zip = data[i]["Zipcode "];
+            if(zip in zips){ zips[zip] +=1; } else{ zips[zip] = 1; }
+        }
+    }
+
+    return zips;
+}
+
+
+//--------------------------------------------------------
+
+
+
+var story = document.getElementById('story');
+var features = document.createElement('div');
+features.setAttribute('id', 'features');
+
+var header = document.createElement('div');
+
+if (config.title) {
+    var titleText = document.createElement('h1');
+    titleText.innerText = config.title;
+    header.appendChild(titleText);
+}
+
+if (config.subtitle) {
+    var subtitleText = document.createElement('p');
+    subtitleText.innerText = config.subtitle;
+    header.appendChild(subtitleText);
+}
+
+if (config.byline) {
+    var bylineText = document.createElement('p');
+    bylineText.innerText = config.byline;
+    header.appendChild(bylineText);
+}
+
+if (header.innerText.length > 0) {
+    header.classList.add(config.theme);
+    header.setAttribute('id', 'header');
+    story.appendChild(header);
+}
+
+config.chapters.forEach((record, idx) => {
+    var container = document.createElement('div');
+    var chapter = document.createElement('div');
+
+    if (record.title) {
+        var title = document.createElement('h3');
+        title.innerText = record.title;
+        chapter.appendChild(title);
+    }
+
+    if (record.image) {
+        var image = new Image();
+        image.src = record.image;
+        chapter.appendChild(image);
+    }
+
+    if (record.description) {
+        var story = document.createElement('p');
+        story.innerHTML = record.description;
+        chapter.appendChild(story);
+    }
+
+    container.setAttribute('id', record.id);
+    container.classList.add('step');
+    if (idx === 0) {
+        container.classList.add('active');
+    }
+
+    chapter.classList.add(config.theme);
+    container.appendChild(chapter);
+    container.classList.add(alignments[record.alignment]);
+    features.appendChild(container);
+});
+
+story.appendChild(features);
+
+var footer = document.createElement('div');
+
+if (config.footer) {
+    var footerText = document.createElement('p');
+    footerText.innerHTML = config.footer;
+    footer.appendChild(footerText);
+}
+
+if (footer.innerText.length > 0) {
+    footer.classList.add(config.theme);
+    footer.setAttribute('id', 'footer');
+    story.appendChild(footer);
+}
+
+mapboxgl.accessToken = config.accessToken;
+
+const transformRequest = (url) => {
+    const hasQuery = url.indexOf("?") !== -1;
+    const suffix = hasQuery ? "&pluginName=journalismScrollytelling" : "?pluginName=journalismScrollytelling";
+    return {
+      url: url + suffix
+    }
+}
+
+var map = new mapboxgl.Map({
+    container: 'map',
+    style: config.style,
+    center: config.chapters[0].location.center,
+    zoom: config.chapters[0].location.zoom,
+    bearing: config.chapters[0].location.bearing,
+    pitch: config.chapters[0].location.pitch,
+    scrollZoom: false,
+    transformRequest: transformRequest
+});
+
+
+// instantiate the scrollama
+var scroller = scrollama();
+
+map.on("load", function() {
+
+    d3.csv(datafile)
+      .then(function(data) {
+
+            var myjson = {"type": "FeatureCollection", "features": []}
+            var sortingCenters = {"type": "FeatureCollection", "features": []}
+            var mylines = {"type": "FeatureCollection", "features": []}
+
+
+            data.forEach(function(d,i) {
+
+
+                d.distance = +d["Distance From SF"];
+
+                d.mailed = parseTime(d["Date Mailed"])
+                d.arrived = parseTime(d["Date reported recieved"])
+
+                //just for now, change region to US or Canada if that's the country too
+                if(d["Country"] == "US" || d["Country"] == "Canada" || d["Country"] == "Australia") d["GlobalRegion"] = d["Country"];
+
+                var travelTime = getTravelTime(d);
+
+                if(travelTime > 0 ){
+
+                    myjson.features.push({
+                        "type": "Feature",
+                                  "geometry": {
+                                    "type": "Point",
+                                    "coordinates": [d.lon, d.lat]
+                                  },
+                                  "properties": {
+                                    "travelTime": travelTime,
+                                    "color": colorScale(travelTime)
+                                  }
+                    })
+
+
+                    if(d["Country"] == "US"){
+                                            
+
+                        sortingCenters.features.push({
+                            "type": "Feature",
+                                    "geometry": {
+                                        "type": "Point",
+                                        "coordinates": [d.SC_lon, d.SC_lat]
+                                    },
+                                    "properties": {
+                                        "travelTime": travelTime,
+                                        "color": colorScale(travelTime)
+                                    }
+
+                        })
+
+                      
+                        mylines.features.push({
+                            "type": "Feature",
+                            "geometry": { 
+                                "type": "LineString",
+                                "coordinates": [[d.lon, d.lat], [d.SC_lon, d.SC_lat]]
+                            },
+                            "properties":{
+                                "travelTime": travelTime,
+                                "color": colorScale(travelTime)
+                            }
+                        })
+                    }
+                }
+
+            })
+
+
+
+            // connect my data to the map, and name it 'testDot'
+            map.addSource('testDot', {
+                    'type': 'geojson',
+                    data: myjson
+                });
+
+            map.addSource('mailCenters', {
+                'type': 'geojson',
+                data: sortingCenters
+
+            });
+
+            map.addSource('mailCenterLines', {
+                'type': 'geojson',
+                data: mylines
+            })
+
+
+
+            map.addLayer({
+                'id': 'mail-centers',
+                'type': 'circle',
+                'source':'mailCenters',
+                'paint': {
+
+                    'circle-opacity': 0.0,
+                    'circle-color': '#404040',
+                    'circle-stroke-color': ['get', 'color'],
+                    'circle-stroke-width': .5,
+                    'circle-radius': 4
+                }
+            })
+
+
+            map.addLayer({
+                'id': 'mail-center-lines',
+                'type': 'line',
+                'source': 'mailCenterLines',
+                'paint': {
+                    'line-width': 1,
+                    'line-color': ['get', 'color'],
+                    
+
+                }
+
+            })
+
+
+            map.addLayer({
+                    'id': 'mail-circles',
+                    'type': 'circle',
+                    'source': 'testDot',
+                    'paint': {
+                        'circle-color': ['get', 'color'],
+                        'circle-opacity': 0.1,
+                        'circle-radius': 10 //['get', 'travelTime']
+                    }
+                });
+
+
+            map.addLayer({
+                    'id': 'mail-dots',
+                    'type': 'circle',
+                    'source': 'testDot',
+                    'paint': {
+                        'circle-color': ['get', 'color'],
+                        'circle-opacity': 0.6,
+                        'circle-radius': 2 //['get', 'travelTime']
+                    }
+                });
+
+            
+
+
+            //--------------------------------------------
+            var dateMax_1 = parseTime("9/1/2020")
+            // var data_2 = data.filter(function(d) { return d.travelTime > 0  && d.arrived < dateMax_1})
+
+
+            var data_2 = data.filter(function(d) { return d.travelTime > 0  && d.arrived < dateMax_1})
+
+            var data_6 = data.filter(function(d) { return (d.travelTime > 0 && d.travelTime < 20) && (d["Country"] == "US") })
+
+            var data_7 = data.filter(function(d) { return (d.travelTime > 0 && d.travelTime < 31 ) })
+
+
+            drawStory("#intro")
+
+
+            // drawScatter(data_2, "#intro3");
+
+            drawLinks(data_6, "#intro4", "Country")
+
+            // drawScatter2(data_7, "#intro5", "GlobalRegion",20, 80);
+
+
+
+            drawDensity(data_7, "#intro7")
+
+            drawZipcodes(data, "#zips")
+
+        })
+
+
+
+
+    // setup the instance, pass callback functions
+    scroller
+    .setup({
+        step: '.step',
+        offset: 0.5,
+        progress: true
+    })
+    .onStepEnter(response => {
+        var chapter = config.chapters.find(chap => chap.id === response.element.id);
+        response.element.classList.add('active');
+        map[config.mapAnimation || 'flyTo'](chapter.location);
+        if (config.showMarkers) {
+            marker.setLngLat(chapter.location.center);
+        }
+        if (chapter.onChapterEnter.length > 0) {
+            chapter.onChapterEnter.forEach(setLayerOpacity);
+        }
+    })
+    .onStepExit(response => {
+        var chapter = config.chapters.find(chap => chap.id === response.element.id);
+        response.element.classList.remove('active');
+        if (chapter.onChapterExit.length > 0) {
+            chapter.onChapterExit.forEach(setLayerOpacity);
+        }
+    });
+});
+
+// setup resize event
+window.addEventListener('resize', scroller.resize);
+
+
+
+
+
+
+//-----------------------------------------------------------------
+function drawStory(targ){
+    var containerWidth = +d3.select(targ).style('width').slice(0, -2)
+
+    margin = ({top:20, right: 30, bottom: 30, left: 60}),
+    width = containerWidth - margin.left - margin.right,
+    height = 300,
+
+    x_text = -200,
+    y_text = -100;
+
+    var myColor = d3.scaleLinear().domain([1,10]).range(["pink", "blue"])
+
+
+
+
+    //  Add the SVG to the page 
+    var svg = d3.select(targ).append("svg")
+        .attr("id", "network")
+        .attr("width", width + margin.left + margin.right)
+        .attr("height", height + margin.top + margin.bottom)
+        .style("background-color", "#333333")
+
+    // place text for story here
+    svg.append("g")
+        .append("text")
+        .attr("x", x_text)
+        .attr("y", y_text)
+        .attr("dy", 0)
+        .style("fill", '#ccc')
+        .style("opacity", .7)
+        .attr("width", "100")
+        .attr("class", "storytext")
+        .attr("font-size", "2em")
+        .text("I've mailed stickers all over the place.  Click on the dots to see the counts.")
+        .call(wrap, 200, 0, x_text)
+
+
+    svg.append("svg")
+        .attr("id", "imageHolder")
+        .attr("x", x_text)
+        .attr("y", y_text);
+
+
+    // destinations data last updated 05/05/2021
+    d3.json("treeStructure2.json").then(function(data) {
+        console.log(data)
+
+
+
+        drag = simulation => {
+          
+          function dragstarted(event, d) {
+            if (!event.active) simulation.alphaTarget(0.3).restart();
+            d.fx = d.x;
+            d.fy = d.y;
+          }
+          
+          function dragged(event, d) {
+            d.fx = event.x;
+            d.fy = event.y;
+          }
+          
+          function dragended(event, d) {
+            if (!event.active) simulation.alphaTarget(0);
+            d.fx = null;
+            d.fy = null;
+          }
+           return d3.drag()
+              .on("start", dragstarted)
+              .on("drag", dragged)
+              .on("end", dragended);
+        }
+
+
+
+        var distance = -100;
+        var r = 6;
+
+
+
+        const root = d3.hierarchy(data);
+        const links = root.links();
+        const nodes = root.descendants();
+
+        console.log(nodes)
+
+        const simulation = d3.forceSimulation(nodes)
+          .force("link", d3.forceLink(links).id(d => d.id).distance(0).strength(1))
+          .force("charge", d3.forceManyBody().strength(distance))
+          .force("x", d3.forceX())
+          .force("y", d3.forceY());
+
+        const svg = d3.select("#network")
+          .attr("viewBox", [-width / 2, -height / 2, width, height]);
+
+        const link = svg.append("g")
+            .attr("stroke", "#999")
+            .attr("stroke-opacity", 0.6)
+            .selectAll("line")
+            .data(links)
+            .join("line");
+
+        const node = svg.append("g")
+            .attr("fill", "#fff")
+            .attr("stroke", "#000")
+            .attr("stroke-width", 1.5)
+
+            .selectAll("circle")
+            .data(nodes)
+            .join("circle")
+              .attr("i", d => d.data.name)
+              // .attr("fill", d => d.children ? "teal" : null)
+              .attr("fill", d => d.children ? "teal" : storyColors(getCount(d)) )
+              // .attr("fill", function(d){ myColor(getRadius(d)) })
+              .attr("stroke", d => d.children ? "#ccc" : null)
+              .attr("r", function(d){return getRadius(d); })
+              .call(drag(simulation))
+              .on("click", function(d){
+                handleClick(this);
+              });
+
+
+      // node.append("title")
+      //     .text(d => d.data.name);
+
+  simulation.on("tick", () => {
+    link
+        .attr("x1", d => d.source.x)
+        .attr("y1", d => d.source.y)
+        .attr("x2", d => d.target.x)
+        .attr("y2", d => d.target.y);
+
+    node
+        .attr("cx", d => d.x)
+        .attr("cy", d => d.y);
+  });
+
+  // invalidation.then(() => simulation.stop());
+
+})
+
+}
+
+
+
+function getCount(d){
+    var amt = storyNodeInfo[d.data.name].amt;
+    return amt;
+}
+
+
+function getRadius(d){
+
+    var amt = storyNodeInfo[d.data.name].amt;
+    if(amt) return bubbleScale(amt);
+
+    return 2;
+
+}
+
+
+function wrap(text, wrapWidth, yAxisAdjustment = 0, start_x) {
+  text.each(function() {
+    var text = d3.select(this),
+        words = text.text().split(/\s+/).reverse(),
+        word,
+        line = [],
+        lineNumber = 0,
+        lineHeight = 1.1, 
+        y = text.attr("y"),
+        dy = parseFloat(text.attr("dy")) - yAxisAdjustment,
+        tspan = text.text(null).append("tspan").attr("x", start_x).attr("y", y).attr("dy", `${dy}em`);
+    while (word = words.pop()) {
+      line.push(word);
+      tspan.text(line.join(" "));
+      if (tspan.node().getComputedTextLength() > wrapWidth) {
+        line.pop();
+        tspan.text(line.join(" "));
+        line = [word];
+        tspan = text.append("tspan").attr("x", start_x).attr("y", y).attr("dy", ++lineNumber * lineHeight + dy + "em").text(word);
+      }
+    }
+  });
+  return 0;
+}
+
+function handleClick(targ){
+
+    var dot = d3.select(targ)
+    dot.style("opacity", 1)
+    dot.style("stroke-width",  5)
+    dot.style("stroke-opacity", .4)
+
+    console.log(dot.attr("i"))
+    console.log(storyNodeInfo[dot.attr("i")].img)
+
+    var d = storyNodeInfo[dot.attr("i")];
+
+    var myText = d.info;
+
+    if(d.amt){ myText = "I've mailed " + d.amt + " stickers to " + d.info;}
+   
+    var txt = d3.select(".storytext").text(myText)
+                .attr("font-size", "3em")
+                .call(wrap, 300, 0, x_text);
+
+
+    // clear old images
+    d3.select("#imageHolder")
+                .selectAll(".myImage")
+                .remove();
+
+
+
+    if(storyNodeInfo[dot.attr("i")].img){
+
+        // console.log(storyNodeInfo[dot.attr("i")].img)
+           
+
+            d3.select("#imageHolder")
+                .append("svg:image")
+                .attr("class", "myImage")
+                // .attr('x', (-30))
+                .attr('x', (0 + randomRange(0, 20)))
+                .attr('y', (40 + randomRange(0, 20)))
+                .attr('width', 200)
+                .attr('height', 100)
+                .attr("xlink:href", "./" +storyNodeInfo[dot.attr("i")].img)
+        }
+   
+
+}
+
+
+
+
+
+function drawDensity(data_raw, targ){
+
+    var color = d3.scaleOrdinal().range(["#c6bad1","#5cbf84", "#e3cd91", "#4287f5", "#9743f7"])
+
+    var containerWidth = +d3.select(targ).style('width').slice(0, -2)
+
+    margin = ({top:20, right: 30, bottom: 30, left: 60}),
+    width = containerWidth - margin.left - margin.right,
+    height = 300
+
+
+  legend_x=20, 
+  legend_y=50;
+
+    //  Add the SVG to the page 
+    var svg = d3.select(targ).append("svg")
+        .attr("width", width + margin.left + margin.right)
+        .attr("height", height + margin.top + margin.bottom)
+        .style("background-color", "#333333")
+
+
+    var subchart = svg.append("g")
+                    .attr("transform", "translate(" + margin.left + "," + margin.top + ")")
+
+
+    
+
+
+
+    // Need to get longest delivery time, for number of bins
+    // get travelTime for all data (unfiltered)
+    // numBins will be max value in that array. We'll use this in histGenerator
+    var numBins = d3.max(data_raw.map(function(d){ return d.travelTime; }))
+    var buff = 2;
+
+    // get count of each instance of a day-value
+    // we're getting bins for all the data here, and we'll plug region data into it later
+    var histGenerator = d3.histogram()
+    .domain([0, numBins +buff])    // Set the domain to cover the entire intervall [0;]
+    .thresholds(numBins+buff);  // number of thresholds; this will create n+1 bins
+
+
+  var x = d3.scaleLinear()
+        .domain([0, numBins]) // input
+        .range([0, width-margin.right]); // output
+
+    var y = d3.scaleLinear()
+        .domain([0, 90]) // input 
+        .range([height-margin.bottom, margin.top]); // output 
+
+
+
+  var xAxis = d3.axisBottom(x);
+  var yAxis = d3.axisLeft(y).ticks(5).tickSizeOuter(0);
+
+
+  // now filter, and prepare data for line/area chart and draw the curves
+  var groups = ["US", "Canada", "Australia", "Europe", "EastAsia"]
+
+  for(var i=0; i<groups.length; i++){
+
+        group = groups[i]
+
+        var mydata = data_raw.filter(function(d){ return d["GlobalRegion"] === group})
+        var mytimes = mydata.map(function(d){ return d.travelTime; })
+
+        var bins = histGenerator(mytimes);
+
+        // convert array of day-values into [day, count] pairs
+        var dataset = [];
+        for(var j=0; j<bins.length; j++){
+            dataset[j] = {"y": bins[j].length}
+        }
+
+          drawCurve(dataset, subchart, x, y, color(group));
+
+    }
+
+
+
+
+  // Add the Axes
+  svg.append("g")
+      .attr("transform", "translate("+ margin.left + "," + (height-10) + ")")
+      .attr("stroke-opacity", .4)
+      .attr('class','axis')
+      .call(xAxis)
+
+  svg.append("text")             
+      .attr("transform", "translate("+(width/2)+","+(height+margin.top+10)+")")
+      .style("text-anchor", "middle")
+      .style('fill', '#ccc')
+      .text("Days to reach destination");
+
+  svg.append("g")
+      .attr("transform", "translate("+ (margin.left) + "," + margin.top + ")")
+      .attr("stroke-opacity", .4)
+      .attr("class", "axis")
+      .call(yAxis)
+
+  // text label for the y axis
+  svg.append("text")
+      .attr("x", margin.left/2)
+      .attr("y", margin.top)
+      .attr("dy", "1em")
+      .style("text-anchor", "Right")
+      .style('fill', '#ccc')
+      .text("Envelopes");
+
+
+  var legend = svg.selectAll(".legend")
+      .data(color.domain())
+    .enter().append("g")
+      .attr("class", "legend")
+      .attr("transform", function(d, i) { return "translate(40," + (legend_y+(i * legend_x )) + ")"; });
+
+  legend.append("rect")
+      .attr("x", width - 18)
+      .attr("width", 18)
+      .attr("height", 18)
+      .attr("fill-opacity", .8)
+      .style("fill", color);
+
+  legend.append("text")
+      .attr("x", width - 24)
+      .attr("y", 9)
+      .attr("dy", ".35em")
+      .style("text-anchor", "end")
+      .style("fill", "#ccc")
+      .text(function(d) { return d; });
+
+
+
+    // Features of the annotation
+    var an_x = x(3)+margin.left
+    const annotations = [
+      {
+        note: {
+          label: "Most letters were delivered in the US within 2-4 days, with most arriving in 3 days.",
+          title: "Delivery Times in US"
+        },
+        x: x(3)+margin.left,
+        y: 100,
+        dy: -20,
+        dx: 50
+      },
+      {
+        note: {
+          label: "Many letters were delivered in 6-7 days.",
+          title: "Delivery Times in Europe"
+        },
+        x: x(6)+margin.left,
+        y: 265,
+        dy: -80,
+        dx: 40
+      }
+      ,
+      {
+        note: {
+          label: "A lot of slow mail took a week or more to arrive.",
+          title: "Late Deliveries in US"
+        },
+        x: x(7)+margin.left,
+        y: 265,
+        dy: -25,
+        dx: 140
+      }
+    ]
+
+    // Add annotation to the chart
+    const makeAnnotations = d3.annotation().annotations(annotations);
+    // d3.select(targ)
+      svg.append("g")
+      .call(makeAnnotations)
+
+    
+}
+
+
+function drawCurve(linedata, targ, x, y, color){
+
+  // line generator
+  var line = d3.line()
+      .x(function(d, i) { return x(i); }) // set the x values for the line generator
+      .y(function(d) { return y(d.y); }) // set the y values for the line generator 
+      .curve(d3.curveMonotoneX) // apply smoothing to the line
+
+  // Append the path, bind the data, and call the line generator 
+  targ.append("path")
+      .datum(linedata) 
+      .attr("class", "line") // Assign a class for styling 
+      .attr("d", line) // 11. Calls the line generator 
+      .style('fill', color)
+      .style('fill-opacity', .4)
+
+}
+
+
+function drawZipcodes(data_raw, targ){
+
+    //-------------------------------------
+    // experimenting here...will need to move this code later
+
+    // var zips = data_raw.map(function(d){ return d["Zipcode "]; })
+    // console.log('zips: ', zips)
+
+    // var zips2 = d3.nest()
+    //             .key(function(d){ return d["Zipcode "]})
+    //             .rollup(function(leaves){ return leaves.length} )
+    //             .entries(data.raw)
+
+    // var zips2 = data_raw.map(function(d){ return d["Zipcode "]; })
+
+    // console.log('zip2: ', data_raw)
+
+    var zips = getZipCounts(data_raw)
+    console.log('zips: ', zips)
+
+    console.log(zips['94119'])
+    
+    //----------------------------------------
+
+    //  Add the SVG to the page 
+    var svg = d3.select(targ).append("svg")
+        .attr("width", width + margin.left + margin.right)
+        .attr("height", height + margin.top + margin.bottom)
+        .style("background-color", "#333333")
+
+}
+
+
+
+
+//-------------------------------------------------------------------
+
+function drawLinks(data, targ, color_by){
+
+  var containerWidth = +d3.select(targ).style('width').slice(0, -2)
+
+  var margin = {top: 50, right: 60, bottom: 40, left: 50},
+    width = containerWidth - margin.left - margin.right,
+    height = 320 - margin.top - margin.bottom;
+
+    var x1 = d3.scaleLinear()
+      .range([0, width]);
+
+    var x2 = d3.scaleLinear()
+      .range([0, width]);
+
+
+    var xAxis1 = d3.axisTop(x1).ticks(5).tickSizeOuter(0);
+    var xAxis2 = d3.axisBottom(x2).ticks(5).tickSizeOuter(0);
+
+    var svg = d3.select(targ).append("svg")
+    .attr("width", width + margin.left + margin.right)
+    .attr("height", height + margin.top + margin.bottom)
+    .style("background-color", "#333333")
+    .append("g")
+    .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
+
+    x1.domain(d3.extent(data, function(d) { return (d.travelTime > 0 ? d.travelTime : 0); })).nice();
+    x2.domain(d3.extent(data, function(d) { return (d.travelTime > 0 ? d.distance : 0); })).nice();
+
+
+    //link generator
+    var link = d3.linkVertical()
+                .source(function(d) { return [x1(d.travelTime), 10];})
+                .target(function(d) { return [x2(d.distance), 200];});
+       
+    // //Adding the link paths
+    // d3.select(svg) 
+    svg.selectAll("path")
+        .data(data)
+        .join("path")
+        .attr("d", link)
+        .attr('stroke', function(d) { return colorScale(d.travelTime); })
+        .attr('stroke-opacity', .4)
+        .attr("fill", 'none')
+        .classed("link", true); 
+
+
+     svg.append("g")
+      .attr("class", "axis")
+      .call(xAxis1)
+
+    svg.append("g")
+      .attr("class", "axis")
+      .attr("transform", "translate( 0, " + (height-20) + " )")
+      .call(xAxis2)
+
+
+     svg.append("text")             
+      .attr("transform", "translate("+(width/2)+","+(-24)+")")
+      .style("text-anchor", "middle")
+      .style('fill', '#ccc')
+      .text("Days to reach destination");
+
+    svg.append("text")             
+      .attr("transform", "translate("+(width/2)+","+(height+14)+")")
+      .style("text-anchor", "middle")
+      .style('fill', '#ccc')
+      .text("Distance Travelled (miles)");
+
+}
+
+function drawScatter(data, targ){
+
+  var containerWidth = +d3.select(targ).style('width').slice(0, -2)
+
+  var margin = {top: 20, right: 20, bottom: 40, left: 70},
+    width = containerWidth - margin.left - margin.right,
+    height = 200 - margin.top - margin.bottom;
+
+  var x = d3.scaleLinear()
+      .range([0, width]);
+
+  var y = d3.scaleLinear()
+      .range([height, 0]);
+
+  var color = d3.scaleOrdinal().range(["#c6bad1","#5cbf84", "#e3cd91", "#4287f5", "#9743f7"])
+
+  var xAxis = d3.axisBottom(x);
+
+  var yAxis = d3.axisLeft(y).ticks(5).tickSizeOuter(0);
+
+  var svg = d3.select(targ).append("svg")
+    .attr("width", width + margin.left + margin.right)
+    .attr("height", height + margin.top + margin.bottom)
+    .style("background-color", "#333333")
+    .append("g")
+    .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
+
+
+  x.domain(d3.extent(data, function(d) { return (d.travelTime > 0 ? d.travelTime : 0); })).nice();
+  y.domain(d3.extent(data, function(d) { return (d.travelTime > 0 ? d.distance : 0); })).nice();
+
+  svg.append("g")
+      .attr("transform", "translate(0," + height + ")")
+      .attr('class','axis')
+      .attr("stroke-opacity", .4)
+      .call(xAxis)
+
+
+  svg.append("text")             
+      .attr("transform", "translate("+(width/2)+","+(height+margin.top+10)+")")
+      .style("text-anchor", "middle")
+      .style('fill', '#ccc')
+      .text("Days to reach destination");
+
+
+
+  svg.append("g")
+      .attr("class", "axis")
+      .attr("stroke-opacity", .4)
+      .call(yAxis)
+
+  // text label for the y axis
+  svg.append("text")
+      .attr("transform", "rotate(-90)")
+      // .attr("x",0 - (height / 2) +100)
+      // .attr("y", 0 - margin.left)
+      .attr("x", -80)
+      .attr("y", -60)
+      .attr("dy", "1em")
+      .style("text-anchor", "middle")
+      .style('fill', '#ccc')
+      .text("Distance Travelled (miles)");
+
+
+  svg.selectAll(".dot")
+      .data(data)
+    .enter().append("circle")
+      .attr("class", "dot")
+      .attr("r", 4.5)
+      .attr("cx", function(d) { return x(d.travelTime); })
+      .attr("cy", function(d) { return y(d.distance); })
+      .attr("fill-opacity","0.4")
+      .style("fill", function(d) { return color(d.Country); })
+      .style("stroke", function(d) { return color(d.Country); });
+
+
+  var legend = svg.selectAll(".legend")
+      .data(color.domain())
+    .enter().append("g")
+      .attr("class", "legend")
+      .attr("transform", function(d, i) { return "translate(0," + (50+(i * 20 )) + ")"; });
+
+  legend.append("rect")
+      .attr("x", width - 18)
+      .attr("width", 18)
+      .attr("height", 18)
+      .style("fill", color);
+
+  legend.append("text")
+      .attr("x", width - 24)
+      .attr("y", 9)
+      .attr("dy", ".35em")
+      .style("text-anchor", "end")
+      .style("fill", "#ccc")
+      .text(function(d) { return d; });
+
+}
+
+//-----------------------------------------------------------------------------------
+
+function drawScatter2(data, targ, color_by, legend_x, legend_y){
+
+    var containerWidth = +d3.select(targ).style('width').slice(0, -2)
+
+
+  var margin = {top: 20, right: 60, bottom: 40, left: 60},
+    width = containerWidth - margin.left - margin.right,
+    height = 300 - margin.top - margin.bottom;
+
+  var x = d3.scaleLinear()
+      .range([0, width]);
+
+  var y = d3.scaleLinear()
+      .range([height, 0]);
+
+  
+
+  var xAxis = d3.axisBottom(x);
+
+  var yAxis = d3.axisLeft(y).ticks(5).tickSizeOuter(0);
+
+  var svg = d3.select(targ).append("svg")
+    .attr("width", width + margin.left + margin.right)
+    .attr("height", height + margin.top + margin.bottom)
+    .style("background-color", "#333333")
+    .append("g")
+    .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
+
+
+  x.domain(d3.extent(data, function(d) { return (d.travelTime > 0 ? d.travelTime : 0); })).nice();
+  y.domain(d3.extent(data, function(d) { return (d.travelTime > 0 ? d.distance : 0); })).nice();
+
+  svg.append("g")
+      .attr("transform", "translate(0," + height + ")")
+      .attr("stroke-opacity", .4)
+      .attr('class','axis')
+      .call(xAxis)
+
+
+  svg.append("text")             
+      .attr("transform", "translate("+(width/2)+","+(height+margin.top+10)+")")
+      .style("text-anchor", "middle")
+      .style('fill', '#ccc')
+      .text("Days to reach destination");
+
+
+
+  svg.append("g")
+      .attr("stroke-opacity", .4)
+      .attr("class", "axis")
+      .call(yAxis)
+
+
+// // text label for the y axis
+//   svg.append("text")
+//       .attr("x", 0)
+//       .attr("y", margin.top)
+//       .attr("dy", "1em")
+//       .style("text-anchor", "Right")
+//       .style('fill', '#ccc')
+//       .text("Envelopes");
+
+  // text label for the y axis
+  svg.append("text")
+      .attr("transform", "rotate(-90)")
+      .attr("x", -120)
+      .attr("y", -60)
+      .attr("dy", "1em")
+      .style("text-anchor", "middle")
+      .style('fill', '#ccc')
+      .text("Distance Travelled (miles)");
+
+
+  svg.selectAll(".dot")
+      .data(data)
+    .enter().append("circle")
+      .attr("class", "dot")
+      .attr("r", 2)
+      .attr("cx", function(d) { return x(d.travelTime); })
+      .attr("cy", function(d) { return y(d.distance); })
+      .style("fill", function(d) { return colorRegion(d[color_by]); })
+      .attr("fill-opacity","0.2")
+      .style("stroke", function(d) { return colorRegion(d[color_by]); })
+      .style("stroke-opacity", "0.9");
+
+
+  var legend = svg.selectAll(".legend")
+      .data(colorRegion.domain())
+    .enter().append("g")
+      .attr("class", "legend")
+      .attr("transform", function(d, i) { return "translate(40," + (legend_y+(i * legend_x )) + ")"; });
+
+  legend.append("rect")
+      .attr("x", width - 18)
+      .attr("width", 18)
+      .attr("height", 18)
+      .attr("fill-opacity", .8)
+      .style("fill", colorRegion);
+
+  legend.append("text")
+      .attr("x", width - 24)
+      .attr("y", 9)
+      .attr("dy", ".35em")
+      .style("text-anchor", "end")
+      .style("fill", "#ccc")
+      .text(function(d) { return d; });
+
+}
+
+
+function randomRange(min, max){ 
+    return Math.floor((Math.random() * (max - min + 1)) + min); 
+}
+
+
+</script>
+
+</body>
+</html>

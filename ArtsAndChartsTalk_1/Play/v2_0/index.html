@@ -1,0 +1,908 @@
+
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset='utf-8' />
+    <title>Stickers And Stamps Project</title>
+    <meta name='viewport' content='initial-scale=1,maximum-scale=1,user-scalable=no' />
+    <script src='https://api.tiles.mapbox.com/mapbox-gl-js/v1.5.0/mapbox-gl.js'></script>
+    <link href='https://api.tiles.mapbox.com/mapbox-gl-js/v1.5.0/mapbox-gl.css' rel='stylesheet' />
+
+    <script src="https://unpkg.com/intersection-observer@0.5.1/intersection-observer.js"></script>
+    <script src="https://unpkg.com/scrollama"></script>
+
+    <script src="https://d3js.org/d3.v6.min.js"></script>
+    <script src="https://d3js.org/d3-color.v2.min.js"></script>
+    <script src="https://d3js.org/d3-interpolate.v2.min.js"></script>
+    <script src="https://rawgit.com/susielu/d3-annotation/master/d3-annotation.min.js"></script>
+    <!-- <script src="storyGraph.js"></script> -->
+    <script src="zipsMap.js"></script>
+    <script src="drawCharts.js"></script>
+   
+
+   <!--  <script src="Semicircle.js"></script> -->
+
+    <style>
+        body {
+            margin:0;
+            padding:0;
+            font-family: sans-serif;
+            /*color: #ff0000;*/
+            /*color: #afb8ba;*/
+        }
+
+        html {
+          font-size: 100%;
+        }
+
+        a:link {
+    color: #657c9e;
+    background-color: transparent;
+    text-decoration: none;
+    font-weight:bold
+  }
+
+  a:visited {
+    color: #657c9e;
+    background-color: transparent;
+    text-decoration: none;
+  }
+
+  a:hover {
+    color: white;
+    background-color: transparent;
+    text-decoration: underline;
+  }
+
+        .axis path,
+        .axis line {
+          fill: none;
+          stroke: #ccc;
+          shape-rendering: crispEdges;
+        }
+        .axis text{
+          fill: #ccc;
+          /*font: 10px sans-serif;*/
+        } 
+
+
+
+.annotation text{
+    /*fill: #f00;*/
+    font-size: 10px;
+}
+
+
+
+        #map {
+            top:0;
+            height: 100vh;
+            width:100vw;
+            position: fixed;
+            z-index: -5;
+        }
+        #header {
+            margin: auto;
+            width: 50vw;
+        }
+        #header h1, #header h2, #header h3, #header p {
+            margin: 0;
+            padding: 2vh 2vw;
+            text-align: center;
+            color: #afb8ba;
+        }
+        #footer {
+            width: 100%;
+            min-height: 5vh;
+            padding-top: 2vh;
+            padding-bottom: 2vh;
+            text-align: center;
+            line-height: 25px;
+            font-size: 13px;
+        }
+        #features {
+            padding-top: 10vh;
+            padding-bottom: 10vh;
+            z-index: 100;
+        }
+
+        #features h3, #features p {
+            color: #afb8ba;
+            font-size: 1rem;
+        }
+
+
+
+        .chart {
+            width:20;
+        }
+
+        .centered {
+            width: 50vw;
+            margin: 0 auto;
+        }
+        .lefty {
+            width: 33vw;
+            margin-left: 5vw;
+        }
+        .righty {
+            width: 33vw;
+            margin-left: 62vw;
+        }
+        .fully {
+            width: 100%;
+            margin: auto;
+        }
+        .light {
+            color: #444;
+            background-color: #fafafa;
+        }
+        .dark {
+            color: #fafafa;
+            background-color: #444;
+        }
+        .step {
+            padding-bottom: 50vh;
+            /* margin-bottom: 10vh; */
+           /* opacity: 0.25;*/
+           opacity: 0.8;
+        }
+        .step.active {
+            opacity: 0.9;
+        }
+
+        .step div {
+            padding:  25px 50px;
+            line-height: 25px;
+            font-size: 13px;
+        }
+
+        .step img {
+            width: 100%;
+        }
+
+        @media (max-width: 750px) {
+            .centered, .lefty, .righty, .fully {
+                width: 90vw;
+                margin: 0 auto;
+            }
+        }
+
+        /* Fix issue on mobile browser where scroll breaks  */
+        .mapboxgl-canvas-container.mapboxgl-touch-zoom-rotate.mapboxgl-touch-drag-pan, 
+        .mapboxgl-canvas-container.mapboxgl-touch-zoom-rotate.mapboxgl-touch-drag-pan .mapboxgl-canvas {
+            touch-action: unset;
+        }
+
+        </style>
+</head>
+<body>
+
+<div id="map"></div>
+<div id="story"></div>
+<script src="./config.js"></script>
+<script>
+var layerTypes = {
+    'fill': ['fill-opacity'],
+    'line': ['line-opacity'],
+    'circle': ['circle-opacity', 'circle-stroke-opacity'],
+    'symbol': ['icon-opacity', 'text-opacity'],
+    'raster': ['raster-opacity']
+}
+
+var alignments = {
+    'left': 'lefty',
+    'center': 'centered',
+    'right': 'righty',
+    'full': 'fully'
+}
+
+
+function getLayerPaintType(layer) {
+    if(layer){
+        var layerType = map.getLayer(layer).type;
+
+        if(layerType){
+         return layerTypes[layerType];
+        }  
+    }
+}
+
+
+function setLayerOpacity(layer, opacity) {
+    var paintProps = getLayerPaintType(layer.layer);
+    if(paintProps){
+        paintProps.forEach(function(prop) {
+            var options = {};
+            if (layer.duration) {
+                var transitionProp = prop + "-transition";
+                options = { "duration": layer.duration };
+                map.setPaintProperty(layer.layer, transitionProp, options);
+            }
+            map.setPaintProperty(layer.layer, prop, layer.opacity, options);
+        });
+    }
+}
+
+
+
+//-------------------------------------------------------
+
+var zipSearchData;  // used to globally store current zip code search result
+
+//--------------------------------------------------------
+// var datafile = "StickerData122920.csv"
+// var datafile = "StickerData051622.csv"
+// var datafile = "stickersData052622.csv"
+var datafile = "stickerData061422.csv"
+
+var data_2;
+var data_6;
+var data_7;
+
+
+
+// 2020-09-23 00:00:00
+var parseTime = d3.timeParse("%Y-%m-%d %H:%M:%S")
+
+var bubbleScale = d3.scaleLinear()
+                .domain([0,80])  // these are max counts for letters sent to a place
+                .range([2,30]);
+
+var storyColors = d3.scaleLinear()
+                .domain([1, 20, 50, 90]) // these are based on counts
+                .range(["White", "CornflowerBlue", "#4e6da6", "#324569"])
+                .interpolate(d3.interpolateHcl)
+
+var colorScale = d3.scaleLinear()
+                .domain([1, 5, 6, 30])
+                .range(['teal', 'white', 'orange', 'red'])
+                .interpolate(d3.interpolateHcl);
+
+
+var colorRegion = d3.scaleOrdinal()
+                // .domain(["US", "Canada", "Europe", "Australia", "EastAsia"])
+                .range(["#c6bad1","#5cbf84", "#e3cd91", "#4287f5", "#9743f7"])
+
+var dateMax_1 = parseTime("2020-12-10 0:0:00")
+            // var dateMax_1 = parseTime("9/1/2021")
+            // var dateMax_1 = parseTime("05/16/2022")
+
+
+
+
+
+ function getTravelTime(d){
+
+
+            d.travelTime = 0;
+            if(d.mailed && d.arrived) d.travelTime = d3.timeDay.count(d.mailed,d.arrived);
+            d.travelTime = +d.travelTime;
+
+            
+
+            return d.travelTime;
+}
+
+
+function getZipCounts(data){
+    zips = {};
+
+    for(i in data){
+        if(data[i]["country"] === "US"){
+            // console.log('travel time: ', data[i]["travelTime"])
+            var zip = data[i]["zipcode"];
+            var travel = data[i]["travelTime"]
+
+            // first, instantiate the data for this zip in our structure
+            if(!(zip in zips)){ 
+                // console.log(zip, " -->not in zips yet")
+                zips[zip] = {'mailed': 0, 'arrived': 0, 'travelTimes': []}
+            }
+            
+            // then, increment if mailed or arrived
+            zips[zip]['mailed'] +=1;
+
+            if(travel > 0){ 
+                zips[zip]['arrived'] += 1;
+                zips[zip]['travelTimes'].push(travel)
+            }
+
+
+            // console.log('updated: ', zips[zip])
+            
+        }
+    }
+
+    return zips;
+}
+
+
+//--------------------------------------------------------
+
+
+
+var story = document.getElementById('story');
+var features = document.createElement('div');
+features.setAttribute('id', 'features');
+
+var header = document.createElement('div');
+
+if (config.title) {
+    var titleText = document.createElement('h1');
+    titleText.innerText = config.title;
+    header.appendChild(titleText);
+}
+
+if (config.subtitle) {
+    var subtitleText = document.createElement('p');
+    subtitleText.innerText = config.subtitle;
+    header.appendChild(subtitleText);
+}
+
+if (config.byline) {
+    var bylineText = document.createElement('p');
+    bylineText.innerText = config.byline;
+    header.appendChild(bylineText);
+}
+
+if (header.innerText.length > 0) {
+    header.classList.add(config.theme);
+    header.setAttribute('id', 'header');
+    story.appendChild(header);
+}
+
+config.chapters.forEach((record, idx) => {
+    var container = document.createElement('div');
+    var chapter = document.createElement('div');
+
+    // ToDo: use this to correctly set tag types in chapter text
+
+    if (record.title) {
+        var title = document.createElement('h2');
+        title.innerText = record.title;
+        chapter.appendChild(title);
+    }
+
+    if (record.image) {
+        var image = new Image();
+        image.src = record.image;
+        chapter.appendChild(image);
+    }
+
+    if (record.description) {
+        var story = document.createElement('p');
+        story.innerHTML = record.description;
+        chapter.appendChild(story);
+    }
+
+    container.setAttribute('id', record.id);
+    container.classList.add('step');
+    if (idx === 0) {
+        container.classList.add('active');
+    }
+
+    chapter.classList.add(config.theme);
+    container.appendChild(chapter);
+    container.classList.add(alignments[record.alignment]);
+    features.appendChild(container);
+});
+
+story.appendChild(features);
+
+var footer = document.createElement('div');
+
+if (config.footer) {
+    var footerText = document.createElement('p');
+    footerText.innerHTML = config.footer;
+    footer.appendChild(footerText);
+}
+
+if (footer.innerText.length > 0) {
+    footer.classList.add(config.theme);
+    footer.setAttribute('id', 'footer');
+    story.appendChild(footer);
+}
+
+mapboxgl.accessToken = config.accessToken;
+
+const transformRequest = (url) => {
+    const hasQuery = url.indexOf("?") !== -1;
+    const suffix = hasQuery ? "&pluginName=journalismScrollytelling" : "?pluginName=journalismScrollytelling";
+    return {
+      url: url + suffix
+    }
+}
+
+var map = new mapboxgl.Map({
+    container: 'map',
+    style: config.style,
+    center: config.chapters[0].location.center,
+    zoom: config.chapters[0].location.zoom,
+    bearing: config.chapters[0].location.bearing,
+    pitch: config.chapters[0].location.pitch,
+    scrollZoom: false,
+    transformRequest: transformRequest
+});
+
+
+// instantiate the scrollama
+var scroller = scrollama();
+
+map.on("load", function() {
+
+    d3.csv(datafile)
+      .then(function(data) {
+
+            var earlyLetters = {"type": "FeatureCollection", "features": []};
+            var laterLetters = {"type": "FeatureCollection", "features": []};
+            var earlySortingCenters = {"type": "FeatureCollection", "features": []}
+            var laterSortingCenters = {"type": "FeatureCollection", "features": []}
+            var notYetReported = {"type": "FeatureCollection", "features": []}
+            
+            var earlyLines = {"type": "FeatureCollection", "features": []}
+            var laterLines = {"type": "FeatureCollection", "features": []}
+
+            var lats = [] // for keeping track of sorting centers
+
+            data.forEach(function(d,i) {
+
+                
+                //  using this limiting of samples to debug problems in the data set
+                var midpoint = 2610;
+                // if(i> midpoint & i < midpoint+10 ){
+                if(i > 0){
+                    // console.log('data: ', i, d)
+
+                    d.distance = +d["distanceFromSF"];
+
+                    d.mailed = parseTime(d["dateMailed"])
+                    d.arrived = parseTime(d["dateArrived"])
+
+                    // console.log('request', parseTime(d.dateRequested), dateMax_1)
+
+
+                    //just for now, change region to US or Canada if that's the country too
+                    if(d["country"] == "US" || d["country"] == "Canada" || d["country"] == "Australia") d["region"] = d["country"];
+
+                    var travelTime = getTravelTime(d);
+
+
+                    // I want to show the locations requested, even if not 'arrived'
+                    if(travelTime == 0){
+
+                        // console.log('-----------------------')
+                        // console.log(d)
+
+                        notYetReported.features.push({
+                            "type": "Feature",
+                                      "geometry": {
+                                        "type": "Point",
+                                        "coordinates": [d.lon, d.lat]
+                                      },
+                                      "properties": {
+                                        "description": "testing description for tooltip",
+                                        "travelTime": travelTime,
+                                        "color": "white" 
+                                      }
+                        })
+
+                    }
+
+                    // now lets look at requests we have arrival data for 
+                    if(travelTime > 0){
+
+                        // first set of mail data
+                        if(parseTime(d.dateRequested) <=  dateMax_1){
+                            earlyLetters.features.push({
+                                "type": "Feature",
+                                          "geometry": {
+                                            "type": "Point",
+                                            "coordinates": [d.lon, d.lat]
+                                          },
+                                          "properties": {
+                                            "travelTime": travelTime,
+                                            "color": colorScale(travelTime)
+                                          }
+                            })
+
+                        } else {
+
+                            // ongoing mail data
+                            laterLetters.features.push({
+                                "type": "Feature",
+                                          "geometry": {
+                                            "type": "Point",
+                                            "coordinates": [d.lon, d.lat]
+                                          },
+                                          "properties": {
+                                            "travelTime": travelTime,
+                                            "color": colorScale(travelTime)
+                                          }
+                            })
+
+                        }
+
+                        // these are the open circles for the usps sorting centers 
+                            // doing this until I can figure out simpler way to get sorting centers saved only once.
+                        if(d["country"] == "US"){
+                                                
+                            if(parseTime(d.dateRequested) <=  dateMax_1){
+
+                                var i = lats.indexOf(d.uspsCenterLat)
+                                if(i<0){
+                                    lats.push(d.uspsCenterLat)
+                                    earlySortingCenters.features.push({
+                                        "type": "Feature",
+                                                "geometry": {
+                                                    "type": "Point",
+                                                    "coordinates": [d.uspsCenterLon, d.uspsCenterLat]
+                                                },
+                                                "properties": {
+                                                    "travelTime": travelTime,
+                                                    "color": "white"
+                                                }
+                                    })
+                                }
+                            } else {
+                                // deal with later sorting centers here
+                                var i = lats.indexOf(d.uspsCenterLat)
+                                if(i<0){
+                                    lats.push(d.uspsCenterLat)
+                                    laterSortingCenters.features.push({
+                                        "type": "Feature",
+                                                "geometry": {
+                                                    "type": "Point",
+                                                    "coordinates": [d.uspsCenterLon, d.uspsCenterLat]
+                                                },
+                                                "properties": {
+                                                    "travelTime": travelTime,
+                                                    "color": "white"
+                                                }
+                                    })
+                                }
+                            }
+
+                            
+                            if(parseTime(d.dateRequested) <=  dateMax_1){
+                                earlyLines.features.push({
+                                    "type": "Feature",
+                                    "geometry": { 
+                                        "type": "LineString",
+                                        "coordinates": [[d.lon, d.lat], [d.uspsCenterLon, d.uspsCenterLat]]
+                                    },
+                                    "properties":{
+                                        "travelTime": travelTime,
+                                        "color": colorScale(travelTime)
+                                    }
+                                })
+                            } else {
+                                // deal with later lines here
+                                laterLines.features.push({
+                                    "type": "Feature",
+                                    "geometry": { 
+                                        "type": "LineString",
+                                        "coordinates": [[d.lon, d.lat], [d.uspsCenterLon, d.uspsCenterLat]]
+                                    },
+                                    "properties":{
+                                        "travelTime": travelTime,
+                                        "color": colorScale(travelTime)
+                                    }
+                                })
+                            }
+                        }
+                    }
+                }
+
+            })
+
+
+
+            // connect my data to layers and add those to the map 
+            map.addSource('earlyLetters', {
+                    'type': 'geojson',
+                    data: earlyLetters
+                });
+
+            map.addLayer({
+                    'id': 'early-letter-glow',
+                    'type': 'circle',
+                    'source': 'earlyLetters',
+                    'opacity': 0.01,
+                    'paint': {
+                        'circle-color': ['get', 'color'],
+                        'circle-opacity': 0.1,
+                        'circle-radius': 10 //['get', 'travelTime']
+                    }
+                });
+
+            map.addLayer({
+                    'id': 'early-letters',
+                    'type': 'circle',
+                    'source': 'earlyLetters',
+                    'opacity': 0.6,
+                    // 'layout': {
+                    //     'visibility': 'none'
+                    // },
+                    'paint': {
+                        'circle-color': ['get', 'color'],
+                        'circle-opacity': 0.6,
+                        'circle-radius': 2 //['get', 'travelTime']
+                    }
+                });
+
+            // ----------------------------
+            map.addSource('earlyLines', {
+                'type': 'geojson',
+                data: earlyLines
+            })
+
+            map.addLayer({
+                'id': 'early-lines',
+                'type': 'line',
+                'source': 'earlyLines',
+                'opacity': 0,
+                'paint': {
+                    'line-width': 1,
+                    'line-color': ['get', 'color'],
+
+                }
+
+            })
+
+
+            
+
+
+
+            //-------------
+            map.addSource('earlyMailCenters', {
+                'type': 'geojson',
+                data: earlySortingCenters
+
+            });
+
+            map.addLayer({
+                'id': 'early-mail-centers',
+                'type': 'circle',
+                'source':'earlyMailCenters',
+                'opacity': 0.5,
+                'paint': {
+
+                    'circle-opacity': 0.0,
+                    'circle-color': '#404040',
+                    'circle-stroke-color': ['get', 'color'],
+                    'circle-stroke-width': .5,
+                    'circle-radius': 4
+                }
+            })
+
+             map.addSource('laterMailCenters', {
+                'type': 'geojson',
+                data: laterSortingCenters
+
+            });
+
+            map.addLayer({
+                'id': 'later-mail-centers',
+                'type': 'circle',
+                'source':'laterMailCenters',
+                'opacity': 0.5,
+                'paint': {
+
+                    'circle-opacity': 0.0,
+                    'circle-color': '#404040',
+                    'circle-stroke-color': ['get', 'color'],
+                    'circle-stroke-width': .5,
+                    'circle-radius': 4
+                }
+            })
+
+
+
+            //-------------
+            
+
+            map.addSource('laterLetters', {
+                    'type': 'geojson',
+                    data: laterLetters
+                });
+
+            map.addLayer({
+                    'id': 'later-letters',
+                    'type': 'circle',
+                    'source': 'laterLetters',
+                    'opacity': 0,
+                    'paint': {
+                        'circle-color': ['get', 'color'],
+                        'circle-opacity': 0.6,
+                        'circle-radius': 2 //['get', 'travelTime']
+                    }
+                });
+
+            //------------------
+            map.addSource('laterLines', {
+                'type': 'geojson',
+                data: laterLines
+            })
+
+            map.addLayer({
+                'id': 'later-lines',
+                'type': 'line',
+                'source': 'laterLines',
+                'opacity': 0,
+                'paint': {
+                    'line-width': 1,
+                    'line-color': ['get', 'color'],
+
+                }
+
+            })
+
+           // --------------------
+            map.addSource('unreported', {
+                'type': 'geojson', data: notYetReported})
+
+            
+
+            map.addLayer({
+                    'id': 'mail-unreported',
+                    'type': 'circle',
+                    'source': 'unreported',
+                    'paint': {
+                        'circle-color': 'white',
+                        'circle-opacity': 0.4,
+                        'circle-radius': 2 //['get', 'travelTime']
+                        
+                    }
+
+                });
+
+            
+            //-------------------------------------------------
+            
+            
+
+            data = data.filter(function(d){ 
+
+                // console.log('------------------------')
+                // console.log('date max: ', dateMax_1)
+                // console.log('date requested: ', d.dateRequested)
+                
+
+                // let requestDate = parseTime(d.dateRequested)
+                // // console.log('filtering', requestDate ); 
+                // console.log('testing dates request<max?', requestDate <= dateMax_1)
+
+                // parseTime(d.dateRequested) <=  dateMax_1
+
+                return parseTime(d.dateRequested) <=  dateMax_1;})
+
+
+            data_2 = data.filter(function(d) { return d.travelTime > 0  && d.arrived < dateMax_1})
+
+            data_6 = data.filter(function(d) { return (d.travelTime > 0 && d.travelTime < 20) && (d["country"] == "US") })
+
+            data_7 = data.filter(function(d) { return (d.travelTime > 0 && d.travelTime < 31 ) })
+
+
+
+
+
+            // drawStory("#intro")
+
+
+            // drawScatter(data_2, "#intro3");
+
+            drawLinks(data_6, "#intro4", "Country","curvesChart")
+
+            // drawScatter2(data_7, "#intro5", "GlobalRegion",20, 80);
+
+
+
+            drawDensity(data_7, "#intro7", "densityChart")
+
+            // drawZipcodes(data, "#zips")
+
+            // drawZipSearch('#zip-search', 'zipChart')
+            var zipCounts = getZipCounts(data)
+            // console.log('zipcounts: ', zipCounts)
+            drawZipSearch('#zip-search', zipCounts);
+        })
+
+
+
+
+    // setup the instance, pass callback functions
+    scroller
+    .setup({
+        step: '.step',
+        offset: 0.5,
+        progress: true
+    })
+    .onStepEnter(response => {
+        var chapter = config.chapters.find(chap => chap.id === response.element.id);
+        response.element.classList.add('active');
+        map[config.mapAnimation || 'flyTo'](chapter.location);
+        if (config.showMarkers) {
+            marker.setLngLat(chapter.location.center);
+        }
+        if (chapter.onChapterEnter.length > 0) {
+            chapter.onChapterEnter.forEach(setLayerOpacity);
+        }
+    })
+    .onStepExit(response => {
+        var chapter = config.chapters.find(chap => chap.id === response.element.id);
+        response.element.classList.remove('active');
+        if (chapter.onChapterExit.length > 0) {
+            chapter.onChapterExit.forEach(setLayerOpacity);
+        }
+    });
+});
+
+
+
+//----------------------------------------------
+function resizeAll(){
+    scroller.resize();
+
+    document.getElementById("densityChart").remove();
+    drawDensity(data_7, "#intro7", "densityChart")
+
+    document.getElementById("curvesChart").remove();
+    drawLinks(data_6, "#intro4", "Country", "curvesChart")
+
+
+    // drawZipSearch('#zip-search', 'zipChart')
+
+    // drawZipcodes(data, "#zips")
+}
+
+
+
+
+// modified from https://stackoverflow.com/questions/45905160/javascript-on-window-resize-end
+function debounce(func, time){
+    var time = time || 100; // 100 by default if no param
+    var timer;
+    return function(event){
+        if(timer) clearTimeout(timer);
+        timer = setTimeout(func, time, event);
+    };
+}
+
+// Function with stuff to execute
+function resizeContent() {
+    console.log('resized');
+    resizeAll();
+}
+
+// Eventlistener
+window.addEventListener("resize", debounce( resizeContent, 150 ));
+
+
+
+
+//-----------------------------------------------------------------
+
+
+
+
+
+
+
+
+//-----------------------------------------------------------------------------------
+
+
+
+
+function randomRange(min, max){ 
+    return Math.floor((Math.random() * (max - min + 1)) + min); 
+}
+
+
+</script>
+
+</body>
+</html>
