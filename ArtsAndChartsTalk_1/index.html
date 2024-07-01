@@ -360,7 +360,7 @@ config.chapters.forEach((record, idx) => {
     // ToDo: use this to correctly set tag types in chapter text
 
     if (record.title) {
-        var title = document.createElement('h2');
+        var title = document.createElement('h1');
         title.innerText = record.title;
         chapter.appendChild(title);
     }

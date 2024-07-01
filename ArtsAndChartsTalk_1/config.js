@@ -14,7 +14,7 @@ var config = {
             alignment: 'center',
             // title: "Hello!",
             image: 'meInKusamaRoom.jpg',
-        description: "<h2>Science + Code + Art</h2> <p>Who am I?</p>  <ul><li> Unconventional path</li> <li>Degrees in Anthropology, Biology, & Computer Science</li><li>Started out developing Science learning tools.</li><li>More CS now, with SciArt and Data Vis</li><li>Art!</li></ul><p><i>Photo is of me in a Yayoi Kusama room at the SFMOMA</i></p>",
+        description: "<h2>Science + Code + Art</h2> <p>Who am I?</p>  <ul><li> Unconventional path</li> <li>Degrees in Anthropology, Biology, & Computer Science</li><li>Started out developing Science learning tools.</li><li>More CS now, with SciArt and Data Vis</li><li>Full-stack engineer and consultant.</li><li>Art!</li></ul><p><i>Photo is of me in a Yayoi Kusama room at the SFMOMA</i></p>",
             location: {
                 center: [-42.44486, 27.77139],
                 zoom: 4,
@@ -112,7 +112,7 @@ var config = {
             alignment: 'center',
             title: "Art from Particles",
             image: 'particleArt.jpg',
-        description: "Inspired by Chemistry +++++ Finding my Voice <br></br>Atoms are interesting <i>to me</i> because of electrons and orbitals",
+        description: "Art, Created with Code, Inspired by Chemistry<br></br>Atoms are interesting <i>to me</i> because of electrons and orbitals",
             location: {
                 center: [-42.44486, 27.77139],
                 zoom: 4,
@@ -549,9 +549,9 @@ var config = {
         {
             id: 'intro',
             alignment: 'center',
-            title: "Back in early 2020, Covid changed all of my plans.",
+            title: "COVID changed all of my plans",
             // image: 'lotsOfStickers.jpg',
-        description: "I wasn't sure what to do. I had all these art stickers. I was planning to give them away at conferences. But everything was cancelled.<br/><br/> I started mailing them to friends. Then to folks who signed up from across the country and around the world.<br/><br/> I work with data, so I asked them to tell me when the envelopes arrived. <br/><br/>In the past few years, I've continued to mail my stickers, collect data on how long they take to arrive, and explore different ways to visualize that data and tell this story.",
+        description: "<ul><li>Early 2020</li><li>I had all these art stickers</li><li>Everything was cancelled</li><li>Startd mailing them to friends</li><li>Other folks signed up</li><li>Told me when the envelopes arrived</li><li>Collecting data on how long they take to arrive</li><li>Different ways to visualize that data</li></ul>",
             location: {
                 center: [-42.44486, 27.77139],
                 zoom: 4,
