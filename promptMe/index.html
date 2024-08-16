@@ -67,7 +67,11 @@ body {
 </form>
 <form action='#' onsubmit="return false;">
     <input type='button' id='showTextField' class='button' value='+' onclick="showHideTextField()" />
-    <input type='text' id='customText' size='80' maxlength='80' value='Write your own Sassy text. Click Enter, to add to watermark' visibility='hidden' onclick="drawCustomText()"/>
+    <input type='text' id='customText' size='80' maxlength='80' value='Write your own SciArt prompt. Click Enter, to add to image' visibility='hidden' onclick="drawCustomText()"/>
+</form>
+<form action='#' onsubmit="return false;">
+    <input type='button' id='showTextField2' class='button' value='+' onclick="showHideTextField()" />
+    <input type='text' id='customText2' size='80' maxlength='80' value='SciArt Prompt Generator' visibility='hidden' onclick="drawCustomWatermark()"/>
 </form>
 <canvas id="canvas"></canvas>
 </div>
@@ -102,6 +106,8 @@ body {
             canvas.width = maxWidth;
             canvas.height = maxHeight;
     var ctx = canvas.getContext("2d");
+
+    var creditText = "SciArt Prompts";
 
     var sassyText = [
         "Helloooo? Are you there World?",
@@ -355,7 +361,7 @@ body {
 
 
     function drawCustomText(){
-        console.log('testing')
+        console.log('testing from drawcustomtest')
     }
 
     function drawSassyText(){
@@ -410,11 +416,11 @@ body {
 
     function drawWatermark(ctx){
 
-        var watermark = 'SciArt Prompts'
+        watermark = creditText;
         ctx.font = 'italic 12px Courier'
         ctx.textAlign = 'middle';
         ctx. textBaseline = 'bottom';
-        ctx.fillStyle = 'white';  // a color name or by using rgb/rgba/hex values
+        ctx.fillStyle = 'grey';  // a color name or by using rgb/rgba/hex values
 
 
         ctx.fillText(watermark, newWidth-newWidth/2, newHeight-newHeight/2+txtHeight/2-txtHeight/8, newWidth); // text and position
@@ -455,6 +461,14 @@ body {
 
     }
 
+    function testing2(customTxt){
+        console.log('testing if enter button clicked')
+        console.log('input text', customTxt)
+        creditText = customTxt;
+        drawText();
+
+    }
+
     console.log("testing testing")
 
     var input = document.getElementById("customText");
@@ -463,6 +477,17 @@ body {
         if(event.keyCode === 13){
             event.preventDefault();
             testing(input.value);
+        }
+
+    });
+
+    var input2 = document.getElementById("customText2");
+
+    input2.addEventListener("keyup", function(event){
+        if(event.keyCode === 13){
+            event.preventDefault();
+            testing2(input2.value);
+            console.log(input2.value)
         }
 
     });
