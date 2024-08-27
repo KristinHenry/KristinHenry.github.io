@@ -37,9 +37,12 @@ body {
     width: 10em;
 }*/
 
-#customText {
-    visibility: hidden;
+/*#customText {
+    visibility: visible;
 }
+#customText2 {
+    visibility: visible;
+}*/
 </style>
 
 </head>
@@ -61,17 +64,20 @@ body {
     
     <!-- <input type='button' id='btnLoad' value='Load Image' onclick='loadImage();' /> -->
     <input type='button' id='drawBox' class="button" value='Get SciArt Prompt' onclick="drawSassyText()" />
-    <a id="downloadLnk" class="button" download="SciArtPrompt.jpg">Save Prompt Image</a>
+    
     <input type='file' id='imgfile'  onChange='loadImage();'/>
 
+    <a id="downloadLnk" class="button" download="SciArtPrompt.jpg">Save Prompt Image</a>
+
+</form>
+<p>Or, you can add your own prompt and artist credit to the watermark.</p>
+<form action='#' onsubmit="return false;">
+    <!-- <input type='button' id='showTextField' class='button' value='+' onclick="showHideTextField('showTextField', 'customText')" /> -->
+    <input type='text' id='customText' size='80' maxlength='80' value='Add your own SciArt prompt. Click Enter, to add to image' visibility='hidden' onclick="drawCustomText()"/>
 </form>
 <form action='#' onsubmit="return false;">
-    <input type='button' id='showTextField' class='button' value='+' onclick="showHideTextField()" />
-    <input type='text' id='customText' size='80' maxlength='80' value='Write your own SciArt prompt. Click Enter, to add to image' visibility='hidden' onclick="drawCustomText()"/>
-</form>
-<form action='#' onsubmit="return false;">
-    <input type='button' id='showTextField2' class='button' value='+' onclick="showHideTextField()" />
-    <input type='text' id='customText2' size='80' maxlength='80' value='Add your own credit here' visibility='hidden' onclick="drawCustomWatermark()"/>
+    <!-- <input type='button' id='showTextField2' class='button' value='+' onclick="showHideTextField('showTextField2', 'customText2')" /> -->
+    <input type='text' id='customText2' size='80' maxlength='80' value='Add your own name here. Click Enter, to add to image' visibility='hidden' onclick="drawCustomWatermark()"/>
 </form>
 <canvas id="canvas"></canvas>
 </div>
@@ -110,6 +116,43 @@ body {
     var creditText = "SciArt Prompts";
 
     var sassyText = [
+        "Pyramidal",
+        "Voronoi",
+        "Symmetry",
+        "Budding",
+        "Symbiosis",
+        "Bone",
+        "Supernova",
+        "Chrysalis",
+        "Tessellation",
+        "Bayesian",
+        "Harmonics",
+        "Radiolaria",
+        "Ectopic",
+        "Neuro",
+        "Scattering",
+        "Curie",
+        "Variegated",
+        "Lumen",
+        "Microscopic",
+        "Lindenmayer Systems",
+        "Algae",
+        "Diffusion",
+        "Lichen",
+        "Spore",
+        "Membrane",
+        "Galliformes",
+        "Crown Shyness",
+        "Antiparallel",
+        "Chaos",
+        "Hexagons",
+        "Nucleus",
+        "Flagella",
+        "Mutation",
+        "Vector",
+        "Synapse",
+        "Fourier",
+        "Luminous",
         "Helloooo? Are you there World?",
         "Phyllotaxy",
         "Lipid",
@@ -122,7 +165,7 @@ body {
         "Influenza Virus",
         "Random Walk",
         "Lichen",
-        "Innoculum",
+        "Inoculum",
         "Ultraviolet",
         "Mycelium",
         "Mutation",
@@ -427,10 +470,11 @@ body {
     }
 
 
-    function showHideTextField(){
+    function showHideTextField(myBtn, myTxt){
         console.log('show or hide')
-        var btn = document.getElementById('showTextField')
-        var fld = document.getElementById('customText')
+        console.log("myid: ", myBtn, myTxt)
+        var btn = document.getElementById(myBtn)
+        var fld = document.getElementById(myTxt)
         console.log(btn.value)
 
         if(btn.value == "+"){
